@@ -1,0 +1,688 @@
+use std::ops::{Add, AddAssign, Mul, Sub};
+
+#[repr(C)]
+pub struct Katamari {
+    pub _x0: Q<32>,
+    pub player_sub: *mut PlayerSubStruct,
+    pub _x28: Q<28>,
+    pub player_index: u8,
+    pub _x45: Q1,
+    pub x46: u8,
+    pub _x47: Q1,
+    pub _x48: Q4,
+    pub _x4c: Q4,
+    pub volume: f32,
+    pub x54: f32,
+    pub _x58: Q<4>,
+    pub diameter: f32,
+    pub store_flag_related_guy: u32,
+    pub base_radius_guy: f32,
+    pub radius: f32,
+    pub _x6c: Q<4>,
+    pub measurement_guy_2: f32,
+    pub circumference: f32,
+    pub guy_that_gets_divided: f32,
+    pub x7c: f32,
+    pub x80: f32,
+    pub x84: f32,
+    pub x88: f32,
+    pub diameter_in_cm: f32,
+    pub measurement_guy: f32,
+    pub measurement_guy_3: f32,
+    pub x98: f32,
+    pub x9c: f32,
+    pub xa0: f32,
+    pub climbing_related_c: u8,
+    pub currently_climbing: bool,
+    pub climb_height_reached: bool,
+    pub dwordflag_xa7: [u8; 4],
+    pub hit_water: u8,
+    pub _xac: Q8U,
+    pub _xb4: Q1,
+    pub standing_on_prop: bool,
+    pub _xb6: Q<3>,
+    pub speed_limit_check_2: u8,
+    pub _xba: Q1,
+    pub _xbb: Q1,
+    pub _xbc: Q1,
+    pub _xbd: Q<3>,
+    pub xc0: bool,
+    pub _xc1: Q1,
+    pub xc2: bool,
+    pub xc3: u8,
+    pub xc4: bool,
+    pub xc5: u8,
+    pub _xc6: Q<5>,
+    pub _xcb: Q4U,
+    pub _xcf: Q8U,
+    pub _xd7: Q1,
+    pub _xd8: Q4,
+    pub _xdc: Q<14>,
+    pub xea: u8,
+    pub xeb: u8,
+    pub climb_flag: bool,
+    pub speed_limit_check_1: u8,
+    pub _xee: Q2,
+    pub xf0: bool,
+    pub _xf1: Q1,
+    pub _xf2: Q2,
+    pub _xf4: Q<7>,
+    pub xfb: bool,
+    pub _xfc: Q<15>,
+    pub x10b: bool,
+    pub _x10c: Q<4>,
+    pub x110: i8,
+    pub _x111: Q1,
+    pub countdown_x112: i16,
+    pub x114: i16,
+    pub x116: i16,
+    pub countdown_x118_possible_climb: i16,
+    pub _x11a: Q<130>,
+    pub x19c: f32,
+    pub x1a0: f32,
+    pub x1a4: f32,
+    pub x1a8: f32,
+    pub x1ac: f32,
+    pub x1b0: f32,
+    pub x1b4: f32,
+    pub x1b8: f32,
+    pub measurement_guy_4: f32,
+    pub climb_related_x1c0: f32,
+    pub _x1c4: Q4,
+    pub scaled_diameter: [f32; 7],
+    pub _x1e4: Q<92>,
+    pub dual_a: KatamariDualThingy,
+    pub dual_b: KatamariDualThingy,
+    pub _x3e0: Q<4>,
+    pub speed_fac_df: f32,
+    pub x3e8: f32,
+    pub xe3c: f32,
+    pub x3f0: f32,
+    pub x3f4: f32,
+    pub x3f8: f32,
+    pub speed_fac_f: f32,
+    pub x400: f32,
+    pub x404: f32,
+    pub x408: f32,
+    pub x40c: f32,
+    pub x410: f32,
+    pub axis_selectee: Vec4,
+    pub x424: f32,
+    pub x428: f32,
+    pub x42c: f32,
+    pub x430: f32,
+    pub x434: f32,
+    pub angle_guy_: f32,
+    pub _x43c: Q<4>,
+    pub normalized_guy: Vec4,
+    pub x450: Vec4,
+    pub position: Vec4,
+    pub position_b: Vec4,
+    pub _x480: Q<4>,
+    pub x484: f32,
+    pub _x488: Q<8>,
+    pub x490: Vec4,
+    pub _x4a0: Q<128>,
+    pub mat_x520: Mat4,
+    pub _x560: Q<64>,
+    pub mat_x5a0: Mat4,
+    pub mat_x5e0: Mat4,
+    pub mat_x620: Mat4,
+    pub x660: Vec4,
+    pub x670: Vec4,
+    pub _x680: Q<16>,
+    pub x690: Vec4,
+    pub _x6a0: Q<112>,
+    pub transform: Mat4,
+    pub divisors: Vec4,
+    pub x760: f32,
+    pub x764: Q4,
+    pub climb_motion_scale: f32,
+    pub climb_increment_guy: f32,
+    pub x770: f32,
+    pub _x774: Q<16>,
+    pub another_climb_timer: i16,
+    pub climb_timer: i16,
+    pub x788: i16,
+    pub x78a: i16,
+    pub x78c: Vec4,
+    pub x79c: Vec4,
+    pub x7ac: Vec4,
+    pub x7bc: f32,
+    pub x7c0: f32,
+    pub x7c4: f32,
+    pub _x7c8: Q<8>,
+    pub x7d0: f32,
+    pub _x7d4: Q<40>,
+    pub radius_again: f32,
+    pub x800: f32,
+    pub x804: i16,
+    pub x806: i16,
+    pub _x808: Q<84>,
+    pub x85c: Vec4,
+    pub sx: f32,
+    pub sy: f32,
+    pub sz: f32,
+    pub _x878: Q<32>,
+    pub climb_flag_thing: i16,
+    pub _x89a: Q<34>,
+    pub x8bc: f32,
+    pub _x8c0: Q<16>,
+    pub indexed_guy: [IndexedGuy; 64],
+    pub copied_from_indexed_guy: [IndexedGuy; 64],
+    pub x38d0: u16,
+    pub _x38d2: Q<2>,
+    pub x38d4: Mat4,
+    pub matrix_that_gets_reset: Mat4,
+    pub vector_that_gets_reset_a: Vec4,
+    pub vector_that_gets_reset_b: Vec4,
+    pub position_c: Vec4,
+    pub is_this_actually_used: Vec4,
+    pub _x3994: Q<4>,
+    pub guy_index: i32,
+    pub guy_index_neighbor: i32,
+    pub x39a0: f32,
+    pub x39a4: f32,
+    pub x39a8: f32,
+    pub x39ac: f32,
+    pub x39b0: f32,
+    pub x39b4: f32,
+    pub _x39b8: Q<4>,
+    pub x39bc: f32,
+    pub _x39c0: Q<24>,
+    pub x39d8: Vec4,
+    pub _x39e8: Q2,
+    pub _x39ea: Q<6>,
+    pub _x39f0: Q4,
+    pub _x39f4: Q4,
+    pub _x3948: Q<106>,
+    pub _x3a62: Q2,
+    pub _x3a64: Q<4>,
+    pub _x3a68: Q8,
+    pub x3a70: f32,
+    pub x3a74: f32,
+    pub x3a78: f32,
+    pub x3a7c: f32,
+    pub x3a80: f32,
+    pub x3a84: Mat4,
+    pub x3ac4: f32,
+    pub x3ac8: f32,
+    pub x3acc: i16,
+    pub climb_timer_possibly: i16,
+    pub timer_x3ad0: i16,
+    pub _x3ad2: Q<4>,
+    pub timer_x3ad6: i16,
+    pub timer_x3ad8: i16,
+    pub _x3ada: Q<66>,
+    pub x3b1c: u8,
+    pub _x3b1d: Q<28>,
+    pub allow_set_pos_foo: bool,
+    pub _x3b3a: Q<18>,
+    pub possible_velocity: Vec4,
+    pub _x3b5c: Q<8>,
+    pub time_guy_2: f32,
+    pub time_guy_1: f32,
+    pub _flag_x3b6c: Q1,
+    pub _x3b6d: Q1,
+    pub counter_x3b6e: i16,
+    pub _x3b70: Q<20>,
+    pub al_mode: u8,
+    pub x3b85: u8,
+    pub al_type: u8,
+    pub _x3b87: Q1,
+    pub angle_guy: f32,
+    pub angle_add_guy: f32,
+    pub angle_mul_guy: f32,
+    pub sfx_0x2d_interval: i16,
+    pub sfx_0x2d_timer: i16,
+    pub _x3b98: Q<40>,
+}
+
+assert_offset!(Katamari, x88, 0x88);
+assert_offset!(Katamari, x98, 0x98);
+assert_offset!(Katamari, xa0, 0xa0);
+assert_offset!(Katamari, climbing_related_c, 0xa4);
+assert_offset!(Katamari, currently_climbing, 0xa5);
+assert_offset!(Katamari, climb_height_reached, 0xa6);
+assert_offset!(Katamari, dwordflag_xa7, 0xa7);
+assert_offset!(Katamari, hit_water, 0xab);
+assert_offset!(Katamari, _xac, 0xac);
+assert_offset!(Katamari, _xbc, 0xbc);
+assert_offset!(Katamari, _xcb, 0xcb);
+assert_offset!(Katamari, xf0, 0xf0);
+assert_offset!(Katamari, x116, 0x116);
+assert_offset!(Katamari, _x1c4, 0x1c4);
+assert_offset!(Katamari, x3f8, 0x3f8);
+assert_offset!(Katamari, x424, 0x424);
+assert_offset!(Katamari, mat_x5a0, 0x5a0);
+assert_offset!(Katamari, x670, 0x670);
+assert_offset!(Katamari, x78a, 0x78a);
+assert_offset!(Katamari, x38d0, 0x38d0);
+assert_offset!(Katamari, matrix_that_gets_reset, 0x3914);
+assert_offset!(Katamari, _x3a64, 0x3a64);
+assert_offset!(Katamari, _x3a68, 0x3a68);
+assert_offset!(Katamari, _x3a68, 0x3a68);
+assert_offset!(Katamari, timer_x3ad0, 0x3ad0);
+assert_offset!(Katamari, _x3ad2, 0x3ad2);
+assert_offset!(Katamari, _x3b70, 0x3b70);
+
+pub struct PlayerSubStruct {}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct KatamariDualThingy {
+    pub a: Vec4,
+    pub b: Vec4,
+    pub c: Vec4,
+    pub d: Vec4,
+    pub e: Vec4,
+    pub f: Vec4,
+    pub g: Vec4,
+    pub h: Vec4,
+    pub i: Vec4,
+    pub j: Vec4,
+    pub external_velocity: Vec4,
+    pub l: Vec4,
+    pub friction: Vec4,
+}
+
+assert_size!(KatamariDualThingy, 0xd0);
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct IndexedGuy {
+    pub m00: Mat4,
+    x40: Q<16>,
+    pub three_floats: [f32; 3],
+    pub x5c: bool,
+    x5d: Q<3>,
+}
+
+assert_size!(IndexedGuy, 0x60);
+
+#[repr(C)]
+pub struct Prince {
+    pub player_idx: u8,
+    pub _x1: Q<3>,
+    pub x4: u32,
+    pub x8: f32,
+    pub t: Vec4,
+    pub x1c: Vec4,
+    pub x2c: f32,
+    pub _x30: Q<12>,
+    pub x3c: f32,
+    pub x40: f32,
+    pub x44: f32,
+    pub x48: f32,
+    pub x4c: f32,
+    pub x50: f32,
+    pub x54: f32,
+    pub x58: f32,
+    pub x5c: Vec4,
+    pub pitch_guy_that_gets_added_to_pi: f32,
+    pub pitch_increment: f32,
+    pub x74: f32,
+    pub x78: f32,
+    pub x7c: f32,
+    pub quotient_1: f32,
+    pub quotient_2: f32,
+    pub _x88: Q<8>,
+    pub x90: f32,
+    pub quotient_3: f32,
+    pub quotient_4: f32,
+    pub view_mode: u8, // ViewMode enum
+    pub block_stick_inputs: bool,
+    pub _x9e: Q1,
+    pub sticks_not_idle: bool,
+    pub _xa0: Q<2>,
+    pub ouji_state: OujiState,
+    pub _xbd: Q<8>,
+    pub _xc5: Q2U,
+    pub _xc7: Q<19>,
+    pub xda: i16,
+    pub xdc: i16,
+    pub _xde: Q<2>,
+    pub _xe0: Q4,
+    pub xe4: f32,
+    pub xe8: f32,
+    pub xec: f32,
+    pub xf0: f32,
+    pub view_mode_flag_thing: i16,
+    pub _xf6: Q<66>,
+    pub transform: Mat4,
+    pub x178: f32,
+    pub _x17c: Q<52>,
+    pub x1b0: Mat4, // position uncertain
+    pub x1f0: f32,
+    pub x1f4: f32,
+    pub _x1f8: Q<84>,
+    pub prince_flip_vector: Vec4,
+    pub _x25c: Q<32>,
+    pub _x27c: Q4,
+    pub _x280: Q4,
+    pub x284: f32,
+    pub x288: f32,
+    pub dividend_3: f32,
+    pub x290: f32,
+    pub divisor_3: i32,
+    pub divisor_4: i32,
+    pub dividend_1: f32,
+    pub divisor_1: i32,
+    pub x2a4: i32,
+    pub x2a8: f32,
+    pub dividend_2: f32,
+    pub x2b0: f32,
+    pub divisor_2: i32,
+    pub x2b8: i32,
+    pub x2bc: f32,
+    pub x2c0: f32,
+    pub x2c4: f32,
+    pub x2c8: f32,
+    pub x2cc: Q<4>,
+    pub x2d0: f32,
+    pub deadzone_for_turnaround: f32,
+    pub x2d8: f32,
+    pub x2dc: i32,
+    pub x2e0: i32,
+    pub counter2_limit: i32,
+    pub x2e8: i32,
+    pub counter2_increment: i16,
+    pub x2ee: Q<2>,
+    pub counter1_limit: i32,
+    pub x2f4: i32,
+    pub x2f8: f32,
+    pub x2fc: i32,
+    pub x300: f32,
+    pub x304: f32,
+    pub x308: Vec4,
+    pub left_stick_x: f32,
+    pub left_stick_z: f32,
+    pub left_stick_y: f32,
+    pub left_stick_w: f32,
+    pub right_stick_x: f32,
+    pub right_stick_z: f32,
+    pub right_stick_y: f32,
+    pub right_stick_w: f32,
+    pub left_stick_direction: Vec4,
+    pub right_stick_direction: Vec4,
+    pub combined_stick_direction: Vec4,
+    pub abs_left_stick_x: f32,
+    pub abs_left_stick_z: f32,
+    pub abs_left_stick_y: f32,
+    pub abs_left_stick_w: f32,
+    pub abs_right_stick_x: f32,
+    pub abs_right_stick_z: f32,
+    pub abs_right_stick_y: f32,
+    pub abs_right_stick_w: f32,
+    pub _x388: Q<16>,
+    pub combined_stick_x: f32,
+    pub combined_stick_z: f32,
+    pub combined_stick_y: f32,
+    pub combined_stick_w: f32,
+    pub left_stick_magnitude: f32,
+    pub right_stick_magnitude: f32,
+    pub avg_stick_magnitude: f32,
+    pub left_stick_angle: f32,
+    pub right_stick_angle: f32,
+    pub combined_stick_angle: f32,
+    pub x3bc: f32,
+    pub x3c0: f32,
+    pub x3c8: f32,
+    pub x3cc: Mat4,
+    pub x40c: Mat4,
+    pub x44c: f32,
+    pub x450: Q<32>,
+    pub left_stick_masked_status: u8,
+    pub right_stick_masked_status: u8,
+    pub left_stick_status: u8,
+    pub right_stick_status: u8,
+    pub left_stick_mask: u8,
+    pub right_stick_mask: u8,
+    pub _x476: Q<2>,
+    pub x478: i16,
+    pub _x47a: Q<2>,
+    pub x47c: Q2,
+    pub counter2: i16,
+    pub counter3: i16,
+    pub prince_callback_index: i16,
+    pub counter1: i16,
+    pub counter_x486: i16,
+    pub x488: Q<4>,
+    pub axis_selector: u8,
+    pub _x48d: Q<7>,
+    pub x494: Vec4,
+    pub x4a4: Vec4,
+    pub angle: f32,
+    pub _x4b8: Q<4>,
+    pub counter_x4bc: i16,
+    pub _x4be: Q<2>,
+    pub x4c0: Mat4,
+    pub _x500: Q4,
+    pub x504: bool,
+    pub _x505: Q<19>,
+}
+
+assert_size!(Prince, 0x518);
+assert_offset!(Prince, x2c, 0x2c);
+assert_offset!(Prince, _xbd, 0xbd);
+assert_offset!(Prince, _xc5, 0xc5);
+assert_offset!(Prince, _xc7, 0xc7);
+assert_offset!(Prince, x1f0, 0x1f0);
+assert_offset!(Prince, x2d0, 0x2d0);
+assert_offset!(Prince, x2ee, 0x2ee);
+assert_offset!(Prince, x308, 0x308);
+assert_offset!(Prince, _x388, 0x388);
+assert_offset!(Prince, x40c, 0x40c);
+assert_offset!(Prince, x47c, 0x47c);
+assert_offset!(Prince, angle, 0x4b4);
+assert_offset!(Prince, x4c0, 0x4c0);
+
+#[repr(C)]
+pub struct OujiState {
+    pub x0: u8,
+    pub x1: u8,
+    pub freeze_counter: bool,
+    pub x3: u8,
+    pub x4: u8,
+    pub _x5: Q1,
+    pub x6: bool,
+    pub _x7: Q1,
+    pub flag_x8: u8,
+    pub flag_x9: u8,
+    pub xa: bool,
+    pub xb: bool,
+    pub xc: u8,
+    pub xd: Q<9>,
+    pub x16: u8,
+    pub x17: bool,
+    pub x18: Q1,
+    pub x19: u8,
+    pub x1a: Q1,
+}
+
+// might be longer! it's just a substruct that's not in an array,
+// so we don't exactly have a stride. it certainly looks like a bunch of just flags
+// I don't even remember why I decided it should be a sub-struct
+assert_size!(OujiState, 0x1b);
+assert_offset!(OujiState, xa, 0xa);
+assert_offset!(OujiState, x1a, 0x1a);
+
+#[repr(C)]
+pub struct Camera {
+    pub x0: Vec4,
+    pub x10: Vec4,
+    pub _x20: Q<64>,
+    pub probably_some_kind_of_struct: *mut f32,
+    pub _x68: Q<22>,
+    pub animation_mode: u8,
+    pub _x7e: Q<2>,
+    pub x81: bool,
+    pub x82: u8,
+    pub _x83: Q1,
+    pub x84: f32, // unsure whether this is actually a float
+    pub x88: f32,
+    pub x8c: f32,
+    pub x90: Vec4,
+    pub xa0: Vec4,
+    pub xb0: Vec4,
+    pub _xc0: Q<1924>,
+    pub x844: Vec4,
+    pub x854: Mat4,
+    pub x894: u8,
+    pub _x895: Q<3>,
+    pub x898: f32,
+    pub x89c: Q4,
+    pub _x8a0: Q<8>,
+    pub x8a8: Vec4,
+    pub x8b8: f32,
+    pub x8bc: f32,
+    pub x8c0: f32,
+    pub _x8c4: Q<8>,
+    pub x8cc: Q2,
+    pub x8ce: u8,
+    pub _x8cf: Q1,
+    pub x8d0: Vec4,
+    pub katamari_position: Vec4,
+    pub x8f0: Vec4,
+    pub x900: Vec4,
+    pub x910: f32,
+    pub x914: f32,
+    pub some_kinda_timer: i16,
+    pub _x91a: Q<2>,
+    pub x91c: Vec4,
+    pub _x92c: Q<2>,
+    pub x92e: Q2,
+    pub _x930: Q<2>,
+    pub x932: Q2,
+    pub _x934: Q<4>,
+    pub x938: *mut u8,
+    pub x940: Vec4,
+    pub x950: Vec4,
+    pub x960: Q2,
+    pub _x962: Q<2>,
+    pub x964: f32,
+    pub _x968: Q<8>,
+    pub some_kinda_func: unsafe extern "C" fn(),
+    pub x978: Q4,
+    pub _x97c: Q<4>,
+}
+
+assert_size!(Camera, 0x980);
+assert_offset!(Camera, x90, 0x90);
+assert_offset!(Camera, x89c, 0x89c);
+assert_offset!(Camera, x8c0, 0x8c0);
+assert_offset!(Camera, x8d0, 0x8d0);
+assert_offset!(Camera, katamari_position, 0x8e0);
+assert_offset!(Camera, x938, 0x938);
+assert_offset!(Camera, some_kinda_func, 0x970);
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Q<const N: usize>([u8; N]);
+
+// aligned
+pub struct Q1(pub u8);
+pub struct Q2(pub u16);
+pub struct Q4(pub u32);
+pub struct Q8(pub u64);
+
+// unaligned
+pub struct Q2U(pub [u8; 2]);
+pub struct Q4U(pub [u8; 4]);
+pub struct Q8U(pub [u8; 8]);
+
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
+pub struct Vec4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+}
+
+impl Vec4 {
+    pub const ZERO: Self = Self::new(0.0, 0.0, 0.0, 0.0);
+    pub const W: Self = Self::new(0.0, 0.0, 0.0, 1.0);
+
+    #[inline]
+    pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+        Self { x, y, z, w }
+    }
+
+    #[inline]
+    pub fn sqrlen(&self) -> f32 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    #[inline]
+    pub fn len(&self) -> f32 {
+        self.sqrlen().sqrt()
+    }
+
+    #[inline]
+    pub fn xyz0(&self) -> Self {
+        Self::new(self.x, self.y, self.z, 0.0)
+    }
+
+    #[inline]
+    pub fn x0zw(&self) -> Self {
+        Self::new(self.x, 0.0, self.y, self.z)
+    }
+}
+
+impl Add for Vec4 {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(
+            self.x + rhs.x,
+            self.y + rhs.y,
+            self.z + rhs.z,
+            self.w + rhs.w,
+        )
+    }
+}
+
+impl AddAssign for Vec4 {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
+        self.w += rhs.w;
+    }
+}
+
+impl Sub for Vec4 {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::new(
+            self.x - rhs.x,
+            self.y - rhs.y,
+            self.z - rhs.z,
+            self.w - rhs.w,
+        )
+    }
+}
+
+impl Mul for Vec4 {
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self::Output {
+        Self::new(
+            self.x * rhs.x,
+            self.y * rhs.y,
+            self.z * rhs.z,
+            self.w * rhs.w,
+        )
+    }
+}
+
+impl Mul<f32> for Vec4 {
+    type Output = Self;
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self::new(self.x * rhs, self.y * rhs, self.z * rhs, self.w)
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone, PartialEq)]
+pub struct Mat4 {
+    pub rows: [Vec4; 4],
+}

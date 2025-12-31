@@ -20,6 +20,9 @@ pub struct PS2 {
     pub apply_deadzones: extern "win64" fn(*mut Vec4, *const Vec4, f32),
     pub gravity_user_3: KFn,
     pub set_player_animation_mode: extern "win64" fn(i32, u8),
+    pub speed_thing_2: extern "win64" fn(*mut Katamari, *mut Katamari),
+    pub calculate_friction: extern "win64" fn(*mut Katamari),
+    pub calculate_gravity_and_some_other_forces: KFn,
 
     pub multiplayer: *mut bool,
     pub climb_limit: *mut i32,
@@ -67,6 +70,9 @@ impl PS2 {
             apply_deadzones: nil3,
             gravity_user_3: nil,
             set_player_animation_mode: nil2,
+            speed_thing_2: nil2,
+            calculate_friction: nil,
+            calculate_gravity_and_some_other_forces: nil,
 
             multiplayer: null_mut(),
             climb_limit: null_mut(),
@@ -111,6 +117,9 @@ impl PS2 {
                 apply_deadzones: func!(0x26b80),
                 gravity_user_3: func!(0x23b70),
                 set_player_animation_mode: func!(0xad40),
+                speed_thing_2: func!(0x1db50),
+                calculate_friction: func!(0x21590),
+                calculate_gravity_and_some_other_forces: func!(0x20cd0),
 
                 val_x7b218: ptr!(0x07b218),
                 g_katamari_speed_f: ptr!(0x07b0ec),
@@ -164,6 +173,9 @@ export_functions! {
     fn apply_deadzones(out: *mut Vec4, v: *const Vec4, threshold: f32);
     fn gravity_user_3(k: *mut Katamari);
     fn set_player_animation_mode(p_idx: i32, mode: u8);
+    fn speed_thing_2(k: *mut Katamari, k_: *mut Katamari);
+    fn calculate_friction(k: *mut Katamari);
+    fn calculate_gravity_and_some_other_forces(k: *mut Katamari);
 }
 
 // TODO: move struct code into here and make an initializer using the offset

@@ -69,6 +69,21 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             0xA0..0xB8,
             replacements::prop_terrain_collision,
         )?;
+
+        // A block I tried to disable to discover gravity
+        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x79a..0x7ae, replacements::gravity)?;
+        // Two more, of twin nature
+        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x7fe..0x819, replacements::gravity)?;
+        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x661..0x673, replacements::gravity)?;
+
+        // The one that actually worked, but not the code I'm actually going to patch
+        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x12d..0x186, replacements::gravity)?;
+
+        hook::patch(
+            dll.calculate_gravity_and_some_other_forces,
+            0xd4..0xfd,
+            replacements::gravity,
+        )?;
     }
 
     Ok(())

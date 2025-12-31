@@ -9,8 +9,8 @@ static THIRTY: f32 = 30.0;
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
     naked_asm! {
         "call {}",
-        "vbroadcastss xmm0, dword ptr [rax]", // xmm0 = [delta_time; 4]
-        "vbroadcastss xmm1, dword ptr [rip+{}]", // xmm1 = [30.0; 4]
+        "movss xmm0, dword ptr [rax]", // xmm0 = [delta_time; 4]
+        "movss xmm1, dword ptr [rip+{}]", // xmm1 = [30.0; 4]
         "mulps xmm0, xmm1", // xmm0 *= xmm1
         "mulps xmm6, xmm0", // xmm6 *= xmm0
         "mulps xmm7, xmm0", // xmm7 *= xmm0
@@ -48,16 +48,38 @@ pub unsafe extern "C" fn prop_terrain_collision() {
         "movss xmm2, dword ptr [rdi+0x298]",
 
         "call {}",
-        "vbroadcastss xmm6, dword ptr [rax]", // xmm0 = [delta_time; 4]
-        "vbroadcastss xmm7, dword ptr [rip+{}]", // xmm1 = [30.0; 4]
-        "mulps xmm6, xmm7",
-        "mulps xmm0, xmm6",
-        "mulps xmm1, xmm6",
-        "mulps xmm2, xmm6",
+        "movss xmm6, dword ptr [rax]", // xmm0 = delta_time
+        "movss xmm7, dword ptr [rip+{}]", // xmm1 = 30.0
+        "mulss xmm6, xmm7",
+        "mulss xmm0, xmm6",
+        "mulss xmm1, xmm6",
+        "mulss xmm2, xmm6",
 
         "ret",
         sym ps2::delta_time,
         sym THIRTY,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn gravity() {
+    naked_asm! {
+        "call {}",
+        "movss xmm5, dword ptr [rax]",
+        "mulss xmm5, [rip+{}]",
+
+        "mulss xmm5, dword ptr [rbx+0x1a0]",
+
+        "xor edi, edi",
+        "movss dword ptr [rbx+0x1c4], xmm0",
+        "mov qword ptr [rbx+0x2f0], rdi",
+        "mov dword ptr [rbx+0x2f8], edi",
+        "mov dword ptr [rbx+0x2fc], {}",
+
+        "ret",
+        sym ps2::delta_time,
+        sym THIRTY,
+        const 1_f32.to_bits(),
     }
 }
 

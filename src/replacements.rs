@@ -9,12 +9,11 @@ static THIRTY: f32 = 30.0;
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
     naked_asm! {
         "call {}",
-        "movss xmm0, dword ptr [rax]", // xmm0 = [delta_time; 4]
-        "movss xmm1, dword ptr [rip+{}]", // xmm1 = [30.0; 4]
-        "mulps xmm0, xmm1", // xmm0 *= xmm1
-        "mulps xmm6, xmm0", // xmm6 *= xmm0
-        "mulps xmm7, xmm0", // xmm7 *= xmm0
-        "mulps xmm8, xmm0", // xmm8 *= xmm0
+        "movss xmm0, dword ptr [rax]", // xmm0 = delta_time
+        "mulss xmm0, dword ptr [rip+{}]", // xmm0 *= 30.0
+        "mulss xmm6, xmm0", // xmm6 *= xmm0
+        "mulss xmm7, xmm0", // xmm7 *= xmm0
+        "mulss xmm8, xmm0", // xmm8 *= xmm0
 
         // the original code
         "movss xmm4, dword ptr [rbx+0x46C]",
@@ -48,9 +47,8 @@ pub unsafe extern "C" fn prop_terrain_collision() {
         "movss xmm2, dword ptr [rdi+0x298]",
 
         "call {}",
-        "movss xmm6, dword ptr [rax]", // xmm0 = delta_time
-        "movss xmm7, dword ptr [rip+{}]", // xmm1 = 30.0
-        "mulss xmm6, xmm7",
+        "movss xmm6, dword ptr [rax]", // xmm6 = delta_time
+        "mulss xmm6, dword ptr [rip+{}]", // xmm6 *= 30.0
         "mulss xmm0, xmm6",
         "mulss xmm1, xmm6",
         "mulss xmm2, xmm6",

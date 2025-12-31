@@ -6,9 +6,15 @@ edition = "2024"
 [lib]
 crate-type = ["cdylib"]
 
+[profile.dev]
+opt-level = 1
+debug = "full"
+overflow-checks = false
+debug-assertions = false
+panic = "abort"
+
 [dependencies]
 eyre = "0.6.12"
-macro_rules_attribute = "0.2.2"
 retour = "0.3.1"
 windows-strings = "0.5.1"
 

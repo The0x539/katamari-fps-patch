@@ -6,6 +6,7 @@ use crate::types::{Camera, Katamari, Prince, Vec4};
 
 type KFn = extern "win64" fn(*mut Katamari);
 
+#[derive(Debug, Copy, Clone)]
 pub struct PS2 {
     pub katamari_physics_big_kahuna: KFn,
     pub normalize: extern "win64" fn(*mut Vec4, *const Vec4),

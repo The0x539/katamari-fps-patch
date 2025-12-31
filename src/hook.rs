@@ -1,5 +1,3 @@
-use eyre::WrapErr;
-
 use crate::w;
 
 pub unsafe fn install(target: *mut (), detour: *const ()) -> eyre::Result<()> {
@@ -7,21 +5,53 @@ pub unsafe fn install(target: *mut (), detour: *const ()) -> eyre::Result<()> {
         let hook_code = hook_asm_bytes();
         let target_code = std::ptr::slice_from_raw_parts_mut(target.cast(), hook_code.len());
 
+        let i = hook_code
+            .windows(8)
+            .position(|w| w == [0xEE; 8])
+            .unwrap_or(0);
+
         mprotect(target_code, w::PAGE_READWRITE, || {
-            let their_code = &mut *target_code;
-            their_code.copy_from_slice(hook_code);
-            for i in 0..their_code.len() {
-                let window = &mut their_code[i..][..8];
-                if window == [0xEE; 8] {
-                    window.copy_from_slice(&detour.addr().to_ne_bytes());
-                    break;
-                }
-            }
-        })
-        .wrap_err("VirtualProtect went wrong")?;
+            let target_code = &mut *target_code;
+            target_code.copy_from_slice(hook_code);
+            target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
+        })?;
     }
 
     Ok(())
+}
+
+pub unsafe fn patch(
+    target: *mut (),
+    range: std::ops::Range<usize>,
+    detour: unsafe extern "C" fn(),
+) -> eyre::Result<()> {
+    unsafe {
+        let detour = detour as *const ();
+        let patch_code = patch_asm_bytes();
+        let target_code: *mut [u8] =
+            std::ptr::slice_from_raw_parts_mut(target.cast::<u8>().add(range.start), range.len());
+
+        let i = patch_code
+            .windows(8)
+            .position(|w| w == [0xEE; 8])
+            .unwrap_or(0);
+
+        mprotect(target_code, w::PAGE_READWRITE, || {
+            let target_code = &mut *target_code;
+            target_code.fill(0x90);
+            target_code[..patch_code.len()].copy_from_slice(patch_code);
+            target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
+        })?;
+    }
+
+    Ok(())
+}
+
+unsafe extern "C" {
+    static hook_start: u8;
+    static hook_end: u8;
+    static patch_start: u8;
+    static patch_end: u8;
 }
 
 core::arch::global_asm! {
@@ -33,17 +63,25 @@ core::arch::global_asm! {
     "mov rax, 0xEEEEEEEEEEEEEEEE",
     "jmp rax",
     "hook_end:",
-}
 
-unsafe extern "C" {
-    static hook_start: u8;
-    static hook_end: u8;
+    "patch_start:",
+    "mov rax, 0xEEEEEEEEEEEEEEEE",
+    "call rax",
+    "patch_end:",
 }
 
 fn hook_asm_bytes() -> &'static [u8] {
     unsafe {
         let start = &raw const hook_start;
         let end = start.with_addr((&raw const hook_end).addr());
+        std::slice::from_ptr_range(start..end)
+    }
+}
+
+fn patch_asm_bytes() -> &'static [u8] {
+    unsafe {
+        let start = &raw const patch_start;
+        let end = start.with_addr((&raw const patch_end).addr());
         std::slice::from_ptr_range(start..end)
     }
 }

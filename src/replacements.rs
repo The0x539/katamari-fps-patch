@@ -1,5 +1,22 @@
+use std::arch::naked_asm;
+
 use crate::ps2;
 use crate::types::{Camera, Katamari, Prince, Vec4};
+
+#[unsafe(naked)]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn normal_motion_branch_first_part() {
+    naked_asm! {
+        "movss xmm4, dword ptr [rbx+0x46C]",
+        "movaps xmm3, xmm6",
+        "addss xmm3, dword ptr [rbx+0x460]",
+        "movaps xmm0, xmm7",
+        "movaps xmm1, xmm8",
+        "addss xmm0, dword ptr [rbx+0x464]",
+        "addss xmm1, dword ptr [rbx+0x468]",
+        "ret",
+    }
+}
 
 pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
     unsafe {

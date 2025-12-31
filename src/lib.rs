@@ -4,7 +4,7 @@
 #[macro_use]
 pub mod macros;
 
-mod hook;
+pub mod hook;
 pub mod ps2;
 pub mod replacements;
 pub mod types;
@@ -61,15 +61,11 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
         println!("Detour supposedly installed");
         */
 
-        std::thread::spawn(|| {
-            // std::thread::sleep(std::time::Duration::from_secs(60));
-
-            hook::install(
-                ps2::DLL.katamari_physics_big_kahuna as _,
-                replacements::raw_rewrite_big_kahuna as _,
-            )
-            .unwrap();
-        });
+        hook::patch(
+            ps2::DLL.katamari_physics_big_kahuna as _,
+            0x41B..0x445,
+            replacements::normal_motion_branch_first_part,
+        )?;
     }
 
     Ok(())

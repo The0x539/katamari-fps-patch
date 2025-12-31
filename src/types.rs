@@ -1,4 +1,7 @@
-use std::ops::{Add, AddAssign, Mul, Sub};
+use std::{
+    ops::{Add, AddAssign, Mul, Sub},
+    simd::f32x4,
+};
 
 #[repr(C)]
 pub struct Katamari {
@@ -602,10 +605,21 @@ pub struct Vec4 {
 impl Vec4 {
     pub const ZERO: Self = Self::new(0.0, 0.0, 0.0, 0.0);
     pub const W: Self = Self::new(0.0, 0.0, 0.0, 1.0);
+    pub const XYZ: Self = Self::new(1.0, 1.0, 1.0, 0.0);
 
     #[inline]
     pub const fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
+    }
+
+    #[inline]
+    pub const fn to_array(self) -> [f32; 4] {
+        [self.x, self.y, self.z, self.w]
+    }
+
+    #[inline]
+    pub const fn to_simd(self) -> f32x4 {
+        f32x4::from_array(self.to_array())
     }
 
     #[inline]

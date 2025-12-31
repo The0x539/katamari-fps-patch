@@ -1,83 +1,90 @@
-use std::arch::{asm, naked_asm};
+use std::arch::asm;
 
 use crate::ps2;
-use crate::types::{Camera, Katamari, Prince, Vec4};
+use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
 
-static THIRTY: f32 = 30.0;
+// calling convention stores result in xmm0
+// clobbers rax
+extern "C" fn frame_ratio() -> f32 {
+    ps2::delta_time() * 30.0_f32
+}
 
-#[unsafe(naked)]
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
-    naked_asm! {
-        "call {}",
-        "movss xmm0, dword ptr [rax]", // xmm0 = delta_time
-        "mulss xmm0, dword ptr [rip+{}]", // xmm0 *= 30.0
-        "mulss xmm6, xmm0", // xmm6 *= xmm0
-        "mulss xmm7, xmm0", // xmm7 *= xmm0
-        "mulss xmm8, xmm0", // xmm8 *= xmm0
+    unsafe {
+        asm! {
+            "mulss xmm6, xmm0",
+            "mulss xmm7, xmm0",
+            "mulss xmm8, xmm0",
 
-        // the original code
-        "movss xmm4, dword ptr [rbx+0x46C]",
-        "movaps xmm3, xmm6",
-        "addss xmm3, dword ptr [rbx+0x460]",
-        "movaps xmm0, xmm7",
-        "movaps xmm1, xmm8",
-        "addss xmm0, dword ptr [rbx+0x464]",
-        "addss xmm1, dword ptr [rbx+0x468]",
+            // the original code
+            "movss xmm4, dword ptr [rbx+0x46C]",
+            "movaps xmm3, xmm6",
+            "addss xmm3, dword ptr [rbx+0x460]",
+            "movaps xmm0, xmm7",
+            "movaps xmm1, xmm8",
+            "addss xmm0, dword ptr [rbx+0x464]",
+            "addss xmm1, dword ptr [rbx+0x468]",
 
-        "ret",
-        sym ps2::delta_time,
-        sym THIRTY,
+            in("xmm0") frame_ratio(),
+        }
     }
 }
 
 pub unsafe extern "C" fn standing_on_prop_branch() {
     unsafe {
         let k: *mut Katamari;
-        asm!("mov {}, rbx", out(reg) k);
+        asm!("mov rcx, rbx", out("rcx") k);
         ps2::update_katamari_measurements(k);
         ps2::katamari_physics_prop_collision(k);
     }
 }
 
-#[unsafe(naked)]
 pub unsafe extern "C" fn prop_terrain_collision() {
-    naked_asm! {
-        "movss xmm1, dword ptr [rdi+0x290]",
-        "movss xmm0, dword ptr [rdi+0x294]",
-        "movss xmm2, dword ptr [rdi+0x298]",
+    unsafe {
+        asm! {
+            // the original code, optimized:
+            // calculate the length of k->dual_a.f and store it in xmm0
+            // (to then be stored in k.guy_that_gets_divided)
+            "movaps xmm0, xmmword ptr [rdi+0x290]", // v = k->dual_a.f
+            "mulps xmm0, xmm1",  // v = v.xyz()
+            "mulps xmm0, xmm0",  // v *= v
+            "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now x*x+y*y, second element is z*z)
+            "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now sqrlen)
+            "sqrtss xmm0, xmm0", // v.x = sqrt(v.x)
 
-        "call {}",
-        "movss xmm6, dword ptr [rax]", // xmm6 = delta_time
-        "mulss xmm6, dword ptr [rip+{}]", // xmm6 *= 30.0
-        "mulss xmm0, xmm6",
-        "mulss xmm1, xmm6",
-        "mulss xmm2, xmm6",
+            "mulss xmm0, xmm2", // now delta-time it
 
-        "ret",
-        sym ps2::delta_time,
-        sym THIRTY,
+            in("xmm1") Vec4::XYZ.to_simd(),
+            in("xmm2") frame_ratio(),
+        }
     }
 }
 
-#[unsafe(naked)]
 pub unsafe extern "C" fn gravity() {
-    naked_asm! {
-        "call {}",
-        "movss xmm5, dword ptr [rax]",
-        "mulss xmm5, [rip+{}]",
+    unsafe {
+        asm! {
+            // modified original code: "load" becomes "mul"
+            "mulss xmm5, dword ptr [rbx+0x1a0]",
 
-        "mulss xmm5, dword ptr [rbx+0x1a0]",
+            // original code
+            "xor edi, edi",
+            "movss dword ptr [rbx+0x1c4], xmm0",
+            "mov qword ptr [rbx+0x2f0], rdi",
+            "mov dword ptr [rbx+0x2f8], edi",
+            "mov dword ptr [rbx+0x2fc], {one}",
 
-        "xor edi, edi",
-        "movss dword ptr [rbx+0x1c4], xmm0",
-        "mov qword ptr [rbx+0x2f0], rdi",
-        "mov dword ptr [rbx+0x2f8], edi",
-        "mov dword ptr [rbx+0x2fc], {}",
+            in("xmm5") frame_ratio(),
+            one = const 1_f32.to_bits(),
+        }
+    }
+}
 
-        "ret",
-        sym ps2::delta_time,
-        sym THIRTY,
-        const 1_f32.to_bits(),
+pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4 {
+    unsafe {
+        // compiles to two ymmword load/store pairs
+        // TODO: make sure clobbering ymm0/ymm1 is okay for the caller...
+        *dst = *src;
+        dst
     }
 }
 

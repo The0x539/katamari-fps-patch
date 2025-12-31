@@ -2,7 +2,7 @@ use std::sync::Once;
 
 use windows::Win32::Foundation::HMODULE;
 
-use crate::types::{Camera, Katamari, Prince, Vec4};
+use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
 
 type KFn = extern "win64" fn(*mut Katamari);
 
@@ -23,6 +23,7 @@ pub struct PS2 {
     pub speed_thing_2: extern "win64" fn(*mut Katamari, *mut Katamari),
     pub calculate_friction: extern "win64" fn(*mut Katamari),
     pub calculate_gravity_and_some_other_forces: KFn,
+    pub copy_matrix: extern "win64" fn(*mut Mat4, *const Mat4) -> *mut Mat4,
 
     pub multiplayer: *mut bool,
     pub climb_limit: *mut i32,
@@ -56,6 +57,10 @@ impl PS2 {
         extern "win64" fn nil2<T, U>(_x: T, _y: U) {}
         extern "win64" fn nil3<T, U, V>(_x: T, _y: U, _z: V) {}
 
+        extern "win64" fn nil2i<T, U>(x: T, _y: U) -> T {
+            x
+        }
+
         use std::ptr::null_mut;
         Self {
             katamari_physics_big_kahuna: nil,
@@ -73,6 +78,7 @@ impl PS2 {
             speed_thing_2: nil2,
             calculate_friction: nil,
             calculate_gravity_and_some_other_forces: nil,
+            copy_matrix: nil2i,
 
             multiplayer: null_mut(),
             climb_limit: null_mut(),
@@ -120,6 +126,7 @@ impl PS2 {
                 speed_thing_2: func!(0x1db50),
                 calculate_friction: func!(0x21590),
                 calculate_gravity_and_some_other_forces: func!(0x20cd0),
+                copy_matrix: func!(0x59590),
 
                 val_x7b218: ptr!(0x07b218),
                 g_katamari_speed_f: ptr!(0x07b0ec),
@@ -176,6 +183,7 @@ export_functions! {
     fn speed_thing_2(k: *mut Katamari, k_: *mut Katamari);
     fn calculate_friction(k: *mut Katamari);
     fn calculate_gravity_and_some_other_forces(k: *mut Katamari);
+    fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4;
 }
 
 // TODO: move struct code into here and make an initializer using the offset

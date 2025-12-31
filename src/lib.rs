@@ -1,5 +1,6 @@
 #![feature(const_slice_from_ptr_range)]
 #![feature(slice_from_ptr_range)]
+#![feature(portable_simd)]
 
 #[macro_use]
 pub mod macros;
@@ -58,6 +59,8 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             replacements::normal_motion_branch_first_part,
         )?;
 
+        hook::install(dll.copy_matrix, replacements::copy_matrix as _)?;
+
         hook::patch(
             dll.katamari_physics_big_kahuna,
             0x597..0x5a7,
@@ -66,7 +69,7 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
 
         hook::patch(
             dll.katamari_physics_prop_collision,
-            0xA0..0xB8,
+            0xA0..0xD1,
             replacements::prop_terrain_collision,
         )?;
 

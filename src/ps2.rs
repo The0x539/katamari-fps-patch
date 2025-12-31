@@ -27,6 +27,7 @@ pub struct PS2 {
     pub game_mode: *mut u8,
     pub val_x7b218: *mut f32,
     pub current_stage: *mut u8,
+    pub delta_time: *mut f32,
 
     pub prince_array: *mut [Prince; 2],
     pub camera_array: *mut [Camera; 2],
@@ -73,6 +74,7 @@ impl PS2 {
             game_mode: null_mut(),
             val_x7b218: null_mut(),
             current_stage: null_mut(),
+            delta_time: null_mut(),
 
             prince_array: null_mut(),
             camera_array: null_mut(),
@@ -115,6 +117,7 @@ impl PS2 {
                 multiplayer: ptr!(0x0ff0f5),
                 climb_limit: ptr!(0x10eb18),
                 game_mode: ptr!(0x10daf5),
+                delta_time: ptr!(0x10eae4),
                 current_stage: ptr!(0xff108),
 
                 prince_array: ptr!(0xd33210),
@@ -181,6 +184,7 @@ export_variables! {
     static game_mode: u8;
     static val_x7b218: f32;
     static current_stage: u8;
+    static delta_time: f32;
 }
 
 #[inline]

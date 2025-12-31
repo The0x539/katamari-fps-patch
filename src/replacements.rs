@@ -4,9 +4,17 @@ use crate::ps2;
 use crate::types::{Camera, Katamari, Prince, Vec4};
 
 #[unsafe(naked)]
-#[unsafe(no_mangle)]
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
     naked_asm! {
+        "call {}",
+        "vbroadcastss xmm0, dword ptr [rax]", // xmm0 = [delta_time; 4]
+        "vbroadcastss xmm1, dword ptr [rip+thirty]", // xmm1 = [30.0; 4]
+        "mulps xmm0, xmm1", // xmm0 *= xmm1
+        "mulps xmm6, xmm0", // xmm6 *= xmm0
+        "mulps xmm7, xmm0", // xmm7 *= xmm0
+        "mulps xmm8, xmm0", // xmm8 *= xmm0
+
+        // the original code
         "movss xmm4, dword ptr [rbx+0x46C]",
         "movaps xmm3, xmm6",
         "addss xmm3, dword ptr [rbx+0x460]",
@@ -14,7 +22,10 @@ pub unsafe extern "C" fn normal_motion_branch_first_part() {
         "movaps xmm1, xmm8",
         "addss xmm0, dword ptr [rbx+0x464]",
         "addss xmm1, dword ptr [rbx+0x468]",
+
         "ret",
+        "thirty: .float 30",
+        sym ps2::delta_time,
     }
 }
 

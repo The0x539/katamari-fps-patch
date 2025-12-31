@@ -1,14 +1,16 @@
-use std::arch::naked_asm;
+use std::arch::{asm, naked_asm};
 
 use crate::ps2;
 use crate::types::{Camera, Katamari, Prince, Vec4};
+
+static THIRTY: f32 = 30.0;
 
 #[unsafe(naked)]
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
     naked_asm! {
         "call {}",
         "vbroadcastss xmm0, dword ptr [rax]", // xmm0 = [delta_time; 4]
-        "vbroadcastss xmm1, dword ptr [rip+thirty]", // xmm1 = [30.0; 4]
+        "vbroadcastss xmm1, dword ptr [rip+{}]", // xmm1 = [30.0; 4]
         "mulps xmm0, xmm1", // xmm0 *= xmm1
         "mulps xmm6, xmm0", // xmm6 *= xmm0
         "mulps xmm7, xmm0", // xmm7 *= xmm0
@@ -24,8 +26,38 @@ pub unsafe extern "C" fn normal_motion_branch_first_part() {
         "addss xmm1, dword ptr [rbx+0x468]",
 
         "ret",
-        "thirty: .float 30",
         sym ps2::delta_time,
+        sym THIRTY,
+    }
+}
+
+pub unsafe extern "C" fn standing_on_prop_branch() {
+    unsafe {
+        let k: *mut Katamari;
+        asm!("mov {}, rbx", out(reg) k);
+        ps2::update_katamari_measurements(k);
+        ps2::katamari_physics_prop_collision(k);
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn prop_terrain_collision() {
+    naked_asm! {
+        "movss xmm1, dword ptr [rdi+0x290]",
+        "movss xmm0, dword ptr [rdi+0x294]",
+        "movss xmm2, dword ptr [rdi+0x298]",
+
+        "call {}",
+        "vbroadcastss xmm6, dword ptr [rax]", // xmm0 = [delta_time; 4]
+        "vbroadcastss xmm7, dword ptr [rip+{}]", // xmm1 = [30.0; 4]
+        "mulps xmm6, xmm7",
+        "mulps xmm0, xmm6",
+        "mulps xmm1, xmm6",
+        "mulps xmm2, xmm6",
+
+        "ret",
+        sym ps2::delta_time,
+        sym THIRTY,
     }
 }
 
@@ -109,7 +141,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             ps2::katamari_physics_sub_sub1(k, &vel.x0zw());
         } else {
             ps2::update_katamari_measurements(k);
-            ps2::katamari_physics_big_subroutine(k);
+            ps2::katamari_physics_prop_collision(k);
         }
 
         // the weird loops that don't look like they do anything in the decomp
@@ -366,7 +398,7 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
             ps2::x20660(k);
         } else {
             ps2::update_katamari_measurements(k);
-            ps2::katamari_physics_big_subroutine(k);
+            ps2::katamari_physics_prop_collision(k);
         }
         /*
         lVar2 = 4;

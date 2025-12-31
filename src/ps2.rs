@@ -16,7 +16,7 @@ pub struct PS2 {
     pub update_katamari_measurements: KFn,
     pub katamari_physics_sub_sub1: extern "win64" fn(*mut Katamari, *const Vec4),
     pub x20660: KFn,
-    pub katamari_physics_big_subroutine: KFn,
+    pub katamari_physics_prop_collision: KFn,
     pub apply_deadzones: extern "win64" fn(*mut Vec4, *const Vec4, f32),
     pub gravity_user_3: KFn,
     pub set_player_animation_mode: extern "win64" fn(i32, u8),
@@ -63,7 +63,7 @@ impl PS2 {
             update_katamari_measurements: nil,
             katamari_physics_sub_sub1: nil2,
             x20660: nil,
-            katamari_physics_big_subroutine: nil,
+            katamari_physics_prop_collision: nil,
             apply_deadzones: nil3,
             gravity_user_3: nil,
             set_player_animation_mode: nil2,
@@ -107,7 +107,7 @@ impl PS2 {
                 update_katamari_measurements: func!(0x1ee70),
                 katamari_physics_sub_sub1: func!(0x1ff50),
                 x20660: func!(0x20660),
-                katamari_physics_big_subroutine: func!(0x1b3b0),
+                katamari_physics_prop_collision: func!(0x1b3b0),
                 apply_deadzones: func!(0x26b80),
                 gravity_user_3: func!(0x23b70),
                 set_player_animation_mode: func!(0xad40),
@@ -159,7 +159,7 @@ export_functions! {
     fn terminate_climb(k: *mut Katamari);
     fn update_katamari_measurements(k: *mut Katamari);
     fn katamari_physics_sub_sub1(k: *mut Katamari, v: *const Vec4);
-    fn katamari_physics_big_subroutine(k: *mut Katamari);
+    fn katamari_physics_prop_collision(k: *mut Katamari);
     fn x20660(k: *mut Katamari);
     fn apply_deadzones(out: *mut Vec4, v: *const Vec4, threshold: f32);
     fn gravity_user_3(k: *mut Katamari);

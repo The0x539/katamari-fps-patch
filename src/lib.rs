@@ -50,21 +50,24 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
 
         ps2::link(module);
 
-        /*
-        let detour = RawDetour::new(
-            ps2::DLL.katamari_physics_big_kahuna as *const (),
-            replacements::null_big_kahuna as *const (),
-        )
-        .wrap_err("Failed to construct detour")?;
-
-        detour.enable().wrap_err("Failed to enable detour")?;
-        println!("Detour supposedly installed");
-        */
+        let dll = ps2::DLL;
 
         hook::patch(
-            ps2::DLL.katamari_physics_big_kahuna as _,
+            dll.katamari_physics_big_kahuna,
             0x41B..0x445,
             replacements::normal_motion_branch_first_part,
+        )?;
+
+        hook::patch(
+            dll.katamari_physics_big_kahuna,
+            0x597..0x5a7,
+            replacements::standing_on_prop_branch,
+        )?;
+
+        hook::patch(
+            dll.katamari_physics_prop_collision,
+            0xA0..0xB8,
+            replacements::prop_terrain_collision,
         )?;
     }
 

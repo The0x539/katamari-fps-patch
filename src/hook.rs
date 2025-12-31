@@ -1,9 +1,10 @@
 use crate::w;
 
-pub unsafe fn install(target: *mut (), detour: *const ()) -> eyre::Result<()> {
+pub unsafe fn install(target: impl Target, detour: *const u8) -> eyre::Result<()> {
+    let target = target.into_target();
     unsafe {
         let hook_code = hook_asm_bytes();
-        let target_code = std::ptr::slice_from_raw_parts_mut(target.cast(), hook_code.len());
+        let target_code = std::ptr::slice_from_raw_parts_mut(target, hook_code.len());
 
         let i = hook_code
             .windows(8)
@@ -21,15 +22,15 @@ pub unsafe fn install(target: *mut (), detour: *const ()) -> eyre::Result<()> {
 }
 
 pub unsafe fn patch(
-    target: *mut (),
+    target: impl Target,
     range: std::ops::Range<usize>,
     detour: unsafe extern "C" fn(),
 ) -> eyre::Result<()> {
+    let target = target.into_target();
     unsafe {
         let detour = detour as *const ();
         let patch_code = patch_asm_bytes();
-        let target_code: *mut [u8] =
-            std::ptr::slice_from_raw_parts_mut(target.cast::<u8>().add(range.start), range.len());
+        let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
 
         let i = patch_code
             .windows(8)
@@ -45,6 +46,34 @@ pub unsafe fn patch(
     }
 
     Ok(())
+}
+
+pub unsafe fn skip(target: impl Target) -> eyre::Result<()> {
+    let target = target.into_target();
+    unsafe {
+        let target_code = std::ptr::slice_from_raw_parts_mut(target, 1);
+        mprotect(target_code, w::PAGE_READWRITE, || {
+            (*target_code)[0] = 0xc3;
+        })?;
+    }
+
+    Ok(())
+}
+
+pub unsafe trait Target {
+    fn into_target(self) -> *mut u8;
+}
+
+unsafe impl<T> Target for extern "win64" fn(T) {
+    fn into_target(self) -> *mut u8 {
+        self as _
+    }
+}
+
+unsafe impl<T, U> Target for extern "win64" fn(T, U) {
+    fn into_target(self) -> *mut u8 {
+        self as _
+    }
 }
 
 unsafe extern "C" {

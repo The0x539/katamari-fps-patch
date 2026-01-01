@@ -79,6 +79,67 @@ pub unsafe extern "C" fn gravity() {
     }
 }
 
+pub unsafe extern "C" fn fast_steer() {
+    unsafe {
+        let prince: *mut Prince;
+        let direction: f32;
+        asm!("", out("rcx") prince, out("xmm1") direction);
+
+        asm! {
+            "movss dword ptr [rcx+0x78], xmm1",
+            "mulss xmm1, {}",
+            "mulss xmm1, {}",
+            "addss xmm1, dword ptr [rcx+0x6c]",
+
+            in(xmm_reg) ps2::g_katamari_rot(),
+            in(xmm_reg) frame_ratio(),
+            in("xmm1") direction,
+            in("rcx") prince,
+        }
+    }
+}
+
+pub unsafe extern "C" fn slow_steer() {
+    unsafe {
+        let prince: *mut Prince;
+        let direction: f32;
+        asm! {
+            "push rbx",
+            "mov {}, rbx",
+            out(reg) prince,
+            out("xmm1") direction,
+        };
+
+        asm! {
+            "movss dword ptr [{prince}+0x78], xmm1",
+            "mulss xmm1, xmm0",
+            "mulss xmm1, xmm2",
+            "addss xmm1, dword ptr [{prince}+0x6c]",
+            "pop rbx",
+
+            in("xmm0") ps2::g_katamari_rot(),
+            in("xmm2") frame_ratio(),
+            in("xmm1") direction,
+            prince = in(reg) prince,
+        }
+    }
+}
+
+pub unsafe extern "C" fn gentle_steer() {
+    unsafe {
+        let prince: *mut Prince;
+        asm!("mov {}, rbx", out(reg) prince);
+
+        asm! {
+            "mulss xmm1, xmm0",
+            "mulss xmm1, dword ptr [{prince}+0x78]",
+            in("xmm1") ps2::g_katamari_rot(),
+            in("xmm0") frame_ratio(),
+            prince = in(reg) prince,
+        }
+    }
+}
+
 pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4 {
     unsafe {
         // compiles to two ymmword load/store pairs

@@ -60,6 +60,15 @@ export_functions! {
 
     #[addr = 0x59590]
     fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4;
+
+    #[addr = 0x56510]
+    fn handle_turn(prince: *mut Prince);
+
+    #[addr = 0x55b70]
+    fn actually_apply_player_input_force_2(prince: *mut Prince);
+
+    #[addr = 0x56250]
+    fn gentle_steering(prince: *mut Prince);
 }
 
 export_variables! {
@@ -70,6 +79,9 @@ export_variables! {
 
     #[addr = 0x07b0ec]
     static g_katamari_speed_f: f32;
+
+    #[addr = 0x07acf4]
+    static g_katamari_rot: f32;
 
     #[addr = 0x0ff0f5]
     static multiplayer: bool;

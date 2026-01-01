@@ -87,6 +87,26 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             0xd4..0xfd,
             replacements::gravity,
         )?;
+
+        // TODO: determine if it would be better to just edit g_katamariRot.
+        // Does anyone set it? Or does the game use it as a constant?
+        hook::patch(dll.handle_turn, 0xa8..0xba, replacements::fast_steer)?;
+
+        // The instructions in play here are identical in all four of these cases,
+        // aside from a RIP-relative offset for loading g_katamariRot.
+        for span in [0x36f..0x381, 0x2c7..0x2d9, 0x215..0x227, 0x15f..0x171] {
+            hook::patch(
+                dll.actually_apply_player_input_force_2,
+                span,
+                replacements::slow_steer,
+            )?;
+        }
+
+        hook::patch(
+            dll.gentle_steering,
+            0x248..0x255,
+            replacements::gentle_steer,
+        )?;
     }
 
     Ok(())

@@ -64,6 +64,12 @@ pub unsafe trait Target {
     fn into_target(self) -> *mut u8;
 }
 
+unsafe impl<R> Target for extern "win64" fn() -> R {
+    fn into_target(self) -> *mut u8 {
+        self as _
+    }
+}
+
 unsafe impl<T, R> Target for extern "win64" fn(T) -> R {
     fn into_target(self) -> *mut u8 {
         self as _

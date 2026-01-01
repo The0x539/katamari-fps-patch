@@ -69,6 +69,9 @@ export_functions! {
 
     #[addr = 0x56250]
     fn gentle_steering(prince: *mut Prince);
+
+    #[addr = 0x5afc0]
+    fn ontick_update_angle_guy();
 }
 
 export_variables! {
@@ -97,6 +100,15 @@ export_variables! {
 
     #[addr = 0x0ff108]
     static current_stage: u8;
+
+    #[addr = 0x10daed]
+    static val_x10daed: bool; // related to the "NPC approaching" sound
+
+    #[addr = 0x0ff0f6]
+    static val_x0ff0f6: u8; // related to the "NPC approaching" sound
+
+    #[addr = 0x0ff0f4]
+    static current_player_index: u8;
 }
 
 #[derive(Debug)]
@@ -121,6 +133,8 @@ pub struct PS2 {
         attach_id: i32,
         player_id: i32,
     ),
+
+    pub cb_play_sound_fx: *mut extern "win64" fn(sfx_id: i32, volume: f32, pan: i32),
 }
 
 impl Nil for PS2 {
@@ -131,6 +145,7 @@ impl Nil for PS2 {
         camera_array: Nil::NIL,
         katamari_array: Nil::NIL,
         cb_play_visual_fx: Nil::NIL,
+        cb_play_sound_fx: Nil::NIL,
     };
 }
 
@@ -147,6 +162,7 @@ pub unsafe fn link(module: HMODULE) {
         DLL.katamari_array = module.0.offset(0x16d720).cast();
 
         DLL.cb_play_visual_fx = module.0.offset(0x10ea00).cast();
+        DLL.cb_play_sound_fx = module.0.offset(0x10ea18).cast();
     });
 }
 
@@ -185,6 +201,12 @@ pub mod cb {
             (*DLL.cb_play_visual_fx)(
                 vfx_id, pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, scale, attach_id, player_id,
             )
+        }
+    }
+
+    pub fn play_sound_fx(sound_id: i32, volume: f32, pan: i32) {
+        unsafe {
+            (*DLL.cb_play_sound_fx)(sound_id, volume, pan);
         }
     }
 }

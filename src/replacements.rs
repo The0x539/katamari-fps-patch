@@ -140,6 +140,24 @@ pub unsafe extern "C" fn gentle_steer() {
     }
 }
 
+pub unsafe extern "C" fn sfx_npc_approaching() {
+    unsafe {
+        let i = ps2::current_player_index();
+        let k = ps2::katamari_ptr(i);
+
+        (*k).sfx_0x2d_timer -= (ps2::delta_time() * 1000.0) as i16;
+        // println!("{}", (*k).sfx_0x2d_timer);
+        if (*k).sfx_0x2d_timer < 0 {
+            // TODO: these two values remain mysterious
+            if ps2::val_x10daed() && ps2::val_x0ff0f6() == 0 {
+                ps2::cb::play_sound_fx(0x2d, 1.0, 0);
+            }
+
+            (*k).sfx_0x2d_timer = (*k).sfx_0x2d_interval * 1000 / 30;
+        }
+    }
+}
+
 pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4 {
     unsafe {
         // compiles to two ymmword load/store pairs

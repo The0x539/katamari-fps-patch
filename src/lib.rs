@@ -107,6 +107,12 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             0x248..0x255,
             replacements::gentle_steer,
         )?;
+
+        hook::patch(
+            dll.ontick_update_angle_guy,
+            0x109..0x14e,
+            replacements::sfx_npc_approaching,
+        )?;
     }
 
     Ok(())

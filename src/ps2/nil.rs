@@ -1,3 +1,4 @@
+extern "win64" fn nil0() {}
 extern "win64" fn nil<T>(_x: T) {}
 extern "win64" fn nil2<T, U>(_x: T, _y: U) {}
 extern "win64" fn nil3<T, U, V>(_x: T, _y: U, _z: V) {}
@@ -8,6 +9,10 @@ extern "win64" fn nil2i<T, U>(x: T, _y: U) -> T {
 
 pub trait Nil {
     const NIL: Self;
+}
+
+impl Nil for extern "win64" fn() {
+    const NIL: Self = nil0;
 }
 
 impl<T> Nil for extern "win64" fn(T) {

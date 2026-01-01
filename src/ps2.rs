@@ -10,203 +10,134 @@ mod macros;
 mod nil;
 use nil::Nil;
 
-export_functions! {
-    DLL_FUNCTIONS: DllFunctions;
-
-    #[addr = 0x1e6a0]
-    fn katamari_physics_big_kahuna(k: *mut Katamari);
-
-    #[addr = 0x59f20]
-    fn normalize(dst: *mut Vec4, src: *const Vec4);
-
-    #[addr = 0x25fb0]
-    fn x25fb0(v: *const Vec4);
-
-    #[addr = 0x21e50]
-    fn climb_guy(_v: *const Vec4, k: *mut Katamari);
-
-    #[addr = 0x12ca0]
-    fn terminate_climb(k: *mut Katamari);
-
-    #[addr = 0x1ee70]
-    fn update_katamari_measurements(k: *mut Katamari);
-
-    #[addr = 0x1ff50]
-    fn katamari_physics_sub_sub1(k: *mut Katamari, v: *const Vec4);
-
-    #[addr = 0x1b3b0]
-    fn katamari_physics_prop_collision(k: *mut Katamari);
-
-    #[addr = 0x20660]
-    fn x20660(k: *mut Katamari);
-
-    #[addr = 0x26b80]
-    fn apply_deadzones(out: *mut Vec4, v: *const Vec4, threshold: f32);
-
-    #[addr = 0x23b70]
-    fn gravity_user_3(k: *mut Katamari);
-
-    #[addr = 0xad40]
-    fn set_player_animation_mode(p_idx: i32, mode: u8);
-
-    #[addr = 0x1db50]
-    fn speed_thing_2(k: *mut Katamari, k_: *mut Katamari);
-
-    #[addr = 0x21590]
-    fn calculate_friction(k: *mut Katamari);
-
-    #[addr = 0x20cd0]
-    fn calculate_gravity_and_some_other_forces(k: *mut Katamari);
-
-    #[addr = 0x59590]
-    fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4;
-
-    #[addr = 0x56510]
-    fn handle_turn(prince: *mut Prince);
-
-    #[addr = 0x55b70]
-    fn actually_apply_player_input_force_2(prince: *mut Prince);
-
-    #[addr = 0x56250]
-    fn gentle_steering(prince: *mut Prince);
-
-    #[addr = 0x5afc0]
-    fn ontick_update_angle_guy();
-}
-
-export_variables! {
-    DLL_VARIABLES: DllVariables;
-
-    #[addr = 0x07b218]
-    static val_x7b218: f32;
-
-    #[addr = 0x07b0ec]
-    static g_katamari_speed_f: f32;
-
-    #[addr = 0x07acf4]
-    static g_katamari_rot: f32;
-
-    #[addr = 0x0ff0f5]
-    static multiplayer: bool;
-
-    #[addr = 0x10eb18]
-    static climb_limit: i32;
-
-    #[addr = 0x10daf5]
-    static game_mode: u8;
-
-    #[addr = 0x10eae4]
-    static delta_time: f32;
-
-    #[addr = 0x0ff108]
-    static current_stage: u8;
-
-    #[addr = 0x10daed]
-    static val_x10daed: bool; // related to the "NPC approaching" sound
-
-    #[addr = 0x0ff0f6]
-    static val_x0ff0f6: u8; // related to the "NPC approaching" sound
-
-    #[addr = 0x0ff0f4]
-    static current_player_index: u8;
-}
-
-#[derive(Debug)]
-pub struct PS2 {
-    pub functions: DllFunctions,
-    pub variables: DllVariables,
-
-    // TODO: these will need their own structs like the above once they scale more
-    pub prince_array: *mut [Prince; 2],
-    pub camera_array: *mut [Camera; 2],
-    pub katamari_array: *mut [Katamari; 2],
-
-    pub cb_play_visual_fx: *mut extern "win64" fn(
-        vfx_id: i32,
-        pos: f32,
-        f32,
-        f32,
-        dir: f32,
-        f32,
-        f32,
-        scale: f32,
-        attach_id: i32,
-        player_id: i32,
-    ),
-
-    pub cb_play_sound_fx: *mut extern "win64" fn(sfx_id: i32, volume: f32, pan: i32),
-}
-
-impl Nil for PS2 {
-    const NIL: Self = Self {
-        functions: Nil::NIL,
-        variables: Nil::NIL,
-        prince_array: Nil::NIL,
-        camera_array: Nil::NIL,
-        katamari_array: Nil::NIL,
-        cb_play_visual_fx: Nil::NIL,
-        cb_play_sound_fx: Nil::NIL,
-    };
-}
-
 pub static mut DLL: PS2 = PS2::NIL;
 
 pub unsafe fn link(module: HMODULE) {
     static INIT: Once = Once::new();
     INIT.call_once(|| unsafe {
-        DLL.functions = DllFunctions::from_module(module);
-        DLL.variables = DllVariables::from_module(module);
-
-        DLL.prince_array = module.0.offset(0xd33210).cast();
-        DLL.camera_array = module.0.offset(0x192ee0).cast();
-        DLL.katamari_array = module.0.offset(0x16d720).cast();
-
-        DLL.cb_play_visual_fx = module.0.offset(0x10ea00).cast();
-        DLL.cb_play_sound_fx = module.0.offset(0x10ea18).cast();
+        DLL = PS2::from_module(module);
     });
 }
 
-#[inline]
-pub fn prince_ptr(player_index: impl Into<i64>) -> *mut Prince {
-    let i = player_index.into() as usize;
-    unsafe { &raw mut (*DLL.prince_array)[i] }
-}
+exports! {
+    struct PS2;
 
-#[inline]
-pub fn camera_ptr(player_index: impl Into<i64>) -> *mut Camera {
-    let i = player_index.into() as usize;
-    unsafe { &raw mut (*DLL.camera_array)[i] }
-}
+    #[func @ 0x1e6a0]
+    fn katamari_physics_big_kahuna(k: *mut Katamari);
 
-#[inline]
-pub fn katamari_ptr(player_index: impl Into<i64>) -> *mut Katamari {
-    let i = player_index.into() as usize;
-    unsafe { &raw mut (*DLL.katamari_array)[i] }
-}
+    #[func @ 0x59f20]
+    fn normalize(dst: *mut Vec4, src: *const Vec4);
 
-pub mod cb {
-    use crate::types::Vec4;
+    #[func @ 0x25fb0]
+    fn x25fb0(v: *const Vec4);
 
-    use super::DLL;
+    #[func @ 0x21e50]
+    fn climb_guy(_v: *const Vec4, k: *mut Katamari);
 
-    pub fn play_visual_fx(
+    #[func @ 0x12ca0]
+    fn terminate_climb(k: *mut Katamari);
+
+    #[func @ 0x1ee70]
+    fn update_katamari_measurements(k: *mut Katamari);
+
+    #[func @ 0x1ff50]
+    fn katamari_physics_sub_sub1(k: *mut Katamari, v: *const Vec4);
+
+    #[func @ 0x1b3b0]
+    fn katamari_physics_prop_collision(k: *mut Katamari);
+
+    #[func @ 0x20660]
+    fn x20660(k: *mut Katamari);
+
+    #[func @ 0x26b80]
+    fn apply_deadzones(out: *mut Vec4, v: *const Vec4, threshold: f32);
+
+    #[func @ 0x23b70]
+    fn gravity_user_3(k: *mut Katamari);
+
+    #[func @ 0xad40]
+    fn set_player_animation_mode(p_idx: i32, mode: u8);
+
+    #[func @ 0x1db50]
+    fn speed_thing_2(k: *mut Katamari, k_: *mut Katamari);
+
+    #[func @ 0x21590]
+    fn calculate_friction(k: *mut Katamari);
+
+    #[func @ 0x20cd0]
+    fn calculate_gravity_and_some_other_forces(k: *mut Katamari);
+
+    #[func @ 0x59590]
+    fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4;
+
+    #[func @ 0x56510]
+    fn handle_turn(prince: *mut Prince);
+
+    #[func @ 0x55b70]
+    fn actually_apply_player_input_force_2(prince: *mut Prince);
+
+    #[func @ 0x56250]
+    fn gentle_steering(prince: *mut Prince);
+
+    #[func @ 0x5afc0]
+    fn ontick_update_angle_guy();
+
+    #[var @ 0x07b218]
+    static val_x7b218: f32;
+
+    #[var @ 0x07b0ec]
+    static g_katamari_speed_f: f32;
+
+    #[var @ 0x07acf4]
+    static g_katamari_rot: f32;
+
+    #[var @ 0x0ff0f5]
+    static multiplayer: bool;
+
+    #[var @ 0x10eb18]
+    static climb_limit: i32;
+
+    #[var @ 0x10daf5]
+    static game_mode: u8;
+
+    #[var @ 0x10eae4]
+    static delta_time: f32;
+
+    #[var @ 0x0ff108]
+    static current_stage: u8;
+
+    #[var @ 0x10daed]
+    static val_x10daed: bool; // related to the "NPC approaching" sound
+
+    #[var @ 0x0ff0f6]
+    static val_x0ff0f6: u8; // related to the "NPC approaching" sound
+
+    #[var @ 0x0ff0f4]
+    static current_player_index: u8;
+
+    #[array @ 0xd33210]
+    static prince_array: [Prince; 2];
+
+    #[array @ 0x192ee0]
+    static camera_array: [Camera; 2];
+
+    #[array @ 0x16d720]
+    static katamari_array: [Katamari; 2];
+
+    #[callback @ 0x10ea00]
+    fn play_visual_fx(
         vfx_id: i32,
-        pos: &Vec4,
-        dir: &Vec4,
+        pos_x: f32,
+        pos_y: f32,
+        pos_z: f32,
+        dir_x: f32,
+        dir_y: f32,
+        dir_z: f32,
         scale: f32,
         attach_id: i32,
         player_id: i32,
-    ) {
-        unsafe {
-            (*DLL.cb_play_visual_fx)(
-                vfx_id, pos.x, pos.y, pos.z, dir.x, dir.y, dir.z, scale, attach_id, player_id,
-            )
-        }
-    }
+    );
 
-    pub fn play_sound_fx(sound_id: i32, volume: f32, pan: i32) {
-        unsafe {
-            (*DLL.cb_play_sound_fx)(sound_id, volume, pan);
-        }
-    }
+    #[callback @ 0x10ea18]
+    fn play_sound_fx(sfx_id: i32, volume: f32, pan: i32);
 }

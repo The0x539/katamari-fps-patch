@@ -51,7 +51,7 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
 
         ps2::link(module);
 
-        let dll = ps2::DLL.functions;
+        let dll = ps2::DLL;
 
         hook::patch(
             dll.katamari_physics_big_kahuna,

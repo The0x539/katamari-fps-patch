@@ -143,7 +143,7 @@ pub unsafe extern "C" fn gentle_steer() {
 pub unsafe extern "C" fn sfx_npc_approaching() {
     unsafe {
         let i = ps2::current_player_index();
-        let k = ps2::katamari_ptr(i);
+        let k = ps2::katamari_array(i);
 
         (*k).sfx_0x2d_timer -= (ps2::delta_time() * 1000.0) as i16;
         // println!("{}", (*k).sfx_0x2d_timer);
@@ -209,7 +209,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             if ps2::multiplayer() {
                 // I have no idea what the hell this code is
                 b_var_2 = true;
-                if (*ps2::prince_ptr((*k).player_index)).ouji_state.x17 {
+                if (*ps2::prince_array((*k).player_index)).ouji_state.x17 {
                     b_var_2 = true;
                     if (*k).climbing_related_c == 0 {
                         b_var_2 = false;
@@ -264,7 +264,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
 
         if ps2::multiplayer() {
             let p_idx = (*k).player_index;
-            if (*ps2::camera_ptr(p_idx)).animation_mode == 5 {
+            if (*ps2::camera_array(p_idx)).animation_mode == 5 {
                 let mut n = (*k).radius * 0.5;
                 (*k).xc2 = true;
                 let delta = (*k).position_b - (*k).position;
@@ -275,7 +275,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                 (*k).x3ac8 = n;
 
                 if n <= 0.0 {
-                    if !std::ptr::addr_eq(ps2::katamari_ptr(p_idx), k) {
+                    if !std::ptr::addr_eq(ps2::katamari_array(p_idx), k) {
                         println!("katamari player index was not self-referential");
                     }
 
@@ -283,7 +283,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                         (*k).xc2 = false;
                         (*k).x3ac8 = 0.0;
                         ps2::set_player_animation_mode(p_idx as i32, 6);
-                        let prince = &mut *ps2::prince_ptr(p_idx);
+                        let prince = &mut *ps2::prince_array(p_idx);
                         prince.ouji_state.x19 = 0;
                         prince.ouji_state.x0 = 0;
                         prince.ouji_state.x1 = 0;
@@ -364,9 +364,9 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
         let pIdx: u8;
         let prince: *mut Prince;
 
-        let PRINCE: &mut [Prince; 2] = &mut *ps2::prince_ptr(0).cast();
-        let CAMERAS: &mut [Camera; 2] = &mut *ps2::camera_ptr(0).cast();
-        let KATAMARI: &mut [Katamari; 2] = &mut *ps2::katamari_ptr(0).cast();
+        let PRINCE: &mut [Prince; 2] = &mut *ps2::prince_array(0).cast();
+        let CAMERAS: &mut [Camera; 2] = &mut *ps2::camera_array(0).cast();
+        let KATAMARI: &mut [Katamari; 2] = &mut *ps2::katamari_array(0).cast();
 
         direction = Vec4::W;
         ((*k).x660).w = 1.0;

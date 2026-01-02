@@ -58,7 +58,7 @@ exports! {
     #[func @ 0xad40]
     fn set_player_animation_mode(p_idx: i32, mode: u8);
 
-    #[func @ 0x1db50]
+    #[func @ 0x22130]
     fn speed_thing_2(k: *mut Katamari, k_: *mut Katamari);
 
     #[func @ 0x21590]

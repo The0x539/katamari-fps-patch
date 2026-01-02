@@ -134,6 +134,12 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             0x404..0x412,
             replacements::decrement_dash_input_timer,
         )?;
+
+        hook::patch(
+            dll.speed_thing_2,
+            0x143..0x21f,
+            replacements::dash_state_machine,
+        )?;
     }
 
     Ok(())

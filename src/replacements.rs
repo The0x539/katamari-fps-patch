@@ -264,7 +264,11 @@ pub unsafe extern "C" fn start_dash_input_timer() {
     }
 }
 
-// TODO: This seems semi-broken: the spin-in-place state can last a bit longer than I'd expect
+// Need to investigate why the pre-dash spin state isn't getting properly cancelled.
+// Seems to not reach the bit at the end that decrements the x47a field.
+// Seems to hit one of the early returns instead.
+// Don't know which, don't know why.
+
 pub unsafe extern "C" fn decrement_dash_input_timer() {
     unsafe {
         asm!("push rcx", "push rdx");
@@ -279,6 +283,55 @@ pub unsafe extern "C" fn decrement_dash_input_timer() {
         }
 
         asm!("pop rdx", "pop rcx");
+    }
+}
+
+pub unsafe extern "C" fn dash_state_machine() {
+    let (prince, k) = unsafe {
+        let prince: *mut Prince;
+        let k: *mut Katamari;
+        asm!("", out("rsi") prince, out("r14") k);
+        (&mut *prince, &mut *k)
+    };
+
+    let dt = (ps2::delta_time() * 1000.0) as i16;
+
+    match k.dash_state {
+        0 => {
+            if !k.hit_water || k.dash_timer != 0 {
+                prince.ouji_state.dash_active = true;
+                k.dash_timer += dt;
+                if k.dash_timer >= 500 {
+                    k.dash_state = 1;
+                }
+                if k.hit_water {
+                    k.dash_state = 2;
+                    k.dash_timer = 333;
+                }
+            } else {
+                k.dash_state = 3;
+            }
+        }
+        1 => {
+            prince.ouji_state.dash_active = true;
+            if k.dwordflag_xa7[0] != 0 || !prince.ouji_state.dash_stationary_spin {
+                k.dash_state = 2;
+                k.dash_timer = 500;
+            }
+            if k.hit_water {
+                k.dash_state = 2;
+                k.dash_timer = 333;
+            }
+        }
+        2 => {
+            prince.ouji_state.dash_active = false;
+            k.dash_timer -= dt;
+            if k.dash_timer <= 0 {
+                k.dash_state = 3;
+            }
+        }
+        3 => prince.ouji_state.dash_active = false,
+        _ => {}
     }
 }
 
@@ -409,10 +462,10 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                         ps2::set_player_animation_mode(p_idx as i32, 6);
                         let prince = &mut *ps2::prince_array(p_idx);
                         prince.ouji_state.x19 = 0;
-                        prince.ouji_state.dash_x0 = 0;
+                        prince.ouji_state.dash_pending = false;
                         prince.ouji_state.dash_x1 = 0;
                         prince.ouji_state.dash_spinning = false;
-                        prince.ouji_state.dash_spinning_inplace = 0;
+                        prince.ouji_state.dash_stationary_spin = false;
                         prince.main_dash_counter.0 = 0; // TODO: identify this field or pair of fields
                         prince.ouji_state.x16 = 0;
                         prince.ouji_state.x17 = false;
@@ -674,10 +727,10 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
                         ps2::set_player_animation_mode(pIdx_ as i32, 6);
                         PRINCE[pIdx as usize].ouji_state.x19 = 0;
                         prince = &mut PRINCE[pIdx as usize];
-                        ((*prince).ouji_state).dash_x0 = 0;
+                        ((*prince).ouji_state).dash_pending = false;
                         ((*prince).ouji_state).dash_x1 = 0;
                         ((*prince).ouji_state).dash_spinning = false;
-                        ((*prince).ouji_state).dash_spinning_inplace = 0;
+                        ((*prince).ouji_state).dash_stationary_spin = false;
                         PRINCE[pIdx as usize].main_dash_counter.0 = 0;
                         PRINCE[pIdx as usize].ouji_state.x16 = 0;
                         PRINCE[pIdx as usize].ouji_state.x17 = false;

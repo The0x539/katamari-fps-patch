@@ -251,6 +251,37 @@ pub unsafe extern "C" fn stamina_drain() {
 
 // TODO: delta-time the exhaustion timer too
 
+// TODO: This one should be unnecessary once we can instead
+pub unsafe extern "C" fn start_dash_input_timer() {
+    unsafe {
+        asm! {
+            "inc cx",
+            "imul r9w, r15w", // r15 is immediately overwritten by the next instruction in the target code
+            "mov word ptr [rdi + 0x478], r9w",
+            "mov word ptr [rdi + 0x47c], cx",
+            in("r15w") ps2::dash_input_window() * 1000 / 30,
+        }
+    }
+}
+
+// TODO: This seems semi-broken: the spin-in-place state can last a bit longer than I'd expect
+pub unsafe extern "C" fn decrement_dash_input_timer() {
+    unsafe {
+        asm!("push rcx", "push rdx");
+
+        asm! {
+            "mov ax, word ptr [rdi + 0x478]",
+            "sub ax, cx",
+            "mov word ptr [rdi + 0x478], ax",
+            "cmp dl, sil", // ugh, this complicates things a lot but I'm working in quite a tight space
+            in("cx") (ps2::delta_time() * 1000.0) as i16,
+            in("dl") ps2::multiplayer() as u8,
+        }
+
+        asm!("pop rdx", "pop rcx");
+    }
+}
+
 pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4 {
     unsafe {
         // compiles to two ymmword load/store pairs

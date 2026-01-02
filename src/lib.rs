@@ -122,6 +122,18 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             0x16f..0x17d,
             replacements::stamina_drain,
         )?;
+
+        hook::patch(
+            dll.prince_handle_dash,
+            0x25c..0x26e,
+            replacements::start_dash_input_timer,
+        )?;
+
+        hook::patch(
+            dll.prince_handle_dash,
+            0x404..0x412,
+            replacements::decrement_dash_input_timer,
+        )?;
     }
 
     Ok(())

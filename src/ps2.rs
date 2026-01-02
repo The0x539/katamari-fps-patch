@@ -130,6 +130,9 @@ exports! {
     #[var @ 0x0ff0f4]
     static current_player_index: u8;
 
+    #[var @ 0x07b1a0]
+    static dash_input_window: i32;
+
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];
 

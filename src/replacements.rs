@@ -4,18 +4,59 @@ use std::f32::consts::{PI, TAU};
 use crate::ps2;
 use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
 
-// calling convention stores result in xmm0
-// clobbers rax
-extern "C" fn frame_ratio() -> f32 {
-    ps2::delta_time() * 30.0_f32
+pub mod values {
+    /// Let a "tick" refer to a 1/30 second duration.
+    /// Let an "update" refer to one call of the Tick() function from PS2KatamariSimulation.dll.
+    ///
+    /// The vanilla game assumes that each update simulates one tick.
+    /// Changing this requires a great deal of x86 surgery.
+    ///
+    /// Mutable variables in this module will be updated once each tick.
+    /// Doing this ahead of time, and having these variables within this DLL's address space,
+    /// allows the hooks' inline assembly to use the values with fewer instructions and fewer registers.
+    ///
+    /// (The initial values are not expected to be observed, but are based on having 60 updates per second.)
+
+    /// The duration, in *seconds*, of the current update.
+    ///
+    /// Corresponds directly to Unity's `time.deltaTime`,
+    /// or at least will when the C# side of this mod is complete.
+    pub static mut DT_SECONDS: f32 = 1.0 / 60.0;
+
+    /// The duration, in *ticks*, of the current update.
+    ///
+    /// If a value is measured in "units per tick", e.g. velocity,
+    /// it should probably be multiplied by this value.
+    pub static mut DT_TICKS: f32 = 0.5;
+
+    /// The duration, in (rounded) *milliseconds*, of the current update.
+    ///
+    /// If the original code uses an integer to count ticks,
+    /// then updating it to instead count milliseconds
+    /// will require using this value (instead of 1) as an increment/decrement.
+    pub static mut DT_MILLIS: i16 = 17;
+
+    /// The duration, in (rounded) milliseconds, of *one tick*.
+    ///
+    /// If the original code uses an integer to count ticks,
+    /// then updating it to instead count milliseconds
+    /// will require multiplying the maximum (*i.e.*: final if counting up; initial if counting down) value
+    /// by this ratio, preferably via that timer's "reset_value" field during initialization,
+    /// or by changing the hardcoded constant that the timer is compared to.
+    ///
+    /// To reduce rounding errors, prefer *not* to actually use this constant,
+    /// instead using the (n * 1000) / 30 order of operations by doing the math inline.
+    pub const TICK_MS: i16 = 1000 / 30;
+
+    // TODO: add more stuff here as necessary and update it whenever needed
 }
 
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
     unsafe {
         asm! {
-            "mulss xmm6, xmm0",
-            "mulss xmm7, xmm0",
-            "mulss xmm8, xmm0",
+            "mulss xmm6, dword ptr [rip+{dt}]",
+            "mulss xmm7, dword ptr [rip+{dt}]",
+            "mulss xmm8, dword ptr [rip+{dt}]",
 
             // the original code
             "movss xmm4, dword ptr [rbx+0x46C]",
@@ -26,7 +67,7 @@ pub unsafe extern "C" fn normal_motion_branch_first_part() {
             "addss xmm0, dword ptr [rbx+0x464]",
             "addss xmm1, dword ptr [rbx+0x468]",
 
-            in("xmm0") frame_ratio(),
+            dt = sym values::DT_TICKS,
         }
     }
 }
@@ -53,10 +94,10 @@ pub unsafe extern "C" fn prop_terrain_collision() {
             "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now sqrlen)
             "sqrtss xmm0, xmm0", // v.x = sqrt(v.x)
 
-            "mulss xmm0, xmm2", // now delta-time it
+            "mulss xmm0, dword ptr [rip+{dt}]", // now delta-time it
 
             in("xmm1") Vec4::XYZ.to_simd(),
-            in("xmm2") frame_ratio(),
+            dt = sym values::DT_TICKS,
         }
     }
 }
@@ -64,17 +105,16 @@ pub unsafe extern "C" fn prop_terrain_collision() {
 pub unsafe extern "C" fn gravity() {
     unsafe {
         asm! {
-            // modified original code: "load" becomes "mul"
-            "mulss xmm5, dword ptr [rbx+0x1a0]",
+            "movss xmm5, dword ptr [rbx+0x1a0]",
+            "mulss xmm5, dword ptr [rip+{dt}]",
 
-            // original code
             "xor edi, edi",
             "movss dword ptr [rbx+0x1c4], xmm0",
             "mov qword ptr [rbx+0x2f0], rdi",
             "mov dword ptr [rbx+0x2f8], edi",
             "mov dword ptr [rbx+0x2fc], {one}",
 
-            in("xmm5") frame_ratio(),
+            dt = sym values::DT_TICKS,
             one = const 1_f32.to_bits(),
         }
     }
@@ -88,14 +128,14 @@ pub unsafe extern "C" fn fast_steer() {
 
         asm! {
             "movss dword ptr [rcx+0x78], xmm1",
-            "mulss xmm1, {}",
-            "mulss xmm1, {}",
+            "mulss xmm1, dword ptr [rip+{dt}]",
+            "mulss xmm1, {gkr}",
             "addss xmm1, dword ptr [rcx+0x6c]",
 
-            in(xmm_reg) ps2::g_katamari_rot(),
-            in(xmm_reg) frame_ratio(),
             in("xmm1") direction,
             in("rcx") prince,
+            dt = sym values::DT_TICKS,
+            gkr = in(xmm_reg) ps2::g_katamari_rot(),
         }
     }
 }
@@ -114,13 +154,13 @@ pub unsafe extern "C" fn slow_steer() {
         asm! {
             "movss dword ptr [{prince}+0x78], xmm1",
             "mulss xmm1, xmm0",
-            "mulss xmm1, xmm2",
+            "mulss xmm1, dword ptr [rip+{dt}]",
             "addss xmm1, dword ptr [{prince}+0x6c]",
             "pop rbx",
 
             in("xmm0") ps2::g_katamari_rot(),
-            in("xmm2") frame_ratio(),
             in("xmm1") direction,
+            dt = sym values::DT_TICKS,
             prince = in(reg) prince,
         }
     }
@@ -132,10 +172,10 @@ pub unsafe extern "C" fn gentle_steer() {
         asm!("mov {}, rbx", out(reg) prince);
 
         asm! {
-            "mulss xmm1, xmm0",
+            "mulss xmm1, dword ptr [rip+{dt}]",
             "mulss xmm1, dword ptr [{prince}+0x78]",
             in("xmm1") ps2::g_katamari_rot(),
-            in("xmm0") frame_ratio(),
+            dt = sym values::DT_TICKS,
             prince = in(reg) prince,
         }
     }
@@ -175,7 +215,7 @@ pub unsafe extern "C" fn prince_flip() {
         if foo != 0.0 {
             println!("{foo}");
         }
-        yaw += foo * frame_ratio();
+        yaw += foo * values::DT_TICKS;
         if yaw > PI {
             yaw -= TAU;
         }

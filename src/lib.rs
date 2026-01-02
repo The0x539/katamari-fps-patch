@@ -11,41 +11,37 @@ pub mod replacements;
 pub mod types;
 
 mod w {
-    pub use windows::Win32::Foundation::*;
     pub use windows::Win32::System::LibraryLoader::*;
     pub use windows::Win32::System::Memory::*;
-    pub use windows::Win32::System::SystemServices::*;
 }
+
+use std::sync::Once;
 
 use eyre::WrapErr;
 use windows_strings::s;
 
-#[unsafe(export_name = "DllMain")]
-pub extern "system" fn dll_main(
-    dll_module: w::HINSTANCE,
-    call_reason: u32,
-    reserved: *mut (),
-) -> bool {
-    match call_reason {
-        w::DLL_PROCESS_ATTACH => {
-            println!("{:?}", dll_module);
-            if let Err(e) = on_attach(dll_module) {
-                println!("oh no!");
-                println!("{e:?}");
-            }
+#[unsafe(export_name = "InstallHooks")]
+pub unsafe extern "C" fn install_hooks() {
+    static ONCE: Once = Once::new();
+
+    ONCE.call_once(|| {
+        if let Err(e) = install_hooks_impl() {
+            println!("oh no! {e:?}");
         }
-        w::DLL_PROCESS_DETACH => println!("detach"),
-        w::DLL_THREAD_ATTACH => (),
-        w::DLL_THREAD_DETACH => (),
-        _ => println!("hello from DLL! {dll_module:?} {call_reason:?} {reserved:?}"),
-    }
-    true
+    });
 }
 
-fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
+#[unsafe(export_name = "SetDeltaTime")]
+pub unsafe extern "C" fn update_values(delta: f32) {
     unsafe {
-        w::DisableThreadLibraryCalls(dll_module.into())?;
+        replacements::values::DT_SECONDS = delta;
+        replacements::values::DT_MILLIS = (delta * 1000.0) as i16;
+        replacements::values::DT_TICKS = delta * 1000.0 / 30.0;
+    }
+}
 
+fn install_hooks_impl() -> eyre::Result<()> {
+    unsafe {
         let module = w::LoadLibraryA(s!("katamari_Data/Plugins/PS2KatamariSimulation.dll"))
             .wrap_err("LoadLibrary failed")?;
 

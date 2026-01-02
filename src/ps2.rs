@@ -82,6 +82,21 @@ exports! {
     #[func @ 0x5afc0]
     fn ontick_update_angle_guy();
 
+    #[func @ 0x533d0]
+    fn update_prince();
+
+    #[func @ 0x53650]
+    fn update_prince_position(prince: *mut Prince, v: *mut Vec4);
+
+    #[func @ 0x55480]
+    fn prince_flip(prince: *mut Prince);
+
+    #[func @ 0x566d0]
+    fn prince_handle_dash(p_idx: i32, prince: *mut Prince);
+
+    #[func @ 0x25be0]
+    fn tick_player(p_idx: i32, prince: *mut Prince);
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 

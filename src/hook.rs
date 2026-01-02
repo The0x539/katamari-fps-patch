@@ -60,6 +60,19 @@ pub unsafe fn skip(target: impl Target) -> eyre::Result<()> {
     Ok(())
 }
 
+pub unsafe fn skip_range(target: impl Target, range: std::ops::Range<usize>) -> eyre::Result<()> {
+    let target = target.into_target();
+
+    unsafe {
+        let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
+        mprotect(target_code, w::PAGE_READWRITE, || {
+            (*target_code).fill(0x90);
+        })?;
+    }
+
+    Ok(())
+}
+
 pub unsafe trait Target {
     fn into_target(self) -> *mut u8;
 }

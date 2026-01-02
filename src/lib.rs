@@ -113,6 +113,15 @@ fn on_attach(dll_module: w::HINSTANCE) -> eyre::Result<()> {
             0x109..0x14e,
             replacements::sfx_npc_approaching,
         )?;
+
+        // hook::patch(dll.prince_flip, 0x305..0x35b, replacements::prince_flip)?;
+
+        hook::patch(dll.tick_player, 0x131..0x188, replacements::stamina_gain)?;
+        hook::patch(
+            dll.prince_handle_dash,
+            0x16f..0x17d,
+            replacements::stamina_drain,
+        )?;
     }
 
     Ok(())

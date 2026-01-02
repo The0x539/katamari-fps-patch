@@ -1,4 +1,5 @@
 use std::arch::asm;
+use std::f32::consts::{PI, TAU};
 
 use crate::ps2;
 use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
@@ -158,6 +159,98 @@ pub unsafe extern "C" fn sfx_npc_approaching() {
     }
 }
 
+// Shelved for now. Harder to do than I expected.
+pub unsafe extern "C" fn prince_flip() {
+    unsafe {
+        let prince: *mut Prince;
+        asm!("", out("rdi") prince);
+
+        let mut yaw = (*prince).actual_yaw;
+        if yaw.is_nan() {
+            yaw = 0.0;
+        }
+        // TODO: I'm not sure this is actually ever used properly,
+        // but it might have something to do with the joysticks
+        let foo = (*prince).prince_flip_rate_guy;
+        if foo != 0.0 {
+            println!("{foo}");
+        }
+        yaw += foo * frame_ratio();
+        if yaw > PI {
+            yaw -= TAU;
+        }
+        if yaw < -PI {
+            yaw += TAU;
+        }
+        (*prince).actual_yaw = yaw;
+
+        // this seems to be the only part of register state
+        // that the function touches in the replaced block and also uses later
+        asm! {
+            "xor rbx, rbx",
+            "mov rcx, rbx",
+        }
+    }
+}
+
+pub unsafe extern "C" fn stamina_gain() {
+    let prince = unsafe {
+        let prince: *mut Prince;
+        asm!("mov rcx, rbx", out("rcx") prince);
+        &mut *prince
+    };
+
+    if prince.ouji_state.dash_spinning {
+        prince.stamina_gain_timer = 0;
+        return;
+    }
+
+    // TODO: Adjust the "cap" values in/after the prince initialization function,
+    // rather than in here. This is also necessary for stamina to start out full
+    // at the start of the level, versus its original measured-in-frames value.
+
+    let dt = (ps2::delta_time() * 1000.0) as i16;
+
+    prince.stamina_gain_timer += dt;
+
+    if prince.stamina_gain_timer as i32 > prince.stamina_gain_interval * 1000 / 30 {
+        prince.stamina_gain_timer = 0;
+
+        let a = prince.stamina;
+
+        let mut stamina = prince.stamina as i32;
+        stamina += prince.stamina_gain_amount * 1000 / 30;
+        stamina = stamina.min(prince.stamina_limit * 1000 / 30);
+        prince.stamina = stamina as i16;
+
+        let b = prince.stamina;
+
+        if a != b {
+            println!("gained stamina: {a} -> {b}");
+        }
+    }
+}
+
+pub unsafe extern "C" fn stamina_drain() {
+    unsafe {
+        let prince: *mut Prince;
+        asm!("", out("rdi") prince);
+        let prince = &mut *prince;
+
+        // TODO: Store this and other similar values in static variables,
+        // *within this segment*, so the injected asm is simpler and can clobber fewer registers
+        let dt = (ps2::delta_time() * 1000.0) as i16;
+        prince.stamina -= dt;
+
+        asm! {
+            "cmp word ptr [rdi+0x47e], bp",
+            in("rdi") prince,
+        }
+    }
+}
+
+// TODO: delta-time the exhaustion timer too
+
 pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4 {
     unsafe {
         // compiles to two ymmword load/store pairs
@@ -285,11 +378,11 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                         ps2::set_player_animation_mode(p_idx as i32, 6);
                         let prince = &mut *ps2::prince_array(p_idx);
                         prince.ouji_state.x19 = 0;
-                        prince.ouji_state.x0 = 0;
-                        prince.ouji_state.x1 = 0;
-                        prince.ouji_state.freeze_counter = false;
-                        prince.ouji_state.x3 = 0;
-                        prince.x47c.0 = 0; // TODO: identify this field or pair of fields
+                        prince.ouji_state.dash_x0 = 0;
+                        prince.ouji_state.dash_x1 = 0;
+                        prince.ouji_state.dash_spinning = false;
+                        prince.ouji_state.dash_spinning_inplace = 0;
+                        prince.main_dash_counter.0 = 0; // TODO: identify this field or pair of fields
                         prince.ouji_state.x16 = 0;
                         prince.ouji_state.x17 = false;
                     }
@@ -550,11 +643,11 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
                         ps2::set_player_animation_mode(pIdx_ as i32, 6);
                         PRINCE[pIdx as usize].ouji_state.x19 = 0;
                         prince = &mut PRINCE[pIdx as usize];
-                        ((*prince).ouji_state).x0 = 0;
-                        ((*prince).ouji_state).x1 = 0;
-                        ((*prince).ouji_state).freeze_counter = false;
-                        ((*prince).ouji_state).x3 = 0;
-                        PRINCE[pIdx as usize].x47c.0 = 0;
+                        ((*prince).ouji_state).dash_x0 = 0;
+                        ((*prince).ouji_state).dash_x1 = 0;
+                        ((*prince).ouji_state).dash_spinning = false;
+                        ((*prince).ouji_state).dash_spinning_inplace = 0;
+                        PRINCE[pIdx as usize].main_dash_counter.0 = 0;
                         PRINCE[pIdx as usize].ouji_state.x16 = 0;
                         PRINCE[pIdx as usize].ouji_state.x17 = false;
                     }

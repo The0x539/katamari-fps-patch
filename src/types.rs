@@ -322,8 +322,8 @@ pub struct Prince {
     pub x54: f32,
     pub x58: f32,
     pub x5c: Vec4,
-    pub pitch_guy_that_gets_added_to_pi: f32,
-    pub pitch_increment: f32,
+    pub actual_yaw: f32,
+    pub prince_flip_rate_guy: f32,
     pub x74: f32,
     pub x78: f32,
     pub x7c: f32,
@@ -339,9 +339,8 @@ pub struct Prince {
     pub sticks_not_idle: bool,
     pub _xa0: Q<2>,
     pub ouji_state: OujiState,
-    pub _xbd: Q<8>,
-    pub _xc5: Q2U,
-    pub _xc7: Q<19>,
+    pub prev_ouji_state: OujiState,
+    pub xd8: i16,
     pub xda: i16,
     pub xdc: i16,
     pub _xde: Q<2>,
@@ -387,11 +386,10 @@ pub struct Prince {
     pub x2d8: f32,
     pub x2dc: i32,
     pub x2e0: i32,
-    pub counter2_limit: i32,
-    pub x2e8: i32,
-    pub counter2_increment: i16,
-    pub x2ee: Q<2>,
-    pub counter1_limit: i32,
+    pub stamina_limit: i32,
+    pub max_exhaustion: i32,
+    pub stamina_gain_amount: i32,
+    pub stamina_gain_interval: i32,
     pub x2f4: i32,
     pub x2f8: f32,
     pub x2fc: i32,
@@ -444,11 +442,12 @@ pub struct Prince {
     pub _x476: Q<2>,
     pub x478: i16,
     pub _x47a: Q<2>,
-    pub x47c: Q2,
-    pub counter2: i16,
-    pub counter3: i16,
-    pub prince_callback_index: i16,
-    pub counter1: i16,
+    pub main_dash_counter: Q2,
+    pub stamina: i16,
+    pub exhaustion_timer: i16,
+    pub is_exhausted: bool,
+    pub _x483: Q1,
+    pub stamina_gain_timer: i16,
     pub counter_x486: i16,
     pub x488: Q<4>,
     pub axis_selector: u8,
@@ -467,32 +466,32 @@ pub struct Prince {
 
 assert_size!(Prince, 0x518);
 assert_offset!(Prince, x2c, 0x2c);
-assert_offset!(Prince, _xbd, 0xbd);
-assert_offset!(Prince, _xc5, 0xc5);
-assert_offset!(Prince, _xc7, 0xc7);
+assert_offset!(Prince, prev_ouji_state, 0xbd);
+assert_offset!(Prince, xd8, 0xd8);
 assert_offset!(Prince, x1f0, 0x1f0);
 assert_offset!(Prince, x2d0, 0x2d0);
-assert_offset!(Prince, x2ee, 0x2ee);
+assert_offset!(Prince, stamina_limit, 0x2e4);
+assert_offset!(Prince, stamina_gain_interval, 0x2f0);
 assert_offset!(Prince, x308, 0x308);
 assert_offset!(Prince, _x388, 0x388);
 assert_offset!(Prince, x40c, 0x40c);
-assert_offset!(Prince, x47c, 0x47c);
+assert_offset!(Prince, main_dash_counter, 0x47c);
 assert_offset!(Prince, angle, 0x4b4);
 assert_offset!(Prince, x4c0, 0x4c0);
 
 #[repr(C)]
 pub struct OujiState {
-    pub x0: u8,
-    pub x1: u8,
-    pub freeze_counter: bool,
-    pub x3: u8,
-    pub x4: u8,
+    pub dash_x0: u8,
+    pub dash_x1: u8,
+    pub dash_spinning: bool,
+    pub dash_spinning_inplace: u8,
+    pub flip_pending: u8,
     pub _x5: Q1,
-    pub x6: bool,
+    pub climbing: bool,
     pub _x7: Q1,
-    pub flag_x8: u8,
+    pub animation_mode: u8,
     pub flag_x9: u8,
-    pub xa: bool,
+    pub swimming: bool,
     pub xb: bool,
     pub xc: u8,
     pub xd: Q<9>,
@@ -503,11 +502,8 @@ pub struct OujiState {
     pub x1a: Q1,
 }
 
-// might be longer! it's just a substruct that's not in an array,
-// so we don't exactly have a stride. it certainly looks like a bunch of just flags
-// I don't even remember why I decided it should be a sub-struct
 assert_size!(OujiState, 0x1b);
-assert_offset!(OujiState, xa, 0xa);
+assert_offset!(OujiState, swimming, 0xa);
 assert_offset!(OujiState, x1a, 0x1a);
 
 #[repr(C)]

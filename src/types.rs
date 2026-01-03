@@ -334,7 +334,7 @@ pub struct Prince {
     pub quotient_3: f32,
     pub quotient_4: f32,
     pub view_mode: u8, // ViewMode enum
-    pub block_stick_inputs: bool,
+    pub prevent_dashing: bool,
     pub _x9e: Q1,
     pub sticks_not_idle: bool,
     pub _xa0: Q<2>,
@@ -384,7 +384,7 @@ pub struct Prince {
     pub x2d0: f32,
     pub deadzone_for_turnaround: f32,
     pub x2d8: f32,
-    pub x2dc: i32,
+    pub dash_input_window: i32,
     pub x2e0: i32,
     pub stamina_limit: i32,
     pub max_exhaustion: i32,
@@ -442,7 +442,7 @@ pub struct Prince {
     pub _x476: Q<2>,
     pub x478: i16,
     pub _x47a: Q<2>,
-    pub main_dash_counter: Q2,
+    pub dash_input_counter: i16,
     pub stamina: i16,
     pub exhaustion_timer: i16,
     pub is_exhausted: bool,
@@ -475,7 +475,7 @@ assert_offset!(Prince, stamina_gain_interval, 0x2f0);
 assert_offset!(Prince, x308, 0x308);
 assert_offset!(Prince, _x388, 0x388);
 assert_offset!(Prince, x40c, 0x40c);
-assert_offset!(Prince, main_dash_counter, 0x47c);
+assert_offset!(Prince, dash_input_counter, 0x47c);
 assert_offset!(Prince, angle, 0x4b4);
 assert_offset!(Prince, x4c0, 0x4c0);
 

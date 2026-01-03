@@ -4,7 +4,7 @@ use std::f32::consts::{PI, TAU};
 use crate::ps2;
 use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
 
-pub mod values {
+pub(crate) mod values {
     /// Let a "tick" refer to a 1/30 second duration.
     /// Let an "update" refer to one call of the Tick() function from PS2KatamariSimulation.dll.
     ///
@@ -34,7 +34,27 @@ pub mod values {
     /// If the original code uses an integer to count ticks,
     /// then updating it to instead count milliseconds
     /// will require using this value (instead of 1) as an increment/decrement.
-    pub static mut DT_MILLIS: i16 = 17;
+    pub static mut DT_MILLIS: i16 = 16;
+
+    /// The accumulated rounding error of DT_MILLIS.
+    static mut DT_MICROS: i16 = 0;
+
+    pub fn set_dt(delta: f32) {
+        unsafe {
+            DT_SECONDS = delta;
+            DT_TICKS = delta * 1000.0 / 30.0;
+
+            let millis = delta * 1000.0;
+            DT_MILLIS = millis.floor() as i16;
+
+            let micros = (millis - millis.floor()) * 1000.0;
+            DT_MICROS += micros.round() as i16;
+            while DT_MICROS > 1000 {
+                DT_MILLIS += 1;
+                DT_MICROS -= 1000;
+            }
+        }
+    }
 
     /// The duration, in (rounded) milliseconds, of *one tick*.
     ///
@@ -46,9 +66,17 @@ pub mod values {
     ///
     /// To reduce rounding errors, prefer *not* to actually use this constant,
     /// instead using the (n * 1000) / 30 order of operations by doing the math inline.
+    #[allow(dead_code)]
     pub const TICK_MS: i16 = 1000 / 30;
 
+    pub static mut MULTIPLAYER: u8 = 0;
     // TODO: add more stuff here as necessary and update it whenever needed
+
+    // Exposed for convenience from safe-Rust code.
+    #[inline]
+    pub(super) fn dt_millis() -> i16 {
+        unsafe { DT_MILLIS }
+    }
 }
 
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
@@ -245,22 +273,16 @@ pub unsafe extern "C" fn stamina_gain() {
         return;
     }
 
-    // TODO: Adjust the "cap" values in/after the prince initialization function,
-    // rather than in here. This is also necessary for stamina to start out full
-    // at the start of the level, versus its original measured-in-frames value.
+    prince.stamina_gain_timer += values::dt_millis();
 
-    let dt = (ps2::delta_time() * 1000.0) as i16;
-
-    prince.stamina_gain_timer += dt;
-
-    if prince.stamina_gain_timer as i32 > prince.stamina_gain_interval * 1000 / 30 {
+    if prince.stamina_gain_timer as i32 > prince.stamina_gain_interval {
         prince.stamina_gain_timer = 0;
 
         let a = prince.stamina;
 
         let mut stamina = prince.stamina as i32;
-        stamina += prince.stamina_gain_amount * 1000 / 30;
-        stamina = stamina.min(prince.stamina_limit * 1000 / 30);
+        stamina += prince.stamina_gain_amount;
+        stamina = stamina.min(prince.stamina_limit);
         prince.stamina = stamina as i16;
 
         let b = prince.stamina;
@@ -273,33 +295,11 @@ pub unsafe extern "C" fn stamina_gain() {
 
 pub unsafe extern "C" fn stamina_drain() {
     unsafe {
-        let prince: *mut Prince;
-        asm!("", out("rdi") prince);
-        let prince = &mut *prince;
-
-        // TODO: Store this and other similar values in static variables,
-        // *within this segment*, so the injected asm is simpler and can clobber fewer registers
-        let dt = (ps2::delta_time() * 1000.0) as i16;
-        prince.stamina -= dt;
-
         asm! {
-            "cmp word ptr [rdi+0x47e], bp",
-            in("rdi") prince,
-        }
-    }
-}
-
-// TODO: delta-time the exhaustion timer too
-
-// TODO: This one should be unnecessary once we can instead
-pub unsafe extern "C" fn start_dash_input_timer() {
-    unsafe {
-        asm! {
-            "inc cx",
-            "imul r9w, r15w", // r15 is immediately overwritten by the next instruction in the target code
-            "mov word ptr [rdi + 0x478], r9w",
-            "mov word ptr [rdi + 0x47c], cx",
-            in("r15w") ps2::dash_input_window() * 1000 / 30,
+            "mov ax, word ptr [rdi + 0x47e]",
+            "sub ax, word ptr [rip + {dt}]",
+            "mov word ptr [rdi + 0x47e], ax",
+            dt = sym values::DT_MILLIS,
         }
     }
 }
@@ -309,20 +309,36 @@ pub unsafe extern "C" fn start_dash_input_timer() {
 // Seems to hit one of the early returns instead.
 // Don't know which, don't know why.
 
-pub unsafe extern "C" fn decrement_dash_input_timer() {
+pub unsafe extern "C" fn update_dash_input_timer() {
     unsafe {
-        asm!("push rcx", "push rdx");
-
         asm! {
             "mov ax, word ptr [rdi + 0x478]",
-            "sub ax, cx",
+            "sub ax, word ptr [rip + {dt}]",
             "mov word ptr [rdi + 0x478], ax",
-            "cmp dl, sil", // ugh, this complicates things a lot but I'm working in quite a tight space
-            in("cx") (ps2::delta_time() * 1000.0) as i16,
-            in("dl") ps2::multiplayer() as u8,
+            "cmp byte ptr [rip + {mp}], sil",
+            dt = sym values::DT_MILLIS,
+            mp = sym values::MULTIPLAYER,
         }
+    }
+}
 
-        asm!("pop rdx", "pop rcx");
+pub unsafe extern "C" fn prince_exhausted(p_idx: i32, prince: *mut Prince) {
+    let (prince, katamari) = unsafe { (&mut *prince, &mut *ps2::katamari_array(p_idx)) };
+
+    if !ps2::multiplayer() {
+        prince.ouji_state.dash_pending = false;
+        prince.ouji_state.dash_x1 = 0;
+        prince.ouji_state.dash_spinning = false;
+        prince.ouji_state.dash_stationary_spin = false;
+        prince.dash_input_counter = 0;
+        katamari._xba.0 = 0;
+    }
+
+    if prince.prevent_dashing {
+        prince.exhaustion_timer -= values::dt_millis();
+        if prince.exhaustion_timer <= 0 {
+            ps2::prince_reset_exhaustion(prince);
+        }
     }
 }
 
@@ -334,13 +350,11 @@ pub unsafe extern "C" fn dash_state_machine() {
         (&mut *prince, &mut *k)
     };
 
-    let dt = (ps2::delta_time() * 1000.0) as i16;
-
     match k.dash_state {
         0 => {
             if !k.hit_water || k.dash_timer != 0 {
                 prince.ouji_state.dash_active = true;
-                k.dash_timer += dt;
+                k.dash_timer += values::dt_millis();
                 if k.dash_timer >= 500 {
                     k.dash_state = 1;
                 }
@@ -365,13 +379,32 @@ pub unsafe extern "C" fn dash_state_machine() {
         }
         2 => {
             prince.ouji_state.dash_active = false;
-            k.dash_timer -= dt;
+            k.dash_timer -= values::dt_millis();
             if k.dash_timer <= 0 {
                 k.dash_state = 3;
             }
         }
         3 => prince.ouji_state.dash_active = false,
         _ => {}
+    }
+}
+
+pub unsafe extern "C" fn prince_post_init() {
+    for i in 0..=1 {
+        let prince = unsafe { &mut *ps2::prince_array(i) };
+
+        // Timer initial/maximum values. Originally counted ticks; will now count milliseconds.
+        for val in [
+            &mut prince.max_exhaustion,
+            &mut prince.stamina_gain_amount,
+            &mut prince.stamina_gain_interval,
+            &mut prince.stamina_limit,
+            &mut prince.dash_input_window,
+        ] {
+            *val = (*val * 1000) / 30;
+        }
+
+        prince.stamina = prince.stamina_limit as i16;
     }
 }
 
@@ -506,7 +539,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                         prince.ouji_state.dash_x1 = 0;
                         prince.ouji_state.dash_spinning = false;
                         prince.ouji_state.dash_stationary_spin = false;
-                        prince.main_dash_counter.0 = 0; // TODO: identify this field or pair of fields
+                        prince.dash_input_counter = 0;
                         prince.ouji_state.x16 = 0;
                         prince.ouji_state.x17 = false;
                     }
@@ -771,7 +804,7 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
                         ((*prince).ouji_state).dash_x1 = 0;
                         ((*prince).ouji_state).dash_spinning = false;
                         ((*prince).ouji_state).dash_stationary_spin = false;
-                        PRINCE[pIdx as usize].main_dash_counter.0 = 0;
+                        PRINCE[pIdx as usize].dash_input_counter = 0;
                         PRINCE[pIdx as usize].ouji_state.x16 = 0;
                         PRINCE[pIdx as usize].ouji_state.x17 = false;
                     }

@@ -73,6 +73,36 @@ pub unsafe fn skip_range(target: impl Target, range: std::ops::Range<usize>) -> 
     Ok(())
 }
 
+/// In its current form, this function is not to be used on a target that uses RAX to return a value.
+pub unsafe fn postfix(
+    target: impl Target,
+    offset: isize,
+    detour: unsafe extern "C" fn(),
+) -> eyre::Result<()> {
+    let target = target.into_target();
+    let detour = detour as *const u8;
+
+    unsafe {
+        let hook_code = hook_asm_bytes();
+        let target_code =
+            std::ptr::slice_from_raw_parts_mut(target.offset(offset), hook_code.len());
+
+        let i = hook_code
+            .windows(8)
+            .position(|w| w == [0xEE; 8])
+            .unwrap_or(0);
+
+        mprotect(target_code, w::PAGE_READWRITE, || {
+            let target_code = &mut *target_code;
+            assert_eq!(target_code[0], 0xc3);
+            target_code.copy_from_slice(hook_code);
+            target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
+        })?;
+    }
+
+    Ok(())
+}
+
 pub unsafe trait Target {
     fn into_target(self) -> *mut u8;
 }

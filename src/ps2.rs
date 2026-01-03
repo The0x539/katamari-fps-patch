@@ -97,6 +97,15 @@ exports! {
     #[func @ 0x25be0]
     fn tick_player(p_idx: i32, prince: *mut Prince);
 
+    #[func @ 0x52bd0]
+    fn initialize_princes();
+
+    #[func @ 0x56e60]
+    fn prince_exhausted(p_idx: i32, prince: *mut Prince);
+
+    #[func @ 0x56650]
+    fn prince_reset_exhaustion(prince: *mut Prince);
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 

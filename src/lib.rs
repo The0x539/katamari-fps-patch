@@ -33,11 +33,7 @@ pub unsafe extern "C" fn install_hooks() {
 
 #[unsafe(export_name = "SetDeltaTime")]
 pub unsafe extern "C" fn update_values(delta: f32) {
-    unsafe {
-        replacements::values::DT_SECONDS = delta;
-        replacements::values::DT_MILLIS = (delta * 1000.0) as i16;
-        replacements::values::DT_TICKS = delta * 1000.0 / 30.0;
-    }
+    replacements::values::set_dt(delta);
 }
 
 fn install_hooks_impl() -> eyre::Result<()> {
@@ -121,20 +117,28 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
         hook::patch(
             dll.prince_handle_dash,
-            0x25c..0x26e,
-            replacements::start_dash_input_timer,
-        )?;
-
-        hook::patch(
-            dll.prince_handle_dash,
             0x404..0x412,
-            replacements::decrement_dash_input_timer,
+            replacements::update_dash_input_timer,
         )?;
 
         hook::patch(
             dll.speed_thing_2,
             0x143..0x21f,
             replacements::dash_state_machine,
+        )?;
+
+        hook::postfix(
+            dll.initialize_princes,
+            0x3e3,
+            replacements::prince_post_init,
+        )?;
+
+        // For some reason, replacing a small part of this function (0x48..0x6a)
+        // just broke it entirely.
+        hook::install(
+            dll.prince_exhausted,
+            // 0x48..0x6a,
+            replacements::prince_exhausted as _,
         )?;
     }
 

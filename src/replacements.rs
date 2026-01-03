@@ -278,18 +278,10 @@ pub unsafe extern "C" fn stamina_gain() {
     if prince.stamina_gain_timer as i32 > prince.stamina_gain_interval {
         prince.stamina_gain_timer = 0;
 
-        let a = prince.stamina;
-
         let mut stamina = prince.stamina as i32;
         stamina += prince.stamina_gain_amount;
         stamina = stamina.min(prince.stamina_limit);
         prince.stamina = stamina as i16;
-
-        let b = prince.stamina;
-
-        if a != b {
-            println!("gained stamina: {a} -> {b}");
-        }
     }
 }
 
@@ -299,23 +291,22 @@ pub unsafe extern "C" fn stamina_drain() {
             "mov ax, word ptr [rdi + 0x47e]",
             "sub ax, word ptr [rip + {dt}]",
             "mov word ptr [rdi + 0x47e], ax",
+            "cmp ax, bp",
             dt = sym values::DT_MILLIS,
         }
     }
 }
 
-// Need to investigate why the pre-dash spin state isn't getting properly cancelled.
-// Seems to not reach the bit at the end that decrements the x47a field.
-// Seems to hit one of the early returns instead.
-// Don't know which, don't know why.
-
 pub unsafe extern "C" fn update_dash_input_timer() {
     unsafe {
         asm! {
-            "mov ax, word ptr [rdi + 0x478]",
-            "sub ax, word ptr [rip + {dt}]",
-            "mov word ptr [rdi + 0x478], ax",
-            "cmp byte ptr [rip + {mp}], sil",
+            "mov ax, word ptr [rdi + 0x478]", // ax = prince->dash_input_timer
+            "sub ax, word ptr [rip + {dt}]",  // ax -= DT_MILLIS
+            "jns 2f",                         // if ax < 0 {
+            "xor eax, eax",                   //     eax = 0
+            "2:",                             // }
+            "mov word ptr [rdi + 0x478], ax", // prince->dash_input_timer = ax
+            "cmp byte ptr [rip + {mp}], sil", // annoying trampoline
             dt = sym values::DT_MILLIS,
             mp = sym values::MULTIPLAYER,
         }
@@ -405,6 +396,10 @@ pub unsafe extern "C" fn prince_post_init() {
         }
 
         prince.stamina = prince.stamina_limit as i16;
+
+        unsafe {
+            values::MULTIPLAYER = ps2::multiplayer() as u8;
+        }
     }
 }
 

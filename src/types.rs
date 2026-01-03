@@ -1,5 +1,5 @@
 use std::{
-    ops::{Add, AddAssign, Mul, Sub},
+    ops::{Add, AddAssign, Div, Mul, Sub},
     simd::f32x4,
 };
 
@@ -17,21 +17,21 @@ pub struct Katamari {
     pub volume: f32,
     pub x54: f32,
     pub _x58: Q<4>,
-    pub diameter: f32,
-    pub store_flag_related_guy: u32,
+    pub diameter_cm: f32,
+    pub diameter_mm: u32,
     pub base_radius_guy: f32,
-    pub radius: f32,
+    pub radius_cm: f32,
     pub _x6c: Q<4>,
-    pub measurement_guy_2: f32,
-    pub circumference: f32,
+    pub radius_inches: f32,
+    pub circumference_cm: f32,
     pub guy_that_gets_divided: f32,
     pub x7c: f32,
     pub x80: f32,
     pub x84: f32,
     pub x88: f32,
-    pub diameter_in_cm: f32,
+    pub diameter_m: f32,
     pub measurement_guy: f32,
-    pub measurement_guy_3: f32,
+    pub diameter_decimeters: f32,
     pub x98: f32,
     pub x9c: f32,
     pub xa0: f32,
@@ -40,8 +40,9 @@ pub struct Katamari {
     pub climb_height_reached: bool,
     pub dwordflag_xa7: [u8; 4],
     pub hit_water: bool,
-    pub _xac: Q8U,
-    pub _xb4: Q1,
+    pub _xac: Q<7>,
+    pub camera_mode_thing: u8,
+    pub vfx_x17_flag: bool,
     pub standing_on_prop: bool,
     pub _xb6: Q<3>,
     pub speed_limit_check_2: u8,
@@ -162,13 +163,16 @@ pub struct Katamari {
     pub x804: i16,
     pub x806: i16,
     pub _x808: Q<84>,
-    pub x85c: Vec4,
+    pub impact_point: Vec4,
     pub sx: f32,
     pub sy: f32,
     pub sz: f32,
     pub _x878: Q<32>,
     pub climb_flag_thing: i16,
-    pub _x89a: Q<34>,
+    pub water_ripple_timer: i16,
+    pub water_droplet_timer: i16,
+    pub splash_sfx_timer: i16,
+    pub _x89a: Q<28>,
     pub x8bc: f32,
     pub _x8c0: Q<16>,
     pub indexed_guy: [IndexedGuy; 64],
@@ -482,7 +486,7 @@ assert_offset!(Prince, x4c0, 0x4c0);
 #[repr(C)]
 pub struct OujiState {
     pub dash_pending: bool,
-    pub dash_x1: u8,
+    pub dash_base_requirement_met: bool,
     pub dash_spinning: bool,
     pub dash_stationary_spin: bool,
     pub flip_pending: u8,
@@ -688,6 +692,13 @@ impl Mul<f32> for Vec4 {
     type Output = Self;
     fn mul(self, rhs: f32) -> Self::Output {
         Self::new(self.x * rhs, self.y * rhs, self.z * rhs, self.w)
+    }
+}
+
+impl Div<f32> for Vec4 {
+    type Output = Self;
+    fn div(self, rhs: f32) -> Self::Output {
+        Self::new(self.x / rhs, self.y / rhs, self.z / rhs, self.w)
     }
 }
 

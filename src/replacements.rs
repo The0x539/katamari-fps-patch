@@ -77,6 +77,11 @@ pub(crate) mod values {
     pub(super) fn dt_millis() -> i16 {
         unsafe { DT_MILLIS }
     }
+
+    #[inline]
+    pub(super) fn multiplayer() -> bool {
+        unsafe { MULTIPLAYER != 0 }
+    }
 }
 
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
@@ -318,7 +323,7 @@ pub unsafe extern "C" fn prince_exhausted(p_idx: i32, prince: *mut Prince) {
 
     if !ps2::multiplayer() {
         prince.ouji_state.dash_pending = false;
-        prince.ouji_state.dash_x1 = 0;
+        prince.ouji_state.dash_base_requirement_met = false;
         prince.ouji_state.dash_spinning = false;
         prince.ouji_state.dash_stationary_spin = false;
         prince.dash_input_counter = 0;
@@ -329,6 +334,71 @@ pub unsafe extern "C" fn prince_exhausted(p_idx: i32, prince: *mut Prince) {
         prince.exhaustion_timer -= values::dt_millis();
         if prince.exhaustion_timer <= 0 {
             ps2::prince_reset_exhaustion(prince);
+        }
+    }
+}
+
+pub unsafe extern "C" fn splash() {
+    let p_idx = ps2::current_player_index();
+    let k = unsafe { &mut *ps2::katamari_array(p_idx) };
+
+    if !k.hit_water {
+        // TODO: I don't think I see anything when this happens.
+        // Is there a bug in the original game?
+        // Is this using the wrong diameter field, making it the wrong size?
+        ps2::play_visual_fx(
+            0x18,
+            k.impact_point / 100.0,
+            Vec4::ZERO,
+            k.diameter_cm / 100.0,
+            -1,
+            p_idx as i32,
+        );
+    }
+
+    k.hit_water = true;
+    let dt = values::dt_millis();
+
+    k.water_ripple_timer -= dt;
+    if k.water_ripple_timer <= 0 {
+        k.water_ripple_timer = 8 * 1000 / 30;
+
+        // The return values from GetImpactNormal don't seem to be used from what I can tell.
+        // The XMM registers used in this call are just populated with the same impact_point values.
+
+        // Ripples
+        ps2::play_visual_fx(
+            0x11,
+            k.impact_point / 100.0,
+            Vec4::ZERO,
+            k.diameter_m / 100.0,
+            -1,
+            0, // why not player index? I guess it doesn't matter if multiplayer has no water
+        );
+    }
+
+    k.splash_sfx_timer -= dt;
+    if k.splash_sfx_timer <= 0 {
+        k.splash_sfx_timer = 24 * 1000 / 30;
+        ps2::cb::play_sound_fx(0x30, 1.0, 0);
+    }
+
+    if !k.vfx_x17_flag && k.camera_mode_thing == 0 {
+        k.water_droplet_timer -= dt;
+        if k.water_droplet_timer <= 0 {
+            k.water_droplet_timer = 1000 / 30; // One tick?! What is this?
+
+            if !values::multiplayer() && k.x88 >= 0.05 {
+                // Droplets
+                ps2::play_visual_fx(
+                    0x17,
+                    k.impact_point / 100.0,
+                    Vec4::ZERO,
+                    k.diameter_m,
+                    -1,
+                    p_idx as i32,
+                );
+            }
         }
     }
 }
@@ -468,7 +538,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             }
 
             if ps2::game_mode() == 3 {
-                (*k).position.y = -(-400.0 - (*k).radius);
+                (*k).position.y = -(-400.0 - (*k).radius_cm);
                 // the instructions around here are relatively difficult to understand
                 ps2::x25fb0(&(*k).dual_a.h.x0zw());
             } else if b_var_2 {
@@ -510,7 +580,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
         if ps2::multiplayer() {
             let p_idx = (*k).player_index;
             if (*ps2::camera_array(p_idx)).animation_mode == 5 {
-                let mut n = (*k).radius * 0.5;
+                let mut n = (*k).radius_cm * 0.5;
                 (*k).xc2 = true;
                 let delta = (*k).position_b - (*k).position;
                 n = n.max(delta.len());
@@ -531,7 +601,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                         let prince = &mut *ps2::prince_array(p_idx);
                         prince.ouji_state.x19 = 0;
                         prince.ouji_state.dash_pending = false;
-                        prince.ouji_state.dash_x1 = 0;
+                        prince.ouji_state.dash_base_requirement_met = false;
                         prince.ouji_state.dash_spinning = false;
                         prince.ouji_state.dash_stationary_spin = false;
                         prince.dash_input_counter = 0;
@@ -544,7 +614,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             }
         }
         if ps2::current_stage() == 3 {
-            (*k).xc0 = 1200.0 <= (*k).diameter;
+            (*k).xc0 = 1200.0 <= (*k).diameter_m;
         }
     }
 }
@@ -688,7 +758,7 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
                 }
             }
             if ps2::game_mode() == 3 {
-                ((*k).position).y = -(-400.0 - (*k).radius);
+                ((*k).position).y = -(-400.0 - (*k).radius_cm);
                 x0zw.x = ((*k).dual_a).h.x;
                 y = (*k).dual_a.h.y;
                 x0zw.z = ((*k).dual_a).h.z;
@@ -776,7 +846,7 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
             pIdx = (*k).player_index;
             pIdx_ = pIdx as u64;
             if CAMERAS[pIdx_ as usize].animation_mode == 5 {
-                speed = (*k).radius * 0.5;
+                speed = (*k).radius_cm * 0.5;
                 (*k).xc2 = true;
                 deltaX = ((*k).position_b).x - ((*k).position).x;
                 deltaY = ((*k).position_b).y - ((*k).position).y;
@@ -796,7 +866,7 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
                         PRINCE[pIdx as usize].ouji_state.x19 = 0;
                         prince = &mut PRINCE[pIdx as usize];
                         ((*prince).ouji_state).dash_pending = false;
-                        ((*prince).ouji_state).dash_x1 = 0;
+                        ((*prince).ouji_state).dash_base_requirement_met = false;
                         ((*prince).ouji_state).dash_spinning = false;
                         ((*prince).ouji_state).dash_stationary_spin = false;
                         PRINCE[pIdx as usize].dash_input_counter = 0;
@@ -809,7 +879,7 @@ pub unsafe extern "win64" fn raw_rewrite_big_kahuna(k: *mut Katamari) {
             }
         }
         if ps2::current_stage() == 3 {
-            (*k).xc0 = 1200.0 <= (*k).diameter;
+            (*k).xc0 = 1200.0 <= (*k).diameter_m;
         }
         return;
     }

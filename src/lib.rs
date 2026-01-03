@@ -136,6 +136,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
         // For some reason, replacing a small part of this function (0x48..0x6a)
         // just broke it entirely.
         hook::install(dll.prince_exhausted, replacements::prince_exhausted as _)?;
+
+        hook::patch(dll.splash, 0x3c1..0x5ad, replacements::splash)?;
     }
 
     Ok(())

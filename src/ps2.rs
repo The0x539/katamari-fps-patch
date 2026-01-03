@@ -106,6 +106,9 @@ exports! {
     #[func @ 0x56650]
     fn prince_reset_exhaustion(prince: *mut Prince);
 
+    #[func @ 0x178e0]
+    fn splash(_rcx: *mut (), k: *mut Katamari);
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 
@@ -167,4 +170,26 @@ exports! {
 
     #[callback @ 0x10ea18]
     fn play_sound_fx(sfx_id: i32, volume: f32, pan: i32);
+}
+
+pub fn play_visual_fx(
+    vfx_id: i32,
+    position: Vec4,
+    direction: Vec4,
+    scale: f32,
+    attach_id: i32,
+    player_id: i32,
+) {
+    cb::play_visual_fx(
+        vfx_id,
+        position.x,
+        position.y,
+        position.z,
+        direction.x,
+        direction.y,
+        direction.z,
+        scale,
+        attach_id,
+        player_id,
+    );
 }

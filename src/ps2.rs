@@ -2,7 +2,7 @@ use std::sync::Once;
 
 use windows::Win32::Foundation::HMODULE;
 
-use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
+use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, Vec4};
 
 #[macro_use]
 mod macros;
@@ -109,6 +109,9 @@ exports! {
     #[func @ 0x178e0]
     fn splash(_rcx: *mut (), k: *mut Katamari);
 
+    #[func @ 0x07080]
+    fn gunshot(_m: *mut ());
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 
@@ -134,10 +137,13 @@ exports! {
     static current_stage: u8;
 
     #[var @ 0x10daed]
-    static val_x10daed: bool; // related to the "NPC approaching" sound
+    static allow_sfx: bool;
 
     #[var @ 0x0ff0f6]
     static val_x0ff0f6: u8; // related to the "NPC approaching" sound
+
+    #[var @ 0x10ea50]
+    static tick_count: u32;
 
     #[var @ 0x0ff0f4]
     static current_player_index: u8;
@@ -153,6 +159,9 @@ exports! {
 
     #[array @ 0x16d720]
     static katamari_array: [Katamari; 2];
+
+    #[array @ 0xd34180]
+    static camera_transform_array: [CameraTransform; 2];
 
     #[callback @ 0x10ea00]
     fn play_visual_fx(

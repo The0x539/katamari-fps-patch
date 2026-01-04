@@ -138,6 +138,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
         hook::install(dll.prince_exhausted, replacements::prince_exhausted as _)?;
 
         hook::patch(dll.splash, 0x3c1..0x5ad, replacements::splash)?;
+
+        // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
+        hook::patch(dll.gunshot, 0x1cb..0x2c7, replacements::bang)?;
     }
 
     Ok(())

@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use super::*;
 
 pub unsafe extern "C" fn sfx_npc_approaching() {
@@ -8,8 +10,7 @@ pub unsafe extern "C" fn sfx_npc_approaching() {
         (*k).sfx_0x2d_timer -= (ps2::delta_time() * 1000.0) as i16;
         // println!("{}", (*k).sfx_0x2d_timer);
         if (*k).sfx_0x2d_timer < 0 {
-            // TODO: these two values remain mysterious
-            if ps2::val_x10daed() && ps2::val_x0ff0f6() == 0 {
+            if ps2::allow_sfx() && ps2::val_x0ff0f6() == 0 {
                 ps2::cb::play_sound_fx(0x2d, 1.0, 0);
             }
 
@@ -80,5 +81,41 @@ pub unsafe extern "C" fn splash() {
                 );
             }
         }
+    }
+}
+
+pub extern "C" fn bang() {
+    let gun_pos = unsafe {
+        let (x, y, z);
+        asm!("", out("xmm2") x, out("xmm0") y, out("xmm1") z);
+        Vec4::new(x, y, z, 1.0)
+    };
+
+    unsafe {
+        static mut MOST_RECENT_SFX: Option<Instant> = None;
+        // Vanilla logic: 5 < tick_count - most_recent
+        // i.e. sound can play if it's been 6 or more ticks
+        if MOST_RECENT_SFX.is_some_and(|t| t.elapsed() < Duration::from_millis(200)) {
+            return;
+        } else {
+            MOST_RECENT_SFX = Some(Instant::now());
+        }
+    }
+
+    let i = ps2::current_player_index();
+
+    let k = unsafe { &*ps2::katamari_array(i) };
+    let camera = unsafe { &*ps2::camera_transform_array(i) };
+    let distance = (gun_pos - camera.x140.rows[3]).len();
+
+    let triple_diameter = k.diameter_cm * 3.0;
+    let raw_volume = (distance - triple_diameter) / (k.diameter_cm * 15.0 - triple_diameter); // ???
+    let volume = 1.0 - raw_volume.clamp(0.0, 1.0);
+
+    // TODO: I'm not at all sure that the volume is being calculated correctly,
+    // in either the original or my recreation.
+
+    if volume > 0.0 {
+        ps2::cb::play_sound_fx(0x31, volume, 0);
     }
 }

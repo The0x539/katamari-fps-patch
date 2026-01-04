@@ -579,6 +579,22 @@ assert_offset!(Camera, katamari_position, 0x8e0);
 assert_offset!(Camera, x938, 0x938);
 assert_offset!(Camera, some_kinda_func, 0x970);
 
+pub struct CameraTransform {
+    pub x0: Mat4,
+    pub x40: Mat4,
+    pub x80: Vec4,
+    pub x90: Vec4,
+    pub xa0: Vec4,
+    pub xb0: Vec4,
+    pub xc0: Mat4,
+    pub x100: Mat4,
+    pub x140: Mat4,
+    pub x180: f32, // scale?
+    pub _x184: Q4,
+}
+
+assert_size!(CameraTransform, 0x188);
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Q<const N: usize>([u8; N]);
 

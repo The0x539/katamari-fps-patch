@@ -95,8 +95,8 @@ pub struct Katamari {
     pub _x1c4: Q4,
     pub scaled_diameter: [f32; 7],
     pub _x1e4: Q<92>,
-    pub dual_a: KatamariDualThingy,
-    pub dual_b: KatamariDualThingy,
+    pub dual_a: MotionVectors,
+    pub dual_b: MotionVectors,
     pub _x3e0: Q<4>,
     pub speed_fac_df: f32,
     pub x3e8: f32,
@@ -277,7 +277,7 @@ pub struct PlayerSubStruct {}
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct KatamariDualThingy {
+pub struct MotionVectors {
     pub a: Vec4,
     pub b: Vec4,
     pub c: Vec4,
@@ -293,7 +293,15 @@ pub struct KatamariDualThingy {
     pub friction: Vec4,
 }
 
-assert_size!(KatamariDualThingy, 0xd0);
+assert_size!(MotionVectors, 0xd0);
+
+impl MotionVectors {
+    pub fn as_slice_mut(&mut self) -> &mut [Vec4] {
+        const N: usize = 13;
+        let _size_assertion = std::mem::transmute::<Self, [Vec4; N]>;
+        unsafe { std::mem::transmute::<_, &mut [Vec4; N]>(self) }
+    }
+}
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

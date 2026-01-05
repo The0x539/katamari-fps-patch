@@ -1,4 +1,4 @@
-use std::arch::asm;
+use std::arch::{asm, naked_asm};
 use std::f32::consts::{PI, TAU};
 
 use crate::ps2;
@@ -7,10 +7,12 @@ use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
 pub mod cacophony;
 pub mod dash;
 pub mod experiments;
+pub mod movement;
 
 pub use cacophony::*;
 pub use dash::*;
 pub use experiments::*;
+pub use movement::*;
 
 pub(crate) mod values {
     /// Let a "tick" refer to a 1/30 second duration.
@@ -94,196 +96,6 @@ pub(crate) mod values {
     #[inline]
     pub(super) fn multiplayer() -> bool {
         unsafe { MULTIPLAYER != 0 }
-    }
-}
-
-pub unsafe extern "C" fn normal_motion_branch_first_part() {
-    unsafe {
-        asm! {
-            "mulss xmm6, dword ptr [rip+{dt}]",
-            "mulss xmm7, dword ptr [rip+{dt}]",
-            "mulss xmm8, dword ptr [rip+{dt}]",
-
-            // the original code
-            "movss xmm4, dword ptr [rbx+0x46C]",
-            "movaps xmm3, xmm6",
-            "addss xmm3, dword ptr [rbx+0x460]",
-            "movaps xmm0, xmm7",
-            "movaps xmm1, xmm8",
-            "addss xmm0, dword ptr [rbx+0x464]",
-            "addss xmm1, dword ptr [rbx+0x468]",
-
-            dt = sym values::DT_TICKS,
-        }
-    }
-}
-
-pub unsafe extern "C" fn standing_on_prop_branch() {
-    unsafe {
-        let k: *mut Katamari;
-        asm!("mov rcx, rbx", out("rcx") k);
-        ps2::update_katamari_measurements(k);
-        ps2::katamari_physics_prop_collision(k);
-    }
-}
-
-pub unsafe extern "C" fn prop_terrain_collision() {
-    unsafe {
-        asm! {
-            // the original code, optimized:
-            // calculate the length of k->dual_a.f and store it in xmm0
-            // (to then be stored in k.guy_that_gets_divided)
-            "movaps xmm0, xmmword ptr [rdi+0x290]", // v = k->dual_a.f
-            "mulps xmm0, xmm1",  // v = v.xyz()
-            "mulps xmm0, xmm0",  // v *= v
-            "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now x*x+y*y, second element is z*z)
-            "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now sqrlen)
-            "sqrtss xmm0, xmm0", // v.x = sqrt(v.x)
-
-            "mulss xmm0, dword ptr [rip+{dt}]", // now delta-time it
-
-            in("xmm1") Vec4::XYZ.to_simd(),
-            dt = sym values::DT_TICKS,
-        }
-    }
-}
-
-pub unsafe extern "C" fn gravity() {
-    unsafe {
-        asm! {
-            "movss xmm5, dword ptr [rbx+0x1a0]",
-            "mulss xmm5, dword ptr [rip+{dt}]",
-
-            "xor edi, edi",
-            "movss dword ptr [rbx+0x1c4], xmm0",
-            "mov qword ptr [rbx+0x2f0], rdi",
-            "mov dword ptr [rbx+0x2f8], edi",
-            "mov dword ptr [rbx+0x2fc], {one}",
-
-            dt = sym values::DT_TICKS,
-            one = const 1_f32.to_bits(),
-        }
-    }
-}
-
-pub unsafe extern "C" fn gravitee() -> u64 {
-    let k = unsafe {
-        let k: *mut Katamari;
-        asm!("", out("rcx") k);
-        &mut *k
-    };
-
-    let p_idx = ps2::current_player_index();
-
-    let prince = unsafe { &mut *ps2::prince_array(p_idx) };
-
-    // trampoline
-    k.versus_xba = prince.ouji_state.dash_stationary_spin;
-
-    ps2::calculate_gravity_and_some_other_forces(k);
-    println!("{:?}", k.dual_a.external_velocity);
-    // k.dual_a.external_velocity = k.dual_a.external_velocity * values::dt_ticks();
-
-    // trampoline: prepare RAX
-    ps2::current_stage() as u64
-}
-
-pub unsafe extern "C" fn good_night() {
-    let k = unsafe {
-        let k: *mut Katamari;
-        asm!("mov rdi, rcx", out("rdi") k);
-        &mut *k
-    };
-
-    let dividend = k.guy_that_gets_divided;
-    let d = k.speed_fac_df * k.speed_fac_d * ps2::g_katamari_speed_d();
-    let f = k.speed_fac_df * k.speed_fac_f * ps2::g_katamari_speed_f();
-
-    let mut result: f32;
-    if dividend < d {
-        result = 1.0;
-        if f < dividend {
-            result = 1.0 - (dividend - f) / (d - f);
-        }
-    } else {
-        result = 0.0;
-    }
-
-    result *= values::dt_ticks(); // IS THIS THE GUY
-    // No, it doesn't seem like it. Damn.
-
-    // TODO: get this to believe it's okay to leave a value in xmm10. I had to patch it in x64dbg.
-    unsafe {
-        asm! {
-            "",
-            in("xmm1") dividend,
-            in("xmm0") d,
-            in("xmm2") f,
-            in("xmm10") result,
-            in("rcx") k,
-            in("rdi") k,
-        }
-    }
-}
-
-pub unsafe extern "C" fn fast_steer() {
-    unsafe {
-        let prince: *mut Prince;
-        let direction: f32;
-        asm!("", out("rcx") prince, out("xmm1") direction);
-
-        asm! {
-            "movss dword ptr [rcx+0x78], xmm1",
-            "mulss xmm1, dword ptr [rip+{dt}]",
-            "mulss xmm1, {gkr}",
-            "addss xmm1, dword ptr [rcx+0x6c]",
-
-            in("xmm1") direction,
-            in("rcx") prince,
-            dt = sym values::DT_TICKS,
-            gkr = in(xmm_reg) ps2::g_katamari_rot(),
-        }
-    }
-}
-
-pub unsafe extern "C" fn slow_steer() {
-    unsafe {
-        let prince: *mut Prince;
-        let direction: f32;
-        asm! {
-            "push rbx",
-            "mov {}, rbx",
-            out(reg) prince,
-            out("xmm1") direction,
-        };
-
-        asm! {
-            "movss dword ptr [{prince}+0x78], xmm1",
-            "mulss xmm1, xmm0",
-            "mulss xmm1, dword ptr [rip+{dt}]",
-            "addss xmm1, dword ptr [{prince}+0x6c]",
-            "pop rbx",
-
-            in("xmm0") ps2::g_katamari_rot(),
-            in("xmm1") direction,
-            dt = sym values::DT_TICKS,
-            prince = in(reg) prince,
-        }
-    }
-}
-
-pub unsafe extern "C" fn gentle_steer() {
-    unsafe {
-        let prince: *mut Prince;
-        asm!("mov {}, rbx", out(reg) prince);
-
-        asm! {
-            "mulss xmm1, dword ptr [rip+{dt}]",
-            "mulss xmm1, dword ptr [{prince}+0x78]",
-            in("xmm1") ps2::g_katamari_rot(),
-            dt = sym values::DT_TICKS,
-            prince = in(reg) prince,
-        }
     }
 }
 

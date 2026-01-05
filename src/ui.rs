@@ -14,6 +14,8 @@ fn draw(ui: &mut egui::Ui) {
 
     k.position.ui(&mut *ui);
 
+    DragValue::new(&mut k.x1a0).ui(&mut *ui);
+
     ui.horizontal(|ui| {
         k.dual_a.ui(ui);
         k.dual_b.ui(ui);

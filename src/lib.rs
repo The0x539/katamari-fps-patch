@@ -157,6 +157,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
         //     0xd..0x7e,
         //     replacements::good_night,
         // )?;
+
+        hook::patch(
+            dll.calculate_gravity_and_some_other_forces,
+            0x12d..0x13d,
+            replacements::gravity_mark3,
+        )?;
     }
 
     Ok(())

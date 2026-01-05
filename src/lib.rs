@@ -9,6 +9,7 @@ pub mod hook;
 pub mod ps2;
 pub mod replacements;
 pub mod types;
+mod ui;
 
 mod w {
     pub use windows::Win32::System::LibraryLoader::*;

@@ -14,9 +14,11 @@ debug-assertions = false
 panic = "abort"
 
 [dependencies]
+eframe = "0.33.3"
 eyre = "0.6.12"
 retour = "0.3.1"
 windows-strings = "0.5.1"
+winit = "0.30.12"
 
 [dependencies.windows]
 version = "0.62.2"

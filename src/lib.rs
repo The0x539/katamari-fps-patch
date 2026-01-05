@@ -74,11 +74,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
         // The one that actually worked, but not the code I'm actually going to patch
         // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x12d..0x186, replacements::gravity)?;
 
-        hook::patch(
-            dll.calculate_gravity_and_some_other_forces,
-            0xd4..0xfd,
-            replacements::gravity,
-        )?;
+        // hook::patch(
+        //     dll.calculate_gravity_and_some_other_forces,
+        //     0xd4..0xfd,
+        //     replacements::gravity,
+        // )?;
 
         // TODO: determine if it would be better to just edit g_katamariRot.
         // Does anyone set it? Or does the game use it as a constant?
@@ -141,6 +141,21 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
         // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
         hook::patch(dll.gunshot, 0x1cb..0x2c7, replacements::bang)?;
+
+        // hook::patch(
+        //     dll.do_katamari_physics,
+        //     0x24c..0x25e,
+        //     replacements::gravitee,
+        // )?;
+
+        // hook::skip_range(dll.do_katamari_physics, 0x40e..0x413)?;
+        // hook::skip_range(dll.do_katamari_physics, 0x4f1..0x4fd)?;
+
+        // hook::patch(
+        //     dll.some_sort_of_collision_guy,
+        //     0xd..0x7e,
+        //     replacements::good_night,
+        // )?;
     }
 
     Ok(())

@@ -40,6 +40,9 @@ exports! {
     #[func @ 0x1ee70]
     fn update_katamari_measurements(k: *mut Katamari);
 
+    #[func @ 0x1db50]
+    fn do_katamari_physics(k: *mut Katamari, delta: f32);
+
     #[func @ 0x1ff50]
     fn katamari_physics_sub_sub1(k: *mut Katamari, v: *const Vec4);
 
@@ -112,8 +115,14 @@ exports! {
     #[func @ 0x07080]
     fn gunshot(_m: *mut ());
 
+    #[func @ 0x1c530]
+    fn some_sort_of_collision_guy(k: *mut Katamari);
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
+
+    #[var @ 0x07a25c]
+    static g_katamari_speed_d: f32;
 
     #[var @ 0x07b0ec]
     static g_katamari_speed_f: f32;

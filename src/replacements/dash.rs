@@ -61,7 +61,7 @@ pub unsafe extern "C" fn prince_exhausted(p_idx: i32, prince: *mut Prince) {
         prince.ouji_state.dash_spinning = false;
         prince.ouji_state.dash_stationary_spin = false;
         prince.dash_input_counter = 0;
-        katamari.versus_xba = false;
+        katamari.spinning_in_place = false;
     }
 
     if prince.prevent_dashing {

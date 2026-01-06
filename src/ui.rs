@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::time::Duration;
 
-use eframe::egui::{self, DragValue, ViewportBuilder, Widget};
+use eframe::egui::{self, DragValue, Ui, ViewportBuilder, Widget};
 use eframe::{App, EframeWinitApplication, NativeOptions, UserEvent};
 use winit::event_loop::EventLoop;
 use winit::platform::{pump_events::EventLoopExtPumpEvents, windows::EventLoopBuilderExtWindows};
@@ -9,12 +9,29 @@ use winit::platform::{pump_events::EventLoopExtPumpEvents, windows::EventLoopBui
 use crate::ps2;
 use crate::types::{MotionVectors, Vec4};
 
-fn draw(ui: &mut egui::Ui) {
+fn draw(ui: &mut Ui) {
     let k = unsafe { &mut *ps2::katamari_array(0) };
 
-    k.position.ui(&mut *ui);
+    label_vec(ui, "pos", &mut k.position);
+    label_vec(ui, "pivot", &mut k.pivot_position);
 
-    DragValue::new(&mut k.x1a0).ui(&mut *ui);
+    label_value(ui, "x1a0", &mut k.x1a0);
+    label_value(ui, "speed", &mut k.speed);
+    label_value(ui, "spin", &mut k.angular_speed);
+    label_vec(ui, "ground", &mut k.ground_normal);
+    label_vec(ui, "wall", &mut k.wall_normal);
+
+    ui.label(&format!("airborne: {}", k.airborne));
+    ui.label(&format!("climbing: {}", k.climbing));
+
+    label_vec(ui, "direction", &mut k.roll_direction);
+    label_vec(ui, "left", &mut k.left_direction);
+
+    label_vec(ui, "local pivot pos", &mut k.local_pivot_pos);
+
+    ui.label(&format!("stgr: {}", k.time_spent_standing_on_prop));
+
+    label_value(ui, "pivot speed", &mut k.x39b8);
 
     ui.horizontal(|ui| {
         k.dual_a.ui(ui);
@@ -22,28 +39,36 @@ fn draw(ui: &mut egui::Ui) {
     });
 }
 
+fn label_value(ui: &mut Ui, label: &str, value: &mut f32) {
+    ui.horizontal(|ui| {
+        ui.label(label);
+        DragValue::new(value).ui(ui);
+    });
+}
+
+fn label_vec(ui: &mut Ui, label: &str, value: &mut Vec4) {
+    ui.horizontal(|ui| {
+        ui.label(label);
+        value.ui(ui);
+    });
+}
+
 impl egui::Widget for &mut Vec4 {
-    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+    fn ui(self, ui: &mut Ui) -> egui::Response {
         ui.horizontal(|ui| {
-            ui.label("x");
-            DragValue::new(&mut self.x).ui(ui);
-            ui.label("y");
-            DragValue::new(&mut self.y).ui(ui);
-            ui.label("z");
-            DragValue::new(&mut self.z).ui(ui);
+            label_value(ui, "x", &mut self.x);
+            label_value(ui, "y", &mut self.y);
+            label_value(ui, "z", &mut self.z);
         })
         .response
     }
 }
 
 impl egui::Widget for &mut MotionVectors {
-    fn ui(self, ui: &mut egui::Ui) -> egui::Response {
+    fn ui(self, ui: &mut Ui) -> egui::Response {
         ui.vertical(|ui| {
             for (vec, label) in self.as_slice_mut().iter_mut().zip('A'..) {
-                ui.horizontal(|ui| {
-                    ui.label(label.to_string());
-                    vec.ui(ui);
-                });
+                label_vec(ui, &label.to_string(), vec);
             }
         })
         .response
@@ -84,8 +109,11 @@ impl UiHandle {
             .unwrap();
 
         let mut opts = NativeOptions::default();
-        opts.window_builder = Some(Box::new(|b: ViewportBuilder| {
-            b.with_resizable(false).with_inner_size((500.0, 800.0))
+        opts.window_builder = Some(Box::new(|mut b: ViewportBuilder| {
+            b.resizable = Some(false);
+            b.inner_size = Some((500.0, 700.0).into());
+            b.active = Some(false);
+            b
         }));
 
         let app = eframe::create_native("katamari", opts, Box::new(MyApp::new_app), &event_loop);

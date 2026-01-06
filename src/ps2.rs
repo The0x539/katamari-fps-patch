@@ -44,7 +44,7 @@ exports! {
     fn do_katamari_physics(k: *mut Katamari, delta: f32);
 
     #[func @ 0x1ff50]
-    fn katamari_physics_sub_sub1(k: *mut Katamari, v: *const Vec4);
+    fn katamari_update_spin(k: *mut Katamari, v: *const Vec4);
 
     #[func @ 0x1b3b0]
     fn katamari_physics_prop_collision(k: *mut Katamari);
@@ -117,6 +117,15 @@ exports! {
 
     #[func @ 0x1c530]
     fn some_sort_of_collision_guy(k: *mut Katamari);
+
+    #[func @ 0x5a970]
+    fn rotate_strange(m: *mut Mat4, v: *const Vec4, theta: f32);
+
+    #[func @ 0x1c8e0]
+    fn x1c8e0(k: *mut Katamari);
+
+    #[func @ 0x20b00]
+    fn x20b00(k: *mut Katamari);
 
     #[var @ 0x07b218]
     static val_x7b218: f32;

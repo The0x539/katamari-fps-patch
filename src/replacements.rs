@@ -2,7 +2,7 @@ use std::arch::{asm, naked_asm};
 use std::f32::consts::{PI, TAU};
 
 use crate::ps2;
-use crate::types::{Camera, Katamari, Mat4, Prince, Vec4};
+use crate::types::*;
 
 pub mod cacophony;
 pub mod dash;

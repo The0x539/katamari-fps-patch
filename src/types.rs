@@ -24,7 +24,7 @@ pub struct Katamari {
     pub _x6c: Q<4>,
     pub radius_inches: f32,
     pub circumference_cm: f32,
-    pub guy_that_gets_divided: f32,
+    pub speed: f32,
     pub x7c: f32,
     pub x80: f32,
     pub x84: f32,
@@ -35,8 +35,8 @@ pub struct Katamari {
     pub x98: f32,
     pub x9c: f32,
     pub xa0: f32,
-    pub climbing_related_c: u8,
-    pub currently_climbing: bool,
+    pub airborne: bool,
+    pub climbing: bool,
     pub climb_height_reached: bool,
     pub dwordflag_xa7: [u8; 4],
     pub hit_water: bool,
@@ -46,7 +46,7 @@ pub struct Katamari {
     pub standing_on_prop: bool,
     pub _xb6: Q<3>,
     pub speed_limit_check_2: u8,
-    pub versus_xba: bool,
+    pub spinning_in_place: bool,
     pub _xbb: Q1,
     pub _xbc: Q1,
     pub _xbd: Q<3>,
@@ -116,12 +116,12 @@ pub struct Katamari {
     pub x42c: f32,
     pub x430: f32,
     pub x434: f32,
-    pub angle_guy_: f32,
+    pub angular_speed: f32,
     pub _x43c: Q<4>,
-    pub normalized_guy: Vec4,
-    pub x450: Vec4,
+    pub roll_direction: Vec4,
+    pub left_direction: Vec4,
     pub position: Vec4,
-    pub position_b: Vec4,
+    pub prev_position: Vec4,
     pub _x480: Q<4>,
     pub x484: f32,
     pub _x488: Q<8>,
@@ -149,8 +149,8 @@ pub struct Katamari {
     pub climb_timer: i16,
     pub x788: i16,
     pub x78a: i16,
-    pub x78c: Vec4,
-    pub x79c: Vec4,
+    pub ground_normal: Vec4,
+    pub wall_normal: Vec4,
     pub x7ac: Vec4,
     pub x7bc: f32,
     pub x7c0: f32,
@@ -181,9 +181,9 @@ pub struct Katamari {
     pub _x38d2: Q<2>,
     pub x38d4: Mat4,
     pub matrix_that_gets_reset: Mat4,
-    pub vector_that_gets_reset_a: Vec4,
+    pub local_pivot_pos: Vec4,
     pub vector_that_gets_reset_b: Vec4,
-    pub position_c: Vec4,
+    pub pivot_position: Vec4,
     pub is_this_actually_used: Vec4,
     pub _x3994: Q<4>,
     pub guy_index: i32,
@@ -194,8 +194,8 @@ pub struct Katamari {
     pub x39ac: f32,
     pub x39b0: f32,
     pub x39b4: f32,
-    pub _x39b8: Q<4>,
-    pub x39bc: f32,
+    pub x39b8: f32,
+    pub time_spent_standing_on_prop: i32,
     pub _x39c0: Q<24>,
     pub x39d8: Vec4,
     pub _x39e8: Q2,
@@ -248,8 +248,8 @@ pub struct Katamari {
 assert_offset!(Katamari, x88, 0x88);
 assert_offset!(Katamari, x98, 0x98);
 assert_offset!(Katamari, xa0, 0xa0);
-assert_offset!(Katamari, climbing_related_c, 0xa4);
-assert_offset!(Katamari, currently_climbing, 0xa5);
+assert_offset!(Katamari, airborne, 0xa4);
+assert_offset!(Katamari, climbing, 0xa5);
 assert_offset!(Katamari, climb_height_reached, 0xa6);
 assert_offset!(Katamari, dwordflag_xa7, 0xa7);
 assert_offset!(Katamari, hit_water, 0xab);
@@ -283,12 +283,12 @@ pub struct MotionVectors {
     pub c: Vec4,
     pub d: Vec4,
     pub e: Vec4,
-    pub f: Vec4,
+    pub effective: Vec4,
     pub g: Vec4,
     pub h: Vec4,
     pub i: Vec4,
     pub j: Vec4,
-    pub external_velocity: Vec4,
+    pub gravity: Vec4,
     pub l: Vec4,
     pub friction: Vec4,
 }
@@ -730,4 +730,15 @@ impl Div<f32> for Vec4 {
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct Mat4 {
     pub rows: [Vec4; 4],
+}
+
+impl Mat4 {
+    pub const IDENTITY: Self = Self {
+        rows: [
+            Vec4::new(1.0, 0.0, 0.0, 0.0),
+            Vec4::new(0.0, 1.0, 0.0, 0.0),
+            Vec4::new(0.0, 0.0, 1.0, 0.0),
+            Vec4::new(0.0, 0.0, 0.0, 1.0),
+        ],
+    };
 }

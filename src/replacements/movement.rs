@@ -14,6 +14,18 @@ pub unsafe extern "C" fn gravity_mark3() {
 }
 
 #[unsafe(naked)]
+pub unsafe extern "C" fn bumpy_ride() {
+    naked_asm! {
+        "mulss xmm6, [rip + {dt}]", // the important bit
+        "movss dword ptr [rdi + 0x39b8], xmm6",
+        // trampoline. extra 8 bytes for this function's return pointer
+        "lea rdx, [rsp + 0x28]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}
+
+#[unsafe(naked)]
 pub unsafe extern "C" fn normal_motion_branch_first_part() {
     naked_asm! {
         "mulss xmm6, dword ptr [rip+{dt}]",
@@ -39,7 +51,7 @@ pub unsafe extern "C" fn standing_on_prop_branch() {
         let k: *mut Katamari;
         asm!("mov rcx, rbx", out("rcx") k);
         ps2::update_katamari_measurements(k);
-        ps2::katamari_physics_prop_collision(k);
+        ps2::katamari_pivot(k);
     }
 }
 

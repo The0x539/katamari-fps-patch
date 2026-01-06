@@ -54,17 +54,20 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
         hook::install(dll.copy_matrix, replacements::copy_matrix as _)?;
 
-        hook::patch(
-            dll.katamari_physics_big_kahuna,
-            0x597..0x5a7,
-            replacements::standing_on_prop_branch,
-        )?;
+        // hook::patch(
+        //     dll.katamari_physics_big_kahuna,
+        //     0x597..0x5a7,
+        //     replacements::standing_on_prop_branch,
+        // )?;
 
-        hook::patch(
-            dll.katamari_physics_prop_collision,
-            0xA0..0xD1,
-            replacements::prop_terrain_collision,
-        )?;
+        // hook::patch(
+        //     dll.katamari_physics_prop_collision,
+        //     0xA0..0xD1,
+        //     replacements::prop_terrain_collision,
+        // )?;
+
+        // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
+        hook::patch(dll.katamari_pivot, 0x17a..0x187, replacements::bumpy_ride)?;
 
         // A block I tried to disable to discover gravity
         // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x79a..0x7ae, replacements::gravity)?;

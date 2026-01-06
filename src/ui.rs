@@ -31,7 +31,7 @@ fn draw(ui: &mut Ui) {
 
     ui.label(&format!("stgr: {}", k.time_spent_standing_on_prop));
 
-    label_value(ui, "pivot speed", &mut k.x39b8);
+    label_value(ui, "pivot speed", &mut k.pivot_speed);
 
     ui.horizontal(|ui| {
         k.dual_a.ui(ui);

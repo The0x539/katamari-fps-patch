@@ -158,7 +158,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             ps2::katamari_update_spin(k, &vel.x0zw());
         } else {
             ps2::update_katamari_measurements(k);
-            ps2::katamari_physics_prop_collision(k);
+            ps2::katamari_pivot(k);
         }
 
         // the weird loops that don't look like they do anything in the decomp

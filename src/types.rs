@@ -194,7 +194,7 @@ pub struct Katamari {
     pub x39ac: f32,
     pub x39b0: f32,
     pub x39b4: f32,
-    pub x39b8: f32,
+    pub pivot_speed: f32,
     pub time_spent_standing_on_prop: i32,
     pub _x39c0: Q<24>,
     pub x39d8: Vec4,

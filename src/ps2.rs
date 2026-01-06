@@ -68,7 +68,7 @@ exports! {
     fn calculate_friction(k: *mut Katamari);
 
     #[func @ 0x20cd0]
-    fn calculate_gravity_and_some_other_forces(k: *mut Katamari);
+    fn calculate_gravity(k: *mut Katamari);
 
     #[func @ 0x59590]
     fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4;
@@ -169,6 +169,9 @@ exports! {
     #[var @ 0x07b1a0]
     static dash_input_window: i32;
 
+    #[var @ 0x10e084]
+    static gravity: Vec4;
+
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];
 
@@ -219,4 +222,18 @@ pub fn play_visual_fx(
         attach_id,
         player_id,
     );
+}
+
+// SAFETY: Beware of aliasing.
+// Other functions may get their own pointer to the same object,
+// in which case the compiler may make incorrect assumptions about what happens to the fields.
+// I don't expect this to be an actual problem in practice,
+// since I'm looking so closely at the compiler output anyway.
+pub unsafe fn current_katamari<'a>() -> &'a mut Katamari {
+    unsafe { &mut *katamari_array(current_player_index()) }
+}
+
+// See above.
+pub unsafe fn current_prince<'a>() -> &'a mut Prince {
+    unsafe { &mut *prince_array(current_player_index()) }
 }

@@ -69,20 +69,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
         // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
         hook::patch(dll.katamari_pivot, 0x17a..0x187, replacements::bumpy_ride)?;
 
-        // A block I tried to disable to discover gravity
-        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x79a..0x7ae, replacements::gravity)?;
-        // Two more, of twin nature
-        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x7fe..0x819, replacements::gravity)?;
-        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x661..0x673, replacements::gravity)?;
-
-        // The one that actually worked, but not the code I'm actually going to patch
-        // hook::patch(dll.calculate_gravity_and_some_other_forces, 0x12d..0x186, replacements::gravity)?;
-
-        // hook::patch(
-        //     dll.calculate_gravity_and_some_other_forces,
-        //     0xd4..0xfd,
-        //     replacements::gravity,
-        // )?;
+        hook::patch(dll.calculate_gravity, 0x688..0x820, replacements::uphill)?;
+        hook::patch(dll.calculate_gravity, 0x607..0x683, replacements::downhill)?;
 
         // TODO: determine if it would be better to just edit g_katamariRot.
         // Does anyone set it? Or does the game use it as a constant?
@@ -162,9 +150,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
         // )?;
 
         hook::patch(
-            dll.calculate_gravity_and_some_other_forces,
+            dll.calculate_gravity,
             0x12d..0x13d,
-            replacements::gravity_mark3,
+            replacements::airborne_gravity,
         )?;
     }
 

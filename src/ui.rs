@@ -29,13 +29,24 @@ fn draw(ui: &mut Ui) {
 
     label_vec(ui, "local pivot pos", &mut k.local_pivot_pos);
 
-    ui.label(&format!("stgr: {}", k.time_spent_standing_on_prop));
+    ui.label(&format!("pivot time: {}", k.time_spent_standing_on_prop));
+    ui.label(&format!("xea: {}", k.xea));
+    ui.label(&format!("downhill: {}", k.time_spent_going_downhill));
+    ui.label(&format!("uphill: {}", k.time_spent_going_uphill));
+
+    let p = unsafe { &mut *ps2::prince_array(0) };
+    label_value(ui, "p.x488 (max)", &mut p.slope_stamina);
+    label_value(ui, "p.x300 (stam)", &mut p.max_slope_stamina);
+    label_value(ui, "p.x304 (drain)", &mut p.slope_stamina_drain_rate);
+
+    label_value(ui, "k.x40c (sum)", &mut k.small_uphil_mass_factor);
+    label_value(ui, "k.x410 (bum)", &mut k.big_uphill_mass_factor);
 
     label_value(ui, "pivot speed", &mut k.pivot_speed);
 
     ui.horizontal(|ui| {
-        k.dual_a.ui(ui);
-        k.dual_b.ui(ui);
+        k.motion.ui(ui);
+        k.prev_motion.ui(ui);
     });
 }
 

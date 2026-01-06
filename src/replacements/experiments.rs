@@ -32,8 +32,8 @@ pub unsafe extern "C" fn gravitee() -> u64 {
     // trampoline
     k.spinning_in_place = prince.ouji_state.dash_stationary_spin;
 
-    ps2::calculate_gravity_and_some_other_forces(k);
-    println!("{:?}", k.dual_a.gravity);
+    ps2::calculate_gravity(k);
+    println!("{:?}", k.motion.gravity);
     // k.dual_a.external_velocity = k.dual_a.external_velocity * values::dt_ticks();
 
     // trampoline: prepare RAX
@@ -83,20 +83,20 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
         // let mut direction = Vec4::W;
 
         (*k).x660 = Vec4::W;
-        (*k).dual_a.effective = Vec4::W;
+        (*k).motion.effective = Vec4::W;
 
-        let mut base_vel = (*k).dual_a.a + (*k).dual_a.l.xyz0();
+        let mut base_vel = (*k).motion.a + (*k).motion.downhill.xyz0();
         let mut vel = base_vel;
 
         if 0.0 < base_vel.len() {
             vel = base_vel;
             if !(*k).climbing {
-                base_vel += (*k).dual_a.friction.xyz0();
+                base_vel += (*k).motion.local_spin.xyz0();
                 vel = base_vel;
             }
         }
 
-        if (*k).speed_limit_check_1 != 0 && (*k).speed_limit_check_2 == 2 {
+        if (*k).speed_limit_check_1 != 0 && (*k).slope_state == 2 {
             let diff_speed = (*k).divisors.x * 3.0 * ps2::g_katamari_speed_f();
             if diff_speed < base_vel.len() {
                 let mut direction = Vec4::ZERO;
@@ -105,14 +105,14 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             }
         }
 
-        (*k).dual_a.effective = vel;
+        (*k).motion.effective = vel;
 
         let foo = vel.x0zw();
-        ps2::normalize(&mut (*k).dual_a.g, &foo);
+        ps2::normalize(&mut (*k).motion.g, &foo);
 
-        let bar = vel + (*k).dual_a.gravity;
-        (*k).dual_a.h = bar;
-        ps2::normalize(&mut (*k).dual_a.i, &bar.x0zw());
+        let bar = vel + (*k).motion.gravity;
+        (*k).motion.h = bar;
+        ps2::normalize(&mut (*k).motion.i, &bar.x0zw());
 
         // let mut b_var_2 = false;
         if !(*k).standing_on_prop {
@@ -136,11 +136,11 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             if ps2::game_mode() == 3 {
                 (*k).position.y = -(-400.0 - (*k).radius_cm);
                 // the instructions around here are relatively difficult to understand
-                ps2::x25fb0(&(*k).dual_a.h.x0zw());
+                ps2::x25fb0(&(*k).motion.h.x0zw());
             } else if b_var_2 {
                 if !(*k).climbing {
                     (*k).position += vel;
-                    (*k).position += (*k).dual_a.gravity.xyz0();
+                    (*k).position += (*k).motion.gravity.xyz0();
                 } else {
                     if !(*k).climb_height_reached {
                         (*k).position += vel.xyz0();
@@ -151,7 +151,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
             }
 
             if (*k).airborne {
-                vel = (*k).dual_a.effective + (*k).dual_a.gravity;
+                vel = (*k).motion.effective + (*k).motion.gravity;
             }
             (*k).speed = vel.len();
             ps2::update_katamari_measurements(k);

@@ -45,7 +45,7 @@ pub struct Katamari {
     pub vfx_x17_flag: bool,
     pub standing_on_prop: bool,
     pub _xb6: Q<3>,
-    pub speed_limit_check_2: u8,
+    pub slope_state: u8,
     pub spinning_in_place: bool,
     pub _xbb: Q1,
     pub _xbc: Q1,
@@ -95,8 +95,8 @@ pub struct Katamari {
     pub _x1c4: Q4,
     pub scaled_diameter: [f32; 7],
     pub _x1e4: Q<92>,
-    pub dual_a: MotionVectors,
-    pub dual_b: MotionVectors,
+    pub motion: MotionVectors,
+    pub prev_motion: MotionVectors,
     pub _x3e0: Q<4>,
     pub speed_fac_df: f32,
     pub x3e8: f32,
@@ -108,8 +108,8 @@ pub struct Katamari {
     pub x400: f32,
     pub x404: f32,
     pub speed_fac_d: f32,
-    pub x40c: f32,
-    pub x410: f32,
+    pub small_uphil_mass_factor: f32,
+    pub big_uphill_mass_factor: f32,
     pub axis_selectee: Vec4,
     pub x424: f32,
     pub x428: f32,
@@ -147,8 +147,8 @@ pub struct Katamari {
     pub _x774: Q<16>,
     pub another_climb_timer: i16,
     pub climb_timer: i16,
-    pub x788: i16,
-    pub x78a: i16,
+    pub time_spent_going_downhill: u16,
+    pub time_spent_going_uphill: u16,
     pub ground_normal: Vec4,
     pub wall_normal: Vec4,
     pub x7ac: Vec4,
@@ -263,7 +263,7 @@ assert_offset!(Katamari, x3f8, 0x3f8);
 assert_offset!(Katamari, x424, 0x424);
 assert_offset!(Katamari, mat_x5a0, 0x5a0);
 assert_offset!(Katamari, x670, 0x670);
-assert_offset!(Katamari, x78a, 0x78a);
+assert_offset!(Katamari, time_spent_going_uphill, 0x78a);
 assert_offset!(Katamari, x38d0, 0x38d0);
 assert_offset!(Katamari, matrix_that_gets_reset, 0x3914);
 assert_offset!(Katamari, _x3a64, 0x3a64);
@@ -287,10 +287,13 @@ pub struct MotionVectors {
     pub g: Vec4,
     pub h: Vec4,
     pub i: Vec4,
-    pub j: Vec4,
+    /// Live representation of player joystick input.
+    pub push_force: Vec4,
     pub gravity: Vec4,
-    pub l: Vec4,
-    pub friction: Vec4,
+    pub downhill: Vec4,
+    /// Used for caluculating friction.
+    /// X represents spin speed leftward, Z represents forward. (away from camera)
+    pub local_spin: Vec4,
 }
 
 assert_size!(MotionVectors, 0xd0);
@@ -405,8 +408,8 @@ pub struct Prince {
     pub x2f4: i32,
     pub x2f8: f32,
     pub x2fc: i32,
-    pub x300: f32,
-    pub x304: f32,
+    pub max_slope_stamina: f32,        // 100.0
+    pub slope_stamina_drain_rate: f32, // 0.76?
     pub x308: Vec4,
     pub left_stick_x: f32,
     pub left_stick_z: f32,
@@ -439,7 +442,7 @@ pub struct Prince {
     pub right_stick_angle: f32,
     pub combined_stick_angle: f32,
     pub x3bc: f32,
-    pub x3c0: f32,
+    pub push_direction_z_ness: f32,
     pub x3c8: f32,
     pub x3cc: Mat4,
     pub x40c: Mat4,
@@ -461,7 +464,7 @@ pub struct Prince {
     pub _x483: Q1,
     pub stamina_gain_timer: i16,
     pub counter_x486: i16,
-    pub x488: Q<4>,
+    pub slope_stamina: f32,
     pub axis_selector: u8,
     pub _x48d: Q<7>,
     pub x494: Vec4,
@@ -648,7 +651,12 @@ impl Vec4 {
 
     #[inline]
     pub fn sqrlen(&self) -> f32 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.dot3(self)
+    }
+
+    #[inline]
+    pub fn dot3(&self, other: &Self) -> f32 {
+        self.x * other.x + self.y * other.y + self.z * other.z
     }
 
     #[inline]

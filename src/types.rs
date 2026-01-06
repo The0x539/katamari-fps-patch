@@ -245,6 +245,8 @@ pub struct Katamari {
     pub _x3b98: Q<40>,
 }
 
+assert_size!(Katamari, 0x3bc0);
+
 assert_offset!(Katamari, x88, 0x88);
 assert_offset!(Katamari, x98, 0x98);
 assert_offset!(Katamari, xa0, 0xa0);

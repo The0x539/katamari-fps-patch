@@ -608,6 +608,17 @@ pub struct CameraTransform {
 
 assert_size!(CameraTransform, 0x188);
 
+pub struct Prop {
+    pub mono_ctrl_idx: u16,
+    pub mono_name_idx: u16,
+    pub alternate_name: u16,
+    pub flags: u8,
+    pub attached: u8,
+    pub _x00: Q<0xbc8>,
+}
+
+assert_size!(Prop, 0xbd0);
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Q<const N: usize>([u8; N]);
 

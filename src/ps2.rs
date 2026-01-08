@@ -2,7 +2,7 @@ use std::sync::Once;
 
 use windows::Win32::Foundation::HMODULE;
 
-use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, Vec4};
+use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, Prop, Vec4};
 
 #[macro_use]
 mod macros;
@@ -127,6 +127,9 @@ exports! {
     #[func @ 0x20b00]
     fn x20b00(k: *mut Katamari);
 
+    #[func @ 0x40bb0]
+    fn npc_40bb0(p: *mut Prop);
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 
@@ -183,6 +186,9 @@ exports! {
 
     #[array @ 0xd34180]
     static camera_transform_array: [CameraTransform; 2];
+
+    #[array @ 0x19b010]
+    static prop_array: [Prop; 4000];
 
     #[callback @ 0x10ea00]
     fn play_visual_fx(

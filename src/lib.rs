@@ -154,6 +154,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             0x12d..0x13d,
             replacements::airborne_gravity,
         )?;
+
+        hook::patch(dll.npc_40bb0, 0x7a..0x8a, replacements::melon_spin)?;
     }
 
     Ok(())

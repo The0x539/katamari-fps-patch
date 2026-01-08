@@ -8,11 +8,13 @@ pub mod cacophony;
 pub mod dash;
 pub mod experiments;
 pub mod movement;
+pub mod things;
 
 pub use cacophony::*;
 pub use dash::*;
 pub use experiments::*;
 pub use movement::*;
+pub use things::*;
 
 pub(crate) mod values {
     /// Let a "tick" refer to a 1/30 second duration.

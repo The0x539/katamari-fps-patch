@@ -52,7 +52,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             replacements::normal_motion_branch_first_part,
         )?;
 
-        hook::install(dll.copy_matrix, replacements::copy_matrix as _)?;
+        // This causes the giant watermelons to stop rotating their yaw for some reason.
+        // hook::install(dll.copy_matrix, replacements::copy_matrix as _)?;
 
         // hook::patch(
         //     dll.katamari_physics_big_kahuna,
@@ -156,6 +157,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
         )?;
 
         hook::patch(dll.npc_40bb0, 0x7a..0x8a, replacements::melon_spin)?;
+
+        hook::patch(
+            dll.npc_update_animal_position,
+            0x9e..0xe5,
+            replacements::animal_walk,
+        )?;
     }
 
     Ok(())

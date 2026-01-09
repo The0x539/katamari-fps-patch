@@ -46,122 +46,103 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
         let dll = ps2::DLL;
 
-        hook::patch(
-            dll.katamari_physics_big_kahuna,
-            0x41B..0x445,
-            replacements::normal_motion_branch_first_part,
-        )?;
+        macro_rules! patches {
+            () => {};
 
-        // This causes the giant watermelons to stop rotating their yaw for some reason.
-        // hook::install(dll.copy_matrix, replacements::copy_matrix as _)?;
+            (
+                $func:ident => {}
+                $($tt:tt)*
+            ) => {
+                hook::skip(dll.$func)?;
+                patches!($($tt)*);
+            };
 
-        // hook::patch(
-        //     dll.katamari_physics_big_kahuna,
-        //     0x597..0x5a7,
-        //     replacements::standing_on_prop_branch,
-        // )?;
+            (
+                $func:ident => $replacement:ident;
+                $($tt:tt)*
+            ) => {
+                hook::install(dll.$func, replacements::$replacement as _)?;
+                patches!($($tt)*);
+            };
 
-        // hook::patch(
-        //     dll.katamari_physics_prop_collision,
-        //     0xA0..0xD1,
-        //     replacements::prop_terrain_collision,
-        // )?;
+            (
+                $func:ident[$range:expr] => {}
+                $($tt:tt)*
+            ) => {
+                hook::skip_range(dll.$func, $range)?;
+                patches!($($tt)*);
+            };
 
-        // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
-        hook::patch(dll.katamari_pivot, 0x17a..0x187, replacements::bumpy_ride)?;
-
-        hook::patch(dll.calculate_gravity, 0x688..0x820, replacements::uphill)?;
-        hook::patch(dll.calculate_gravity, 0x607..0x683, replacements::downhill)?;
-
-        // TODO: determine if it would be better to just edit g_katamariRot.
-        // Does anyone set it? Or does the game use it as a constant?
-        hook::patch(dll.handle_turn, 0xa8..0xba, replacements::fast_steer)?;
-
-        // The instructions in play here are identical in all four of these cases,
-        // aside from a RIP-relative offset for loading g_katamariRot.
-        for span in [0x36f..0x381, 0x2c7..0x2d9, 0x215..0x227, 0x15f..0x171] {
-            hook::patch(
-                dll.actually_apply_player_input_force_2,
-                span,
-                replacements::slow_steer,
-            )?;
+            (
+                $func:ident[$range:expr] => $replacement:ident;
+                $($tt:tt)*
+            ) => {
+                hook::patch(dll.$func, $range, replacements::$replacement)?;
+                patches!($($tt)*);
+            }
         }
 
-        hook::patch(
-            dll.gentle_steering,
-            0x248..0x255,
-            replacements::gentle_steer,
-        )?;
+        patches! {
+            katamari_physics_big_kahuna[0x41B..0x445] => normal_motion_branch_first_part;
 
-        hook::patch(
-            dll.ontick_update_angle_guy,
-            0x109..0x14e,
-            replacements::sfx_npc_approaching,
-        )?;
+            // This causes the giant watermelons to stop rotating their yaw for some reason.
+            //copy_matrix => copy_matrix;
 
-        // hook::patch(dll.prince_flip, 0x305..0x35b, replacements::prince_flip)?;
+            katamari_physics_big_kahuna[0x597..0x5a7] => standing_on_prop_branch;
+            //katamari_physics_prop_collision[0xA0..0xD1] => prop_terrain_collision;
 
-        hook::patch(dll.tick_player, 0x131..0x188, replacements::stamina_gain)?;
-        hook::patch(
-            dll.prince_handle_dash,
-            0x16f..0x17d,
-            replacements::stamina_drain,
-        )?;
+            // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
+            katamari_pivot[0x17a..0x187] => bumpy_ride;
 
-        hook::patch(
-            dll.prince_handle_dash,
-            0x404..0x412,
-            replacements::update_dash_input_timer,
-        )?;
+            calculate_gravity[0x688..0x820] => uphill;
+            calculate_gravity[0x607..0x683] => downhill;
 
-        hook::patch(
-            dll.speed_thing_2,
-            0x143..0x21f,
-            replacements::dash_state_machine,
-        )?;
+            // TODO: determine if it would be better to just edit g_katamariRot.
+            // Does anyone set it? Or does the game use it as a constant?
+            handle_turn[0xa8..0xba] => fast_steer;
+
+            // The instructions in play here are identical in all four of these cases,
+            // aside from a RIP-relative offset for loading g_katamariRot.
+            actually_apply_player_input_force_2[0x36f..0x381] => slow_steer;
+            actually_apply_player_input_force_2[0x2c7..0x2d9] => slow_steer;
+            actually_apply_player_input_force_2[0x215..0x227] => slow_steer;
+            actually_apply_player_input_force_2[0x15f..0x171] => slow_steer;
+
+            gentle_steering [0x248..0x255] => gentle_steer;
+
+            ontick_update_angle_guy[0x109..0x14e] => sfx_npc_approaching;
+
+            //prince_flip[0x305..0x35b] => prince_flip;
+            tick_player[0x131..0x188] => stamina_gain;
+            prince_handle_dash[0x16f..0x17d] => stamina_drain;
+            prince_handle_dash[0x404..0x412] => update_dash_input_timer;
+            speed_thing_2[0x143..0x21f] => dash_state_machine;
+
+            // For some reason, replacing a small part of this function (0x48..0x6a)
+            // just broke it entirely.
+            prince_exhausted => prince_exhausted;
+
+            splash[0x3c1..0x5ad] => splash;
+
+            // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
+            gunshot[0x1cb..0x2c7] => bang;
+
+            //do_katamari_physics[0x24c..0x25e] => gravitee;
+            //do_katamari_physics[0x40e..0x413] => {}
+            //do_katamari_physics[0x4f1..0x4fd] => {}
+            //some_sort_of_collision_guy[0xd..0x7e] => good_night;
+
+            calculate_gravity[0x12d..0x13d] => airborne_gravity;
+
+            npc_40bb0[0x7a..0x8a] => melon_spin;
+
+            npc_update_animal_position[0x9e..0xe5] => animal_walk;
+        }
 
         hook::postfix(
             dll.initialize_princes,
             0x3e3,
             replacements::prince_post_init,
-        )?;
-
-        // For some reason, replacing a small part of this function (0x48..0x6a)
-        // just broke it entirely.
-        hook::install(dll.prince_exhausted, replacements::prince_exhausted as _)?;
-
-        hook::patch(dll.splash, 0x3c1..0x5ad, replacements::splash)?;
-
-        // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
-        hook::patch(dll.gunshot, 0x1cb..0x2c7, replacements::bang)?;
-
-        // hook::patch(
-        //     dll.do_katamari_physics,
-        //     0x24c..0x25e,
-        //     replacements::gravitee,
-        // )?;
-
-        // hook::skip_range(dll.do_katamari_physics, 0x40e..0x413)?;
-        // hook::skip_range(dll.do_katamari_physics, 0x4f1..0x4fd)?;
-
-        // hook::patch(
-        //     dll.some_sort_of_collision_guy,
-        //     0xd..0x7e,
-        //     replacements::good_night,
-        // )?;
-
-        hook::patch(
-            dll.calculate_gravity,
-            0x12d..0x13d,
-            replacements::airborne_gravity,
-        )?;
-
-        hook::patch(dll.npc_40bb0, 0x7a..0x8a, replacements::melon_spin)?;
-
-        hook::patch(
-            dll.npc_update_animal_position,
-            0x9e..0xe5,
-            replacements::animal_walk,
         )?;
     }
 

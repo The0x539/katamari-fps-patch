@@ -242,3 +242,15 @@ pub unsafe extern "C" fn spin_amount() {
         dt = sym values::DT_TICKS,
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn turn_radius() {
+    naked_asm! {
+        "movss xmm2, dword ptr [rsi + 0x78]",
+        "mulss xmm2, dword ptr [rip + {dt}]",
+        "lea rdx, qword ptr [rsp + 0x68]",
+        "lea rcx, qword ptr [rbp - 0x60]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}

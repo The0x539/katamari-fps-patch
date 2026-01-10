@@ -118,6 +118,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             prince_handle_dash[0x404..0x412] => update_dash_input_timer;
             speed_thing_2[0x143..0x21f] => dash_state_machine;
 
+            speed_thing_2[0x42a..0x438] => turn_radius;
+
             // For some reason, replacing a small part of this function (0x48..0x6a)
             // just broke it entirely.
             prince_exhausted => prince_exhausted;

@@ -128,6 +128,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
             gunshot[0x1cb..0x2c7] => bang;
+            // This handles the local cooldown
+            gunshot[0xd5..0x10a] => bang2;
+            // Remove a weird remaining increment of the counter, since my code handles it
+            gunshot[0x1bb..0x1be] => {}
 
             //do_katamari_physics[0x24c..0x25e] => gravitee;
             //do_katamari_physics[0x40e..0x413] => {}

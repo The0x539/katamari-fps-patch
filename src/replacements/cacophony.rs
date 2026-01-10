@@ -119,3 +119,28 @@ pub extern "C" fn bang() {
         ps2::cb::play_sound_fx(0x31, volume, 0);
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn bang2() {
+    naked_asm! {
+        "mov eax, dword ptr [rbx + r8*8]",
+        "add eax, dword ptr [rip + {dt}]",
+        "mov dword ptr [rbx + r8*8], eax",
+        "cmp eax, 333",
+        "jg 2f",
+        // and now for the tricky bit
+        // I probably should have just rewritten a bigger chunk of the original function
+        // maybe I'll do that on a later date
+        "add rsp, 0x8",                    // "return" without returning
+        "mov rbx, qword ptr [rsp + 0xf0]", // unwind the caller's stack frame
+        "add rsp, 0xe0",
+        "pop rdi",
+        "ret",
+        "2:",
+        // reset the timer
+        "sub eax, 333",
+        "mov dword ptr [rbx + r8*8], eax",
+        "ret",
+        dt = sym values::DT_MILLIS,
+    }
+}

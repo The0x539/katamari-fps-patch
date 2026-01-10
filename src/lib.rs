@@ -137,6 +137,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             npc_40bb0[0x7a..0x8a] => melon_spin;
 
             npc_update_animal_position[0x9e..0xe5] => animal_walk;
+
+            x20660[0x254..0x260] => spin_amount;
         }
 
         hook::postfix(

@@ -133,6 +133,9 @@ exports! {
     #[func @ 0x31a30]
     fn npc_update_animal_position(p: *mut Prop, _idk: *mut (), _idk_: bool);
 
+    #[func @ 0x5a970]
+    fn rotation_from_axis_angle(out: *mut Mat4, axis: *const Vec4, angle: f32);
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 

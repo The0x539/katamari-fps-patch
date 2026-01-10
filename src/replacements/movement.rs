@@ -226,3 +226,19 @@ pub unsafe extern "C" fn gentle_steer() {
         }
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn spin_amount() {
+    naked_asm! {
+        "movss dword ptr [rsp + 0x2c + 8], xmm9",
+        // this feels like a hack - angular speed should use the same measurement no matter which state you're in
+        "mov al, byte ptr [rdi + 0xa4]", // al = k->airborne
+        "cmp al, 0",
+        "je not_airborne",
+        "mulss xmm2, dword ptr [rip + {dt}]",
+        "not_airborne:",
+        "jmp {}",
+        sym ps2::rotation_from_axis_angle,
+        dt = sym values::DT_TICKS,
+    }
+}

@@ -2,7 +2,7 @@ use std::sync::Once;
 
 use windows::Win32::Foundation::HMODULE;
 
-use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, Prop, Vec4};
+use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, Prop, PropConstants, Vec4};
 
 #[macro_use]
 mod macros;
@@ -204,6 +204,9 @@ exports! {
 
     #[array @ 0x19b010]
     static prop_array: [Prop; 4000];
+
+    #[array @ 0x8a880]
+    static prop_data_array: [PropConstants; 1718];
 
     #[callback @ 0x10ea00]
     fn play_visual_fx(

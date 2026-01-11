@@ -74,7 +74,7 @@ pub struct Katamari {
     pub xfb: bool,
     pub _xfc: Q<15>,
     pub x10b: bool,
-    pub _x10c: Q<4>,
+    pub x10c: [u8; 4],
     pub x110: i8,
     pub _x111: Q1,
     pub countdown_x112: i16,
@@ -83,7 +83,7 @@ pub struct Katamari {
     pub countdown_x118_possible_climb: i16,
     pub _x11a: Q<130>,
     pub x19c: f32,
-    pub x1a0: f32,
+    pub mass: f32,
     pub x1a4: f32,
     pub x1a8: f32,
     pub x1ac: f32,
@@ -592,6 +592,7 @@ assert_offset!(Camera, katamari_position, 0x8e0);
 assert_offset!(Camera, x938, 0x938);
 assert_offset!(Camera, some_kinda_func, 0x970);
 
+#[repr(C)]
 pub struct CameraTransform {
     pub x0: Mat4,
     pub x40: Mat4,
@@ -608,16 +609,84 @@ pub struct CameraTransform {
 
 assert_size!(CameraTransform, 0x188);
 
+#[repr(C)]
 pub struct Prop {
     pub mono_ctrl_idx: u16,
     pub mono_name_idx: u16,
     pub alternate_name: u16,
-    pub flags: u8,
+    pub has_parent: u8, // more flags
     pub attached: u8,
-    pub _x00: Q<0xbc8>,
+    pub flags_x8: u8,
+    pub is_prop_stop: bool,
+    pub is_disp_off: bool,
+    pub xb: u8,
+    pub xc: u8,
+    pub xd: u8,
+    pub xe: u8,
+    pub timer_max: u8,
+    pub dispatch_x10: u8,
+    pub counter_x11: u8,
+    pub _x12: Q<2>,
+    pub alpha_ratio: f32,
+    pub mono_move_type_num: u16,
+    pub hit_on_area_num: u8,
+    pub link_act_num: i8,
+    pub _x1c: Q<1>,
+    pub dispatch_x1d: u8,
+    pub flags_x1e: u8,
+    pub _x1f: u8,
+    pub mono_shake_off_flag: bool,
+    pub flag_x21: bool,
+    pub _x22: Q<6>,
+    pub multi_child: *mut Self,
+    pub child: *mut Self,
+    pub map_area: u8,
+    pub _x39: Q<7>,
+    pub pos_x40: Vec4,
+    pub m_x450: Mat4,
+    pub position: Vec4,
+    pub rotation: Vec4,
+    pub v_xb0: Vec4,
+    pub pos_xc0: Vec4,
+    pub rot_xd0: Vec4,
+    pub vel_xe0: Vec4,
+    pub rot_xf0: Vec4,
+    pub rot_x100: Vec4,
+    pub transform: Mat4,
+    pub m_x150: Mat4,
+    pub m_x190: Mat4,
+    pub _x1d0: Q<0xa00>,
 }
 
 assert_size!(Prop, 0xbd0);
+assert_offset!(Prop, has_parent, 0x6);
+assert_offset!(Prop, flags_x8, 0x8);
+assert_offset!(Prop, xb, 0xb);
+assert_offset!(Prop, mono_shake_off_flag, 0x20);
+assert_offset!(Prop, pos_x40, 0x40);
+assert_offset!(Prop, vel_xe0, 0xe0);
+assert_offset!(Prop, m_x190, 0x190);
+
+#[repr(C)]
+pub struct PropConstants {
+    pub name: *const std::ffi::c_char,
+    pub x8: f32,
+    pub xc: f32,
+    pub _x10: Q<7>,
+    pub x18: i8,
+    pub _x19: Q<5>,
+    pub x1e: u8,
+    pub _x1f: Q<1>,
+    pub x20: u8,
+    pub scream_sfx_type: u8,
+    pub const_parent: u16,
+    pub spawn_vfx_9: bool,
+    pub prevent_pickup: bool,
+    pub _x26: Q<2>,
+    pub x28: u64,
+}
+
+assert_size!(PropConstants, 0x30);
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Q<const N: usize>([u8; N]);

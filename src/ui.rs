@@ -1,53 +1,37 @@
 use std::cell::RefCell;
-use std::time::Duration;
 
 use eframe::egui::{self, DragValue, Ui, ViewportBuilder, Widget};
 use eframe::{App, EframeWinitApplication, NativeOptions, UserEvent};
 use winit::event_loop::EventLoop;
-use winit::platform::{pump_events::EventLoopExtPumpEvents, windows::EventLoopBuilderExtWindows};
+use winit::platform::windows::EventLoopBuilderExtWindows;
 
 use crate::ps2;
-use crate::types::{MotionVectors, Vec4};
+use crate::types::{Katamari, MotionVectors, Vec4};
+
+static mut MONO_CTRL_IDX: u16 = u16::MAX;
 
 fn draw(ui: &mut Ui) {
-    let k = unsafe { &mut *ps2::katamari_array(0) };
+    let idx = unsafe { MONO_CTRL_IDX };
+    if idx >= 4000 {
+        return;
+    }
 
-    label_vec(ui, "pos", &mut k.position);
-    label_vec(ui, "pivot", &mut k.pivot_position);
+    let thing = unsafe { &mut *ps2::prop_array(idx as usize) };
 
-    label_value(ui, "x1a0", &mut k.x1a0);
-    label_value(ui, "speed", &mut k.speed);
-    label_value(ui, "spin", &mut k.angular_speed);
-    label_vec(ui, "ground", &mut k.ground_normal);
-    label_vec(ui, "wall", &mut k.wall_normal);
+    if thing.mono_name_idx >= 1718 {
+        return;
+    }
 
-    ui.label(&format!("airborne: {}", k.airborne));
-    ui.label(&format!("climbing: {}", k.climbing));
+    let data = unsafe { &*ps2::prop_data_array(thing.mono_name_idx as usize) };
 
-    label_vec(ui, "direction", &mut k.roll_direction);
-    label_vec(ui, "left", &mut k.left_direction);
+    let name = unsafe { std::ffi::CStr::from_ptr(data.name) }
+        .to_str()
+        .unwrap();
 
-    label_vec(ui, "local pivot pos", &mut k.local_pivot_pos);
-
-    ui.label(&format!("pivot time: {}", k.time_spent_standing_on_prop));
-    ui.label(&format!("xea: {}", k.xea));
-    ui.label(&format!("downhill: {}", k.time_spent_going_downhill));
-    ui.label(&format!("uphill: {}", k.time_spent_going_uphill));
-
-    let p = unsafe { &mut *ps2::prince_array(0) };
-    label_value(ui, "p.x488 (max)", &mut p.slope_stamina);
-    label_value(ui, "p.x300 (stam)", &mut p.max_slope_stamina);
-    label_value(ui, "p.x304 (drain)", &mut p.slope_stamina_drain_rate);
-
-    label_value(ui, "k.x40c (sum)", &mut k.small_uphil_mass_factor);
-    label_value(ui, "k.x410 (bum)", &mut k.big_uphill_mass_factor);
-
-    label_value(ui, "pivot speed", &mut k.pivot_speed);
-
-    ui.horizontal(|ui| {
-        k.motion.ui(ui);
-        k.prev_motion.ui(ui);
-    });
+    ui.label(format!("{idx}: {name}"));
+    ui.label(format!("{}", thing.mono_ctrl_idx));
+    label_vec(ui, "position", &mut thing.position);
+    label_vec(ui, "rotation", &mut thing.rotation);
 }
 
 fn label_value(ui: &mut Ui, label: &str, value: &mut f32) {
@@ -86,23 +70,55 @@ impl egui::Widget for &mut MotionVectors {
     }
 }
 
-#[unsafe(export_name = "PreTick")]
-pub unsafe extern "C" fn pre_tick() {}
+impl egui::Widget for &mut Katamari {
+    fn ui(self, ui: &mut Ui) -> egui::Response {
+        label_vec(ui, "pos", &mut self.position);
+        label_vec(ui, "pivot", &mut self.pivot_position);
 
-#[unsafe(export_name = "PostTick")]
-pub unsafe extern "C" fn post_tick() {
+        label_value(ui, "mass", &mut self.mass);
+        label_value(ui, "speed", &mut self.speed);
+        label_value(ui, "spin", &mut self.angular_speed);
+
+        ui.label(&format!("airborne: {}", self.airborne));
+        ui.label(&format!("climbing: {}", self.climbing));
+
+        ui.label(&format!("pivot time: {}", self.time_spent_standing_on_prop));
+        ui.label(&format!("xea: {}", self.xea));
+
+        ui.label(&format!("x10b: {}", self.x10b));
+        ui.label(&format!("x10c: {:?}", self.x10c));
+
+        label_value(ui, "pivot speed", &mut self.pivot_speed);
+
+        label_value(ui, "angle guy", &mut self.angle_guy);
+
+        ui.horizontal(|ui| {
+            self.motion.ui(ui);
+            self.prev_motion.ui(ui);
+        });
+
+        ui.response()
+    }
+}
+
+#[unsafe(export_name = "UpdateUI")]
+pub unsafe extern "C" fn update_ui() {
     thread_local! {
         static UI_HANDLE: RefCell<UiHandle> = RefCell::new(UiHandle::new());
     }
 
-    let timeout = Some(Duration::from_millis(1));
-
     UI_HANDLE.with(|h| {
         let mut h = h.borrow_mut();
         let h = &mut *h;
-
-        h.event_loop.pump_app_events(timeout, &mut h.app);
+        h.app.pump_eframe_app(&mut h.event_loop, None);
     });
+}
+
+#[unsafe(export_name = "PickThing")]
+pub extern "C" fn pick_thing(idx: u16) {
+    unsafe {
+        MONO_CTRL_IDX = idx;
+    }
 }
 
 // implementation details below

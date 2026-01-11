@@ -5,6 +5,7 @@ use crate::ps2;
 use crate::types::*;
 
 pub mod cacophony;
+pub mod camera;
 pub mod dash;
 pub mod experiments;
 pub mod movement;

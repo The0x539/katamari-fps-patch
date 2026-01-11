@@ -58,10 +58,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             };
 
             (
-                $func:ident => $replacement:ident;
+                $func:ident => $($replacement:ident)::*;
                 $($tt:tt)*
             ) => {
-                hook::install(dll.$func, replacements::$replacement as _)?;
+                hook::install(dll.$func, replacements::$($replacement)::* as _)?;
                 patches!($($tt)*);
             };
 
@@ -74,10 +74,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             };
 
             (
-                $func:ident[$range:expr] => $replacement:ident;
+                $func:ident[$range:expr] => $($replacement:ident)::*;
                 $($tt:tt)*
             ) => {
-                hook::patch(dll.$func, $range, replacements::$replacement)?;
+                hook::patch(dll.$func, $range, replacements::$($replacement)::*)?;
                 patches!($($tt)*);
             }
         }
@@ -145,6 +145,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             npc_update_animal_position[0x9e..0xe5] => animal_walk;
 
             x20660[0x254..0x260] => spin_amount;
+
+            camera_bear_cow_orbit[0xd7..0xe7] => camera::orbit_a;
+            camera_versus_winner_orbit[0x55..0x67] => camera::orbit_b;
+            camera_animate[0x2b4..0x2c4] => camera::zoom_out;
         }
 
         hook::postfix(

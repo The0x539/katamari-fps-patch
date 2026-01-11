@@ -136,6 +136,15 @@ exports! {
     #[func @ 0x5a970]
     fn rotation_from_axis_angle(out: *mut Mat4, axis: *const Vec4, angle: f32);
 
+    #[func @ 0xebf0]
+    fn camera_bear_cow_orbit(p_idx: i32, cam: *mut Camera);
+
+    #[func @ 0xef70]
+    fn camera_versus_winner_orbit(p_idx: i32, cam: *mut Camera);
+
+    #[func @ 0xb7d0]
+    fn camera_animate();
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 

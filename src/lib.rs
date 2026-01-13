@@ -9,7 +9,20 @@ pub mod hook;
 pub mod ps2;
 pub mod replacements;
 pub mod types;
+
+#[cfg(feature = "ui")]
 mod ui;
+
+// Dummy exports so that the other side of the equation can safely
+// assume these functions are available to be called.
+#[cfg(not(feature = "ui"))]
+mod ui {
+    #[unsafe(export_name = "UpdateUI")]
+    extern "C" fn update_ui() {}
+
+    #[unsafe(export_name = "PickThing")]
+    extern "C" fn pick_thing(_idx: u16) {}
+}
 
 mod w {
     pub use windows::Win32::System::LibraryLoader::*;

@@ -14,16 +14,21 @@ debug-assertions = false
 panic = "abort"
 
 [dependencies]
-eframe = "0.33.3"
 eyre = "0.6.12"
-retour = "0.3.1"
 windows-strings = "0.5.1"
-winit = "0.30.12"
 
-[dependencies.windows]
-version = "0.62.2"
-features = [
+eframe.version = "0.33.3"
+eframe.optional = true
+winit.version = "0.30.12"
+winit.optional = true
+
+windows.version = "0.62.2"
+windows.features = [
   "Win32_Foundation",
   "Win32_System_LibraryLoader",
   "Win32_System_Memory",
 ]
+
+[features]
+default = ["ui"]
+ui = ["dep:eframe", "dep:winit"]

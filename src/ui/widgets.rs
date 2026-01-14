@@ -60,7 +60,7 @@ impl FieldType {
                     let mut cursor = ptr;
                     for _ in 0..*len {
                         inner.ui(cursor, ui);
-                        cursor = cursor.offset(stride);
+                        cursor = cursor.byte_offset(stride);
                     }
                     ui.response()
                 }

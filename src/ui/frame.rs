@@ -20,6 +20,7 @@ impl UiHandle {
             b.resizable = Some(false);
             b.inner_size = Some((700.0, 960.0).into());
             b.active = Some(false);
+            b.position = Some((10.0, 10.0).into());
             b
         }));
 

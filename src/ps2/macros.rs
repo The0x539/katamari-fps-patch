@@ -97,5 +97,23 @@ macro_rules! exports {
                 }
             )*
         }
+
+        pub mod raw {
+            use super::*;
+
+            $(
+                #[inline]
+                pub fn $var() -> *mut $var_ty {
+                    unsafe { DLL.$var }
+                }
+            )*
+
+            $(
+                #[inline]
+                pub fn $arr() -> *mut [$arr_ty; $len] {
+                    unsafe { DLL.$arr }
+                }
+            )*
+        }
     }
 }

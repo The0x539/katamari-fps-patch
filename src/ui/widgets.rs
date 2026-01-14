@@ -21,9 +21,8 @@ impl Field {
             ui.label(self.label());
 
             unsafe {
-                let ptr = data.cast::<()>().byte_offset(self.offset as isize);
-                // ui.label(format!("{:#x}: {:?}", self.offset, ptr));
-                self.field_type.ui(ptr, ui);
+                let field = data.cast::<()>().byte_offset(self.offset as isize);
+                self.field_type.ui(data, field, ui);
             }
         })
         .response
@@ -31,7 +30,7 @@ impl Field {
 }
 
 impl FieldType {
-    pub unsafe fn ui(&self, ptr: *mut (), ui: &mut Ui) -> egui::Response {
+    pub unsafe fn ui<T>(&self, parent: *mut T, field: *mut (), ui: &mut Ui) -> egui::Response {
         unsafe fn drag_value<'a, T: egui::emath::Numeric>(ptr: *mut ()) -> DragValue<'a> {
             unsafe {
                 let val: &mut T = &mut *ptr.cast::<T>();
@@ -41,31 +40,79 @@ impl FieldType {
 
         unsafe {
             match self {
-                FieldType::Float => drag_value::<f32>(ptr).ui(ui),
-                FieldType::Vec4 => (&mut *ptr.cast::<Vec4>()).ui(ui),
+                FieldType::Float => drag_value::<f32>(field).ui(ui),
+                FieldType::Vec4 => (&mut *field.cast::<Vec4>()).ui(ui),
                 FieldType::Mat4 => todo!(),
-                FieldType::Bool => Checkbox::without_text(&mut *ptr.cast::<bool>()).ui(ui),
-                FieldType::Int8 { signed: false } => drag_value::<u8>(ptr).ui(ui),
-                FieldType::Int8 { signed: true } => drag_value::<i8>(ptr).ui(ui),
-                FieldType::Int16 { signed: false } => drag_value::<u16>(ptr).ui(ui),
-                FieldType::Int16 { signed: true } => drag_value::<i16>(ptr).ui(ui),
-                FieldType::Int32 { signed: false } => drag_value::<u32>(ptr).ui(ui),
-                FieldType::Int32 { signed: true } => drag_value::<i32>(ptr).ui(ui),
-                FieldType::Int64 { signed: false } => drag_value::<u64>(ptr).ui(ui),
-                FieldType::Int64 { signed: true } => drag_value::<i64>(ptr).ui(ui),
-                // TODO: Find addresses within known arrays
-                FieldType::Address => ui.label(format!("{:?}", *ptr.cast::<*mut ()>())),
+                FieldType::Bool => Checkbox::without_text(&mut *field.cast::<bool>()).ui(ui),
+                FieldType::Int8 { signed: false } => drag_value::<u8>(field).ui(ui),
+                FieldType::Int8 { signed: true } => drag_value::<i8>(field).ui(ui),
+                FieldType::Int16 { signed: false } => drag_value::<u16>(field).ui(ui),
+                FieldType::Int16 { signed: true } => drag_value::<i16>(field).ui(ui),
+                FieldType::Int32 { signed: false } => drag_value::<u32>(field).ui(ui),
+                FieldType::Int32 { signed: true } => drag_value::<i32>(field).ui(ui),
+                FieldType::Int64 { signed: false } => drag_value::<u64>(field).ui(ui),
+                FieldType::Int64 { signed: true } => drag_value::<i64>(field).ui(ui),
+                FieldType::Address => ui.label(identify_addr(parent, *field.cast::<*mut ()>())),
                 FieldType::Array(inner, len) => {
                     let stride = inner.size() as isize;
-                    let mut cursor = ptr;
+                    let mut elem = field;
                     for _ in 0..*len {
-                        inner.ui(cursor, ui);
-                        cursor = cursor.byte_offset(stride);
+                        inner.ui(parent, elem, ui);
+                        elem = elem.byte_offset(stride);
                     }
                     ui.response()
                 }
             }
         }
+    }
+}
+
+fn identify_addr<T>(parent: *mut T, ptr: *mut ()) -> String {
+    if ptr.is_null() {
+        return "NULL".into();
+    }
+
+    if let Some(n) = ptr.addr().checked_sub(parent.addr())
+        && n < std::mem::size_of::<T>()
+    {
+        return format!("self + {n:#x}");
+    }
+
+    let arrays: &[(&dyn AmITheParent, &str)] = &[
+        (&ps2::raw::katamari_array(), "KATAMARI"),
+        (&ps2::raw::prop_array(), "THINGS"),
+        (&ps2::raw::prop_data_array(), "THING_DATA"),
+    ];
+
+    for (array, name) in arrays {
+        if let Some((index, offset)) = array.check_for_child(ptr.cast()) {
+            return format!("{name}[{index}] + {offset:#x}");
+        }
+    }
+
+    if let Some(offset) = ptr.addr().checked_sub(ps2::raw::base_addr().addr()) {
+        return format!("DLL + {offset:#X}");
+    }
+
+    return format!("{ptr:?}");
+}
+
+trait AmITheParent {
+    fn check_for_child(&self, ptr: *mut ()) -> Option<(usize, usize)>;
+}
+
+impl<T, const N: usize> AmITheParent for *mut [T; N] {
+    fn check_for_child(&self, ptr: *mut ()) -> Option<(usize, usize)> {
+        let ptr = ptr.addr();
+        let base = (*self).addr();
+
+        let offset = ptr.checked_sub(base)?;
+
+        if offset >= std::mem::size_of::<[T; N]>() {
+            return None;
+        }
+        let elem_size = std::mem::size_of::<T>();
+        Some((offset / elem_size, offset % elem_size))
     }
 }
 
@@ -145,10 +192,11 @@ unsafe impl Research for Prop {
 
     fn extra_before(&mut self, ui: &mut Ui) {
         unsafe {
-            let idx = self.mono_name_idx;
-            let data = &*ps2::prop_data_array(idx as usize);
+            let idx = self.mono_ctrl_idx;
+            let name_idx = self.mono_name_idx;
+            let data = &*ps2::prop_data_array(name_idx as usize);
             let name = std::ffi::CStr::from_ptr(data.name).to_str().unwrap();
-            ui.label(format!("{idx}: {name}"));
+            ui.label(format!("[{idx}]: {name} ({name_idx})"));
         }
     }
 }

@@ -145,6 +145,9 @@ exports! {
     #[func @ 0xb7d0]
     fn camera_animate();
 
+    #[var @ 0]
+    static base_addr: ();
+
     #[var @ 0x07b218]
     static val_x7b218: f32;
 

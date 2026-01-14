@@ -21,6 +21,8 @@ eframe.version = "0.33.3"
 eframe.optional = true
 winit.version = "0.30.12"
 winit.optional = true
+winnow.version = "0.7.14"
+winnow.optional = true
 
 windows.version = "0.62.2"
 windows.features = [
@@ -31,4 +33,4 @@ windows.features = [
 
 [features]
 default = ["ui"]
-ui = ["dep:eframe", "dep:winit"]
+ui = ["dep:eframe", "dep:winit", "dep:winnow"]

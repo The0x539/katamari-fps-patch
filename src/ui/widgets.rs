@@ -3,7 +3,7 @@ use egui::{Checkbox, DragValue, Ui, Widget, WidgetText};
 
 use crate::{
     ps2,
-    types::{Katamari, MotionVectors, Prop, Vec4},
+    types::{Katamari, MotionVectors, Prince, Prop, Vec4},
     ui::definition_file::{DefinitionFile, Field, FieldType},
 };
 
@@ -182,6 +182,12 @@ unsafe impl Research for Katamari {
             self.motion.ui(ui);
             self.prev_motion.ui(ui);
         });
+    }
+}
+
+unsafe impl Research for Prince {
+    fn get_section(defs: &DefinitionFile) -> &[Field] {
+        &defs.prince
     }
 }
 

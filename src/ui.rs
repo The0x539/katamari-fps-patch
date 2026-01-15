@@ -35,6 +35,12 @@ impl MyApp {
         };
 
         unsafe {
+            ui.label("Prince");
+            let prince = ps2::current_prince();
+            prince.with(definitions).ui(ui);
+        }
+
+        unsafe {
             ui.label("Katamari");
             let katamari = ps2::current_katamari();
             katamari.with(definitions).ui(ui);

@@ -4,6 +4,7 @@ use std::f32::consts::{PI, TAU};
 use crate::ps2;
 use crate::types::*;
 
+pub mod abilities;
 pub mod cacophony;
 pub mod camera;
 pub mod dash;

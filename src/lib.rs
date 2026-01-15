@@ -92,7 +92,16 @@ fn install_hooks_impl() -> eyre::Result<()> {
             ) => {
                 hook::patch(dll.$func, $range, replacements::$($replacement)::*)?;
                 patches!($($tt)*);
-            }
+            };
+
+            // EXTREMELY sketchy, but handy for e.g. changing a Jcc into another Jcc
+            (
+                $func:ident[$offset:literal..] => $replacement:expr;
+                $($tt:tt)*
+            ) => {
+                hook::raw_patch(dll.$func, $offset, &$replacement)?;
+                patches!($($tt)*);
+            };
         }
 
         patches! {
@@ -162,6 +171,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_bear_cow_orbit[0xd7..0xe7] => camera::orbit_a;
             camera_versus_winner_orbit[0x55..0x67] => camera::orbit_b;
             camera_animate[0x2b4..0x2c4] => camera::zoom_out;
+
+            tick_player[0x113..0x121] => abilities::flip_duration;
+            prince_flip[0x62..0x73] => abilities::flip_timer;
+            prince_flip[0x303..] => [0x7F]; // JNZ -> JG
+            // TODO: go back and figure out if any other branch fixes would be simplified by the "raw" patch
         }
 
         hook::postfix(

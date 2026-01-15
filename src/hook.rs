@@ -48,6 +48,22 @@ pub unsafe fn patch<R>(
     Ok(())
 }
 
+pub unsafe fn raw_patch(
+    target: impl Target,
+    offset: usize,
+    replacement: &[u8],
+) -> eyre::Result<()> {
+    let target = target.into_target();
+    unsafe {
+        let dst = std::ptr::slice_from_raw_parts_mut(target.add(offset), replacement.len());
+        mprotect(dst, w::PAGE_READWRITE, || {
+            (*dst).copy_from_slice(replacement);
+        })?;
+    }
+
+    Ok(())
+}
+
 pub unsafe fn skip(target: impl Target) -> eyre::Result<()> {
     let target = target.into_target();
     unsafe {

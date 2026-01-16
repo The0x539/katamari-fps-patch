@@ -28,3 +28,26 @@ pub unsafe extern "C" fn flip_timer() {
         w = sym W,
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn katamari_view_ascend() {
+    naked_asm! {
+        "mov eax, ebx",
+        "add eax, [rip + {dt}]",
+        "movaps xmm6, xmm0",
+        "mov [rsi + 0x884], eax",
+        "ret",
+        dt = sym values::DT_MILLIS,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn katamari_view_descend() {
+    naked_asm! {
+        "mov edi, [rsi + 0x884]",
+        "mov ebx, [rsi + 0x888]",
+        "add edi, [rip + {dt}]",
+        "ret",
+        dt = sym values::DT_MILLIS,
+    }
+}

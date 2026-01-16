@@ -58,9 +58,6 @@ exports! {
     #[func @ 0x23b70]
     fn gravity_user_3(k: *mut Katamari);
 
-    #[func @ 0xad40]
-    fn set_player_animation_mode(p_idx: i32, mode: u8);
-
     #[func @ 0x22130]
     fn speed_thing_2(k: *mut Katamari, k_: *mut Katamari);
 
@@ -144,6 +141,12 @@ exports! {
 
     #[func @ 0xb7d0]
     fn camera_animate();
+
+    #[func @ 0xbe60]
+    fn camera_update_katamari_view(p_idx: u64, cam: *mut Camera, k: *mut Katamari);
+
+    #[func @ 0xad40]
+    fn camera_set_view_mode(p_idx: i32, mode: u8);
 
     #[var @ 0]
     static base_addr: ();
@@ -263,4 +266,9 @@ pub unsafe fn current_katamari<'a>() -> &'a mut Katamari {
 // See above.
 pub unsafe fn current_prince<'a>() -> &'a mut Prince {
     unsafe { &mut *prince_array(current_player_index()) }
+}
+
+// See above.
+pub unsafe fn current_camera<'a>() -> &'a mut Camera {
+    unsafe { &mut *camera_array(current_player_index()) }
 }

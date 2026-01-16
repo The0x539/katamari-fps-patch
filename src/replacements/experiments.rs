@@ -193,7 +193,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                     if (*k).xc2 {
                         (*k).xc2 = false;
                         (*k).x3ac8 = 0.0;
-                        ps2::set_player_animation_mode(p_idx as i32, 6);
+                        ps2::camera_set_view_mode(p_idx as i32, 6);
                         let prince = &mut *ps2::prince_array(p_idx);
                         prince.ouji_state.x19 = 0;
                         prince.ouji_state.dash_pending = false;

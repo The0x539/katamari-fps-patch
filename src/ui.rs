@@ -41,6 +41,12 @@ impl MyApp {
         }
 
         unsafe {
+            ui.label("Camera");
+            let camera = ps2::current_camera();
+            camera.with(definitions).ui(ui);
+        }
+
+        unsafe {
             ui.label("Katamari");
             let katamari = ps2::current_katamari();
             katamari.with(definitions).ui(ui);

@@ -176,6 +176,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             prince_flip[0x62..0x73] => abilities::flip_timer;
             prince_flip[0x303..] => [0x7F]; // JNZ -> JG
             // TODO: go back and figure out if any other branch fixes would be simplified by the "raw" patch
+
+            camera_update_katamari_view[0x489..0x495] => abilities::katamari_view_ascend;
+            camera_update_katamari_view[0xe7..0xf5] => abilities::katamari_view_descend;
+            camera_set_view_mode[0x286..] => 666_i32.to_ne_bytes(); // mov eax, 20 -> mov eax, 666 (frames -> ms)
         }
 
         hook::postfix(

@@ -18,6 +18,7 @@ pub struct DefinitionFile {
     pub prince: Vec<Field>,
     pub thing: Vec<Field>,
     pub camera: Vec<Field>,
+    pub global: Vec<Field>,
 }
 
 impl DefinitionFile {
@@ -164,6 +165,7 @@ parsers! {
                 "prince" => &mut doc.prince,
                 "thing" => &mut doc.thing,
                 "camera" => &mut doc.camera,
+                "global" => &mut doc.global,
                 _ => return None,
             };
             target.extend(lines);

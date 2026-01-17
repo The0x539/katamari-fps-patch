@@ -55,6 +55,14 @@ impl MyApp {
             .inner_margin(4);
 
         frame.show(ui, |ui| unsafe {
+            ui.label("Global");
+            let base_addr = ps2::raw::base_addr();
+            for field in &definitions.global {
+                field.ui(base_addr, ui);
+            }
+        });
+
+        frame.show(ui, |ui| unsafe {
             ui.label("Prince");
             let prince = ps2::current_prince();
             prince.with(definitions).ui(ui);
@@ -72,11 +80,11 @@ impl MyApp {
             katamari.with(definitions).ui(ui);
         });
 
+        let idx = unsafe { MONO_CTRL_IDX };
+        if idx >= 4000 {
+            return;
+        }
         frame.show(ui, |ui| unsafe {
-            let idx = MONO_CTRL_IDX;
-            if idx >= 4000 {
-                return;
-            }
             let thing = &mut *ps2::prop_array(idx as usize);
             if thing.mono_name_idx >= 1718 {
                 return;

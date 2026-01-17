@@ -1,8 +1,9 @@
 use std::fs::File;
 use std::time::SystemTime;
 
-use eframe::egui::{self, ViewportBuilder};
+use eframe::egui;
 use eframe::{App, EframeWinitApplication, NativeOptions, UserEvent};
+use egui::{TextStyle, ViewportBuilder};
 use winit::event_loop::EventLoop;
 use winit::platform::windows::EventLoopBuilderExtWindows;
 
@@ -44,8 +45,13 @@ impl eframe::App for MyApp {
 
 impl MyApp {
     fn new_app(
-        _ctx: &eframe::CreationContext<'_>,
+        ctx: &eframe::CreationContext<'_>,
     ) -> Result<Box<dyn App>, Box<dyn std::error::Error + Send + Sync>> {
+        ctx.egui_ctx.all_styles_mut(|style| {
+            style.override_text_style = Some(TextStyle::Monospace);
+            style.drag_value_text_style = TextStyle::Monospace;
+        });
+
         let file = File::open("./fields.ini")?;
         let definitions = super::DefinitionFile::load(&file);
         let last_updated = SystemTime::now();

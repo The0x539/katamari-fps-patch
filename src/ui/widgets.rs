@@ -14,8 +14,10 @@ impl Field {
             .unwrap_or_else(|| format!("{:#x}", self.offset))
     }
 
-    pub fn ui<T>(&self, data: *mut T, ui: &mut Ui) -> egui::Response {
-        assert!(self.offset < std::mem::size_of::<T>());
+    pub unsafe fn ui<T: 'static>(&self, data: *mut T, ui: &mut Ui) -> egui::Response {
+        if std::any::TypeId::of::<T>() != std::any::TypeId::of::<()>() {
+            assert!(self.offset < std::mem::size_of::<T>());
+        }
 
         ui.horizontal(|ui| {
             ui.label(self.label());
@@ -150,7 +152,7 @@ impl Widget for &mut Vec4 {
             DragValue::new(&mut self.x).label_ui(ui, "x");
             DragValue::new(&mut self.y).label_ui(ui, "y");
             DragValue::new(&mut self.z).label_ui(ui, "z");
-            DragValue::new(&mut self.z).label_ui(ui, "w");
+            DragValue::new(&mut self.w).label_ui(ui, "w");
         })
         .response
     }
@@ -167,14 +169,16 @@ impl Widget for &mut MotionVectors {
     }
 }
 
-pub unsafe trait Research: Sized {
+pub unsafe trait Research: Sized + 'static {
     fn get_section(defs: &DefinitionFile) -> &[Field];
 
-    fn fields(&mut self, ui: &mut Ui, defs: &DefinitionFile) -> egui::Response {
+    unsafe fn fields(&mut self, ui: &mut Ui, defs: &DefinitionFile) -> egui::Response {
         self.extra_before(ui);
         // ui.label(format!("{:#?}", &raw mut *self));
         for field in Self::get_section(defs) {
-            field.ui::<Self>(&raw mut *self, ui);
+            unsafe {
+                field.ui::<Self>(&raw mut *self, ui);
+            }
         }
         self.extra_after(ui);
         ui.response()
@@ -226,6 +230,6 @@ pub struct WithDefinitions<'a, T>(T, &'a DefinitionFile);
 
 impl<T: Research> Widget for WithDefinitions<'_, &mut T> {
     fn ui(self, ui: &mut Ui) -> egui::Response {
-        self.0.fields(ui, &self.1)
+        unsafe { self.0.fields(ui, &self.1) }
     }
 }

@@ -113,32 +113,23 @@ pub unsafe extern "C" fn bumpy_ride() {
 }
 
 #[unsafe(naked)]
-pub unsafe extern "C" fn normal_motion_branch_first_part() {
+pub unsafe extern "C" fn rolling_position() {
     naked_asm! {
-        "mulss xmm6, dword ptr [rip+{dt}]",
-        "mulss xmm7, dword ptr [rip+{dt}]",
-        "mulss xmm8, dword ptr [rip+{dt}]",
+        // xmm6-8 contain the x/y/z of the "vel" variable,
+        // but reading it back from memory is a lot easier than shuffling those into one XMM register.
+        // Bonus: we can read the version that already includes gravity
+        // xmm0-4 are clobbered by the original code.
+        "movups xmm0, [rbx + 0x460]",      // xmm0 = k->position
+        "movups xmm1, [rbx + 0x2b0]",      // xmm1 = k->motion.h (effective velocity, including gravity)
+        "movss xmm2, [rbx + 0x46c]",       // xmm2 = k->position.w
 
-        // the original code
-        "movss xmm4, dword ptr [rbx+0x46C]",
-        "movaps xmm3, xmm6",
-        "addss xmm3, dword ptr [rbx+0x460]",
-        "movaps xmm0, xmm7",
-        "movaps xmm1, xmm8",
-        "addss xmm0, dword ptr [rbx+0x464]",
-        "addss xmm1, dword ptr [rbx+0x468]",
+        "vbroadcastss xmm3, [rip + {dt}]", // xmm3 = splat(dt)
+        "vfmadd231ps xmm0, xmm1, xmm3",    // xmm0 += xmm1 * xmm3
+
+        "movups [rbx + 0x460], xmm0",      // k->position = xmm0
+        "movss [rbx + 0x46c], xmm2",       // k->position.w = xmm2
         "ret",
-
         dt = sym values::DT_TICKS,
-    }
-}
-
-pub unsafe extern "C" fn standing_on_prop_branch() {
-    unsafe {
-        let k: *mut Katamari;
-        asm!("mov rcx, rbx", out("rcx") k);
-        ps2::update_katamari_measurements(k);
-        ps2::katamari_pivot(k);
     }
 }
 
@@ -146,9 +137,9 @@ pub unsafe extern "C" fn prop_terrain_collision() {
     unsafe {
         asm! {
             // the original code, optimized:
-            // calculate the length of k->dual_a.f and store it in xmm0
+            // calculate the length of k->motion.effective and store it in xmm0
             // (to then be stored in k.guy_that_gets_divided)
-            "movaps xmm0, xmmword ptr [rdi+0x290]", // v = k->dual_a.f
+            "movaps xmm0, xmmword ptr [rdi+0x290]", // v = k->motion.effective
             "mulps xmm0, xmm1",  // v = v.xyz()
             "mulps xmm0, xmm0",  // v *= v
             "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now x*x+y*y, second element is z*z)
@@ -230,13 +221,8 @@ pub unsafe extern "C" fn gentle_steer() {
 #[unsafe(naked)]
 pub unsafe extern "C" fn spin_amount() {
     naked_asm! {
-        "movss dword ptr [rsp + 0x2c + 8], xmm9",
-        // this feels like a hack - angular speed should use the same measurement no matter which state you're in
-        "mov al, byte ptr [rdi + 0xa4]", // al = k->airborne
-        "cmp al, 0",
-        "je not_airborne",
-        "mulss xmm2, dword ptr [rip + {dt}]",
-        "not_airborne:",
+        "movss [rsp + 0x2c + 8], xmm9", // trampoline: finish storing the roll direction on the stack (what a waste)
+        "mulss xmm2, [rip + {dt}]",     // important part: delta-time the "theta" arg
         "jmp {}",
         sym ps2::rotation_from_axis_angle,
         dt = sym values::DT_TICKS,

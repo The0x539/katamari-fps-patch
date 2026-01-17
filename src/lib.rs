@@ -105,16 +105,15 @@ fn install_hooks_impl() -> eyre::Result<()> {
         }
 
         patches! {
-            katamari_physics_big_kahuna[0x41B..0x445] => normal_motion_branch_first_part;
+            // katamari_physics_big_kahuna[0x41B..0x445] => normal_motion_branch_first_part;
+            katamari_physics_big_kahuna[0x41b..0x4e8] => movement::rolling_position;
+            katamari_physics_roll[0x254..0x260] => movement::spin_amount;
+            //katamari_physics_prop_collision[0xA0..0xD1] => prop_terrain_collision;
+            // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
+            katamari_pivot[0x17a..0x187] => bumpy_ride;
 
             // This causes the giant watermelons to stop rotating their yaw for some reason.
             //copy_matrix => copy_matrix;
-
-            katamari_physics_big_kahuna[0x597..0x5a7] => standing_on_prop_branch;
-            //katamari_physics_prop_collision[0xA0..0xD1] => prop_terrain_collision;
-
-            // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
-            katamari_pivot[0x17a..0x187] => bumpy_ride;
 
             calculate_gravity[0x688..0x820] => uphill;
             calculate_gravity[0x607..0x683] => downhill;
@@ -165,8 +164,6 @@ fn install_hooks_impl() -> eyre::Result<()> {
             npc_40bb0[0x7a..0x8a] => melon_spin;
 
             npc_update_animal_position[0x9e..0xe5] => animal_walk;
-
-            x20660[0x254..0x260] => spin_amount;
 
             camera_bear_cow_orbit[0xd7..0xe7] => camera::orbit_a;
             camera_versus_winner_orbit[0x55..0x67] => camera::orbit_b;

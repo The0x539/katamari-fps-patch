@@ -180,3 +180,7 @@ pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut M
         dst
     }
 }
+
+pub const fn shuf(x: u8, y: u8, z: u8, w: u8) -> u8 {
+    x | (y << 2) | (z << 4) | (w << 6)
+}

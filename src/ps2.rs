@@ -50,7 +50,7 @@ exports! {
     fn katamari_pivot(k: *mut Katamari);
 
     #[func @ 0x20660]
-    fn x20660(k: *mut Katamari);
+    fn katamari_physics_roll(k: *mut Katamari);
 
     #[func @ 0x26b80]
     fn apply_deadzones(out: *mut Vec4, v: *const Vec4, threshold: f32);

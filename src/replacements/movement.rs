@@ -240,3 +240,16 @@ pub unsafe extern "C" fn turn_radius() {
         dt = sym values::DT_TICKS,
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn friction() {
+    naked_asm! {
+        // xmm12 is the first register to be overwritten after the patched code
+        "movss xmm12, [rip + {dt}]",
+        "vfmadd231ss xmm6, xmm12, [rbx + 0x300]",
+        "vfmadd231ss xmm7, xmm12, [rbx + 0x304]",
+        "vfmadd231ss xmm8, xmm12, [rbx + 0x308]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}

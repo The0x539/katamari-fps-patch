@@ -110,7 +110,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_roll[0x254..0x260] => movement::spin_amount;
             //katamari_physics_prop_collision[0xA0..0xD1] => prop_terrain_collision;
             // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
-            katamari_pivot[0x17a..0x187] => bumpy_ride;
+            katamari_pivot[0x17a..0x187] => movement::bumpy_ride;
+            katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
 
             // This causes the giant watermelons to stop rotating their yaw for some reason.
             //copy_matrix => copy_matrix;

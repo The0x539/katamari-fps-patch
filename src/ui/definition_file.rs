@@ -1,3 +1,5 @@
+use std::io::{Read, Seek};
+
 use winnow::Parser;
 use winnow::ascii::{
     dec_uint, escaped, hex_uint, line_ending, multispace0, space0, space1, till_line_ending,
@@ -8,6 +10,8 @@ use winnow::combinator::{
 use winnow::error::ParserError;
 use winnow::token::{any, none_of, one_of, take_till};
 
+use crate::types::{Mat4, MotionVectors, Vec4};
+
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct DefinitionFile {
     pub katamari: Vec<Field>,
@@ -17,8 +21,10 @@ pub struct DefinitionFile {
 }
 
 impl DefinitionFile {
-    pub fn load() -> Result<Self, String> {
-        let text = std::fs::read_to_string("./fields.ini").map_err(|e| e.to_string())?;
+    pub fn load(mut f: &std::fs::File) -> Result<Self, String> {
+        let mut text = String::new();
+        f.rewind().map_err(|e| e.to_string())?;
+        f.read_to_string(&mut text).map_err(|e| e.to_string())?;
         let this = document.parse(&text).map_err(|e| format!("{e:?}"))?;
         Ok(this)
     }
@@ -35,18 +41,21 @@ pub enum FieldType {
     Int32 { signed: bool },
     Int64 { signed: bool },
     Address,
+    MotionVectors,
     Array(Box<Self>, usize),
 }
 
 impl FieldType {
     pub fn size(&self) -> usize {
+        use std::mem::size_of;
         match self {
             Self::Int8 { .. } | Self::Bool => 1,
             Self::Int16 { .. } => 2,
             Self::Int32 { .. } | Self::Float => 4,
             Self::Int64 { .. } | Self::Address => 8,
-            Self::Vec4 => 0x10,
-            Self::Mat4 => 0x40,
+            Self::Vec4 => size_of::<Vec4>(), // 0x10 / 16
+            Self::Mat4 => size_of::<Mat4>(), // 0x40 / 64
+            Self::MotionVectors => size_of::<MotionVectors>(),
             Self::Array(inner, count) => inner.size() * count,
         }
     }
@@ -100,6 +109,9 @@ parsers! {
         'u' => integer_type(false),
         'a' => "ddr".value(FieldType::Address),
         'p' => "tr".value(FieldType::Address),
+        '@' => alt((
+            "motion_vectors".value(FieldType::MotionVectors),
+        )),
         '[' => seq!(FieldType::Array(
             field_type.map(Box::new),
             _: ';',

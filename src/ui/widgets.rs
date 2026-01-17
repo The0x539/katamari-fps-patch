@@ -3,7 +3,7 @@ use egui::{Checkbox, DragValue, Ui, Widget, WidgetText};
 
 use crate::{
     ps2,
-    types::{Camera, Katamari, MotionVectors, Prince, Prop, Vec4},
+    types::{Camera, Katamari, Mat4, MotionVectors, Prince, Prop, Vec4},
     ui::definition_file::{DefinitionFile, Field, FieldType},
 };
 
@@ -30,7 +30,7 @@ impl Field {
 }
 
 impl FieldType {
-    pub unsafe fn ui<T>(&self, parent: *mut T, field: *mut (), ui: &mut Ui) -> egui::Response {
+    pub unsafe fn ui<P>(&self, parent: *mut P, field: *mut (), ui: &mut Ui) -> egui::Response {
         unsafe fn drag_value<'a, T: egui::emath::Numeric>(ptr: *mut ()) -> DragValue<'a> {
             unsafe {
                 let val: &mut T = &mut *ptr.cast::<T>();
@@ -42,7 +42,6 @@ impl FieldType {
             match self {
                 FieldType::Float => drag_value::<f32>(field).ui(ui),
                 FieldType::Vec4 => (&mut *field.cast::<Vec4>()).ui(ui),
-                FieldType::Mat4 => todo!(),
                 FieldType::Bool => Checkbox::without_text(&mut *field.cast::<bool>()).ui(ui),
                 FieldType::Int8 { signed: false } => drag_value::<u8>(field).ui(ui),
                 FieldType::Int8 { signed: true } => drag_value::<i8>(field).ui(ui),
@@ -53,6 +52,23 @@ impl FieldType {
                 FieldType::Int64 { signed: false } => drag_value::<u64>(field).ui(ui),
                 FieldType::Int64 { signed: true } => drag_value::<i64>(field).ui(ui),
                 FieldType::Address => ui.label(identify_addr(parent, *field.cast::<*mut ()>())),
+                FieldType::Mat4 => {
+                    let m = &mut *field.cast::<Mat4>();
+                    let resp = egui::Grid::new("grib").show(ui, |ui| {
+                        for row in &mut m.rows {
+                            DragValue::new(&mut row.x).ui(ui);
+                            DragValue::new(&mut row.y).ui(ui);
+                            DragValue::new(&mut row.z).ui(ui);
+                            DragValue::new(&mut row.w).ui(ui);
+                            ui.end_row();
+                        }
+                    });
+                    resp.response
+                }
+                FieldType::MotionVectors => {
+                    let motion_vectors: &mut MotionVectors = &mut *field.cast();
+                    ui.vertical(|ui| motion_vectors.ui(ui)).response
+                }
                 FieldType::Array(inner, len) => {
                     let stride = inner.size() as isize;
                     let mut elem = field;
@@ -134,6 +150,7 @@ impl Widget for &mut Vec4 {
             DragValue::new(&mut self.x).label_ui(ui, "x");
             DragValue::new(&mut self.y).label_ui(ui, "y");
             DragValue::new(&mut self.z).label_ui(ui, "z");
+            DragValue::new(&mut self.z).label_ui(ui, "w");
         })
         .response
     }
@@ -174,14 +191,6 @@ pub unsafe trait Research: Sized {
 unsafe impl Research for Katamari {
     fn get_section(defs: &DefinitionFile) -> &[Field] {
         &defs.katamari
-    }
-
-    fn extra_after(&mut self, ui: &mut Ui) {
-        ui.label("motion vectors (main/previous)");
-        ui.horizontal(|ui| {
-            self.motion.ui(ui);
-            self.prev_motion.ui(ui);
-        });
     }
 }
 

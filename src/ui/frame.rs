@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::time::SystemTime;
+
 use eframe::egui::{self, ViewportBuilder};
 use eframe::{App, EframeWinitApplication, NativeOptions, UserEvent};
 use winit::event_loop::EventLoop;
@@ -40,7 +43,16 @@ impl eframe::App for MyApp {
 }
 
 impl MyApp {
-    fn new_app<E>(_ctx: &eframe::CreationContext<'_>) -> Result<Box<dyn App>, E> {
-        Ok(Box::new(Self::default()))
+    fn new_app(
+        _ctx: &eframe::CreationContext<'_>,
+    ) -> Result<Box<dyn App>, Box<dyn std::error::Error + Send + Sync>> {
+        let file = File::open("./fields.ini")?;
+        let definitions = super::DefinitionFile::load(&file);
+        let last_updated = SystemTime::now();
+        Ok(Box::new(MyApp {
+            file,
+            last_updated,
+            definitions,
+        }))
     }
 }

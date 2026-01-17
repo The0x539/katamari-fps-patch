@@ -67,6 +67,18 @@ pub(crate) mod values {
                 DT_MILLIS += 1;
                 DT_MICROS -= 1000;
             }
+
+            // This variable isn't actually semantically much of a vector.
+            // Its only usage takes the product of all four elements (each in the range 0 < v <= 1).
+            // This product is used as the "lerp smoothing" factor for moving the camera
+            // towards its "target" position and orientation.
+            //
+            // Fortunately, the game only updates this when loading an area,
+            // and even then it only touches the x/y/z elements, leaving w untouched at 1.0.
+            //
+            // I don't think it's mathematically correct to just introduce DT_TICKS as another factor,
+            // but the results are at least an improvement until I can work out the proper formula.
+            (*crate::ps2::raw::camera_smoothing()).w = DT_TICKS.clamp(0.01, 1.0);
         }
     }
 

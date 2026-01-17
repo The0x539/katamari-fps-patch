@@ -196,6 +196,9 @@ exports! {
     #[var @ 0x10e084]
     static gravity: Vec4;
 
+    #[var @ 0xb23e0]
+    static camera_smoothing: Vec4;
+
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];
 

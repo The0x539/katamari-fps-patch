@@ -76,9 +76,11 @@ pub(crate) mod values {
             // Fortunately, the game only updates this when loading an area,
             // and even then it only touches the x/y/z elements, leaving w untouched at 1.0.
             //
-            // I don't think it's mathematically correct to just introduce DT_TICKS as another factor,
-            // but the results are at least an improvement until I can work out the proper formula.
-            (*crate::ps2::raw::camera_smoothing()).w = DT_TICKS.clamp(0.01, 1.0);
+            // We can leave x/y/z untouched and put a value in w that results in an appropriate overall product.
+            let smoothing = &mut *crate::ps2::raw::camera_smoothing();
+            let vanilla_t = smoothing.x * smoothing.y * smoothing.z;
+            let desired_t = 1.0 - (1.0 - vanilla_t).powf(DT_TICKS);
+            smoothing.w = (desired_t / vanilla_t).clamp(0.01, 1.0);
         }
     }
 

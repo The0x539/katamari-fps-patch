@@ -1,5 +1,5 @@
 use std::arch::{asm, naked_asm};
-use std::f32::consts::{PI, TAU};
+use std::f32::consts::PI;
 
 use crate::ps2;
 use crate::types::*;
@@ -114,40 +114,6 @@ pub(crate) mod values {
     #[inline]
     pub(super) fn multiplayer() -> bool {
         unsafe { MULTIPLAYER != 0 }
-    }
-}
-
-// Shelved for now. Harder to do than I expected.
-pub unsafe extern "C" fn prince_flip() {
-    unsafe {
-        let prince: *mut Prince;
-        asm!("", out("rdi") prince);
-
-        let mut yaw = (*prince).actual_yaw;
-        if yaw.is_nan() {
-            yaw = 0.0;
-        }
-        // TODO: I'm not sure this is actually ever used properly,
-        // but it might have something to do with the joysticks
-        let foo = (*prince).prince_flip_rate_guy;
-        if foo != 0.0 {
-            println!("{foo}");
-        }
-        yaw += foo * values::DT_TICKS;
-        if yaw > PI {
-            yaw -= TAU;
-        }
-        if yaw < -PI {
-            yaw += TAU;
-        }
-        (*prince).actual_yaw = yaw;
-
-        // this seems to be the only part of register state
-        // that the function touches in the replaced block and also uses later
-        asm! {
-            "xor rbx, rbx",
-            "mov rcx, rbx",
-        }
     }
 }
 

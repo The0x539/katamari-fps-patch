@@ -105,14 +105,21 @@ fn install_hooks_impl() -> eyre::Result<()> {
         }
 
         patches! {
-            // katamari_physics_big_kahuna[0x41B..0x445] => normal_motion_branch_first_part;
             katamari_physics_big_kahuna[0x41b..0x4e8] => movement::rolling_position;
+            katamari_physics_big_kahuna[0x3ac..0x40e] => movement::climbing_position;
+            katamari_physics_climb[0x271..0x2d7] => movement::climbing_ascent;
+
             katamari_physics_roll[0x254..0x260] => movement::spin_amount;
             //katamari_physics_prop_collision[0xA0..0xD1] => prop_terrain_collision;
             // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
             katamari_pivot[0x17a..0x187] => movement::bumpy_ride;
             katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
             speed_thing_2[0xe12..0xe2d] => movement::push_force;
+
+            katamari_physics_climb[0xb9..0xd2] => movement::climb_ascent_timer;
+            katamari_physics_climb[0xd2..] => [0x0F, 0x8E]; // JNE -> JNG
+            katamari_physics_climb[0x15..0x26] => movement::climb_sustain_timer;
+            katamari_physics_climb[0x7F..0x90] => movement::climb_sustain_timer;
 
             // This causes the giant watermelons to stop rotating their yaw for some reason.
             //copy_matrix => copy_matrix;
@@ -179,6 +186,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_update_katamari_view[0x489..0x495] => abilities::katamari_view_ascend;
             camera_update_katamari_view[0xe7..0xf5] => abilities::katamari_view_descend;
             camera_set_view_mode[0x286..] => 666_i32.to_ne_bytes(); // mov eax, 20 -> mov eax, 666 (frames -> ms)
+        }
+
+        {
+            let n = &mut *ps2::raw::climb_sustain_limit();
+            *n = (*n * 1000) / 30;
         }
 
         hook::postfix(

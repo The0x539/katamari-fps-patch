@@ -115,12 +115,30 @@ pub unsafe extern "C" fn bumpy_ride() {
 #[unsafe(naked)]
 pub unsafe extern "C" fn rolling_position() {
     naked_asm! {
+        "movups xmm1, [rbx + 0x2b0]", // xmm1 = k->motion.h (effective velocity, including gravity)
+        "jmp {}",
+        sym increment_position,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn climbing_position() {
+    naked_asm! {
+        "movups xmm1, [rbx + 0x290]", // xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
+        "jmp {}",
+        sym increment_position,
+        // TODO: Something's broken about spinning and I don't know where it's going wrong.
+    }
+}
+
+#[unsafe(naked)]
+unsafe extern "C" fn increment_position() {
+    naked_asm! {
         // xmm6-8 contain the x/y/z of the "vel" variable,
         // but reading it back from memory is a lot easier than shuffling those into one XMM register.
         // Bonus: we can read the version that already includes gravity
         // xmm0-4 are clobbered by the original code.
         "movups xmm0, [rbx + 0x460]",      // xmm0 = k->position
-        "movups xmm1, [rbx + 0x2b0]",      // xmm1 = k->motion.h (effective velocity, including gravity)
         "movss xmm2, [rbx + 0x46c]",       // xmm2 = k->position.w
 
         "vbroadcastss xmm3, [rip + {dt}]", // xmm3 = splat(dt)
@@ -262,6 +280,44 @@ pub unsafe extern "C" fn push_force() {
         "vfmadd213ss xmm10, xmm1, [r12 + 0x4]",
         "vfmadd213ss xmm9,  xmm1, [r12 + 0x8]",
         "vfmadd213ss xmm15, xmm1, [r12 + 0xc]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn climb_ascent_timer() {
+    naked_asm! {
+        "mov [rsp + 0xc0 + 8], rsi",
+        "mov si, [rip + {dt}]",
+        "add [rdx + 0x784], si",
+        "xor esi, esi",
+        "cmp word ptr [rdx + 0x784], 1000", // 1 second
+        "ret",
+        dt = sym values::DT_MILLIS,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn climb_sustain_timer() {
+    naked_asm! {
+        "movzx eax, word ptr [rdx + 0x786]",
+        "add ax, [rip + {dt}]",
+        "mov [rdx + 0x786], ax",
+        "ret",
+        dt = sym values::DT_MILLIS,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn climbing_ascent() {
+    // the original code is insanely complex to just subtract climb_amount from position.y
+    // we start with climb_amount stored in xmm5
+    naked_asm! {
+        "mov rsi, [rsp + 0xC0 + 8]", // annoying thing that was in the middle of the replaced code
+        "movss xmm3, [rbx + 0x464]",             // xmm3 = k->position.y
+        "vfnmadd231ss xmm3, xmm5, [rip + {dt}]", // xmm3 -= xmm5 * dt
+        "movss [rbx + 0x464], xmm3",
         "ret",
         dt = sym values::DT_TICKS,
     }

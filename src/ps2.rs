@@ -32,7 +32,7 @@ exports! {
     fn x25fb0(v: *const Vec4);
 
     #[func @ 0x21e50]
-    fn climb_guy(_v: *const Vec4, k: *mut Katamari);
+    fn katamari_physics_climb(_v: *const Vec4, k: *mut Katamari);
 
     #[func @ 0x12ca0]
     fn terminate_climb(k: *mut Katamari);
@@ -198,6 +198,9 @@ exports! {
 
     #[var @ 0xb23e0]
     static camera_smoothing: Vec4;
+
+    #[var @ 0x10eb18]
+    static climb_sustain_limit: u32;
 
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];

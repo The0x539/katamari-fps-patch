@@ -146,7 +146,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
                         (*k).position += vel.xyz0();
                     }
                     let foo = Vec4::ZERO;
-                    ps2::climb_guy(&foo, k);
+                    ps2::katamari_physics_climb(&foo, k);
                 }
             }
 

@@ -3,7 +3,7 @@ use egui::{Checkbox, DragValue, Ui, Widget, WidgetText};
 
 use crate::{
     ps2,
-    types::{Camera, Katamari, Mat4, MotionVectors, Prince, Prop, Vec4},
+    types::{Camera, Katamari, Mat4, MotionVectors, Prince, Thing, Vec4},
     ui::definition_file::{DefinitionFile, Field, FieldType},
 };
 
@@ -210,7 +210,7 @@ unsafe impl Research for Camera {
     }
 }
 
-unsafe impl Research for Prop {
+unsafe impl Research for Thing {
     fn get_section(defs: &DefinitionFile) -> &[Field] {
         &defs.thing
     }

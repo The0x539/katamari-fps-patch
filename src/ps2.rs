@@ -2,7 +2,7 @@ use std::sync::Once;
 
 use windows::Win32::Foundation::HMODULE;
 
-use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, Prop, PropConstants, Vec4};
+use crate::types::{Camera, CameraTransform, Katamari, Mat4, Prince, PropConstants, Thing, Vec4};
 
 #[macro_use]
 mod macros;
@@ -125,10 +125,10 @@ exports! {
     fn x20b00(k: *mut Katamari);
 
     #[func @ 0x40bb0]
-    fn npc_40bb0(p: *mut Prop);
+    fn npc_40bb0(p: *mut Thing);
 
     #[func @ 0x31a30]
-    fn npc_update_animal_position(p: *mut Prop, _idk: *mut (), _idk_: bool);
+    fn npc_update_animal_position(p: *mut Thing, _idk: *mut (), _idk_: bool);
 
     #[func @ 0x5a970]
     fn rotation_from_axis_angle(out: *mut Mat4, axis: *const Vec4, angle: f32);
@@ -221,7 +221,7 @@ exports! {
     static camera_transform_array: [CameraTransform; 2];
 
     #[array @ 0x19b010]
-    static prop_array: [Prop; 4000];
+    static prop_array: [Thing; 4000];
 
     #[array @ 0x8a880]
     static prop_data_array: [PropConstants; 1718];

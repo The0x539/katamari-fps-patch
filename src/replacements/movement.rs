@@ -127,7 +127,6 @@ pub unsafe extern "C" fn climbing_position() {
         "movups xmm1, [rbx + 0x290]", // xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
         "jmp {}",
         sym increment_position,
-        // TODO: Something's broken about spinning and I don't know where it's going wrong.
     }
 }
 
@@ -314,7 +313,9 @@ pub unsafe extern "C" fn climbing_ascent() {
     // the original code is insanely complex to just subtract climb_amount from position.y
     // we start with climb_amount stored in xmm5
     naked_asm! {
-        "mov rsi, [rsp + 0xC0 + 8]", // annoying thing that was in the middle of the replaced code
+        "mov rsi, [rsp + 0xC0 + 8]",     // annoying thing that was in the middle of the replaced code
+        "movaps xmm6, [rsp + 0xA0 + 8]", // likewise, and this one took way too long to find
+
         "movss xmm3, [rbx + 0x464]",             // xmm3 = k->position.y
         "vfnmadd231ss xmm3, xmm5, [rip + {dt}]", // xmm3 -= xmm5 * dt
         "movss [rbx + 0x464], xmm3",

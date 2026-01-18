@@ -107,7 +107,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
         patches! {
             katamari_physics_big_kahuna[0x41b..0x4e8] => movement::rolling_position;
             katamari_physics_big_kahuna[0x3ac..0x40e] => movement::climbing_position;
-            katamari_physics_climb[0x271..0x2d7] => movement::climbing_ascent;
+            katamari_physics_climb[0x259..0x2d7] => movement::climbing_ascent;
 
             katamari_physics_roll[0x254..0x260] => movement::spin_amount;
             //katamari_physics_prop_collision[0xA0..0xD1] => prop_terrain_collision;

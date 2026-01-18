@@ -5,30 +5,29 @@ pub unsafe extern "C" fn airborne_gravity() {
     naked_asm! {
         // xmm5 is currently initialized to the katamari's f32@0x1a0 field,
         // which seems to be the gravitational acceleration value.
-        "mulss xmm5, [rip + {dt}]",            // delta-time it
-        "addss xmm5, dword ptr [rbx + 0x2e4]", // do the original thing: add to the previous velocity
-        "movss xmm1, dword ptr [rbx + 0x2e8]", // trampoline to have enough room to fit the hook
+        "movss xmm1, [rip + {dt}]",
+        "vfmadd213ss xmm5, xmm1, [rbx + 0x2e4]",
+        "movss xmm1, [rbx + 0x2e8]", // trampoline to have enough room to fit the hook
         "ret",
         dt = sym values::DT_TICKS,
     }
 }
 
-pub unsafe extern "C" fn uphill() {
-    let downhill_v: Vec4;
-    let k: &mut Katamari;
-    let p: &mut Prince;
+#[inline]
+fn pre_slope<'a>() -> (Vec4, &'a mut Katamari, &'a mut Prince) {
     unsafe {
         let (x, y, z);
-        asm! {
-            "",
-            out("xmm13") x,
-            out("xmm14") y,
-            out("xmm15") z,
-        }
-        downhill_v = Vec4::new(x, y, z, 0.0);
-        k = ps2::current_katamari();
-        p = ps2::current_prince();
+        asm!("", out("xmm13") x, out("xmm14") y, out("xmm15") z);
+        (
+            Vec4::new(x, y, z, 0.0),
+            ps2::current_katamari(),
+            ps2::current_prince(),
+        )
     }
+}
+
+pub unsafe extern "C" fn uphill() {
+    let (downhill_v, k, p) = pre_slope();
 
     k.time_spent_going_downhill = 0;
     // This is probably one of the most likely things to overflow.
@@ -72,19 +71,7 @@ pub unsafe extern "C" fn uphill() {
 }
 
 pub unsafe extern "C" fn downhill() {
-    let downhill_v: Vec4;
-    let k: &mut Katamari;
-    unsafe {
-        let (x, y, z);
-        asm! {
-            "",
-            out("xmm13") x,
-            out("xmm14") y,
-            out("xmm15") z,
-        }
-        downhill_v = Vec4::new(x, y, z, 0.0);
-        k = ps2::current_katamari();
-    }
+    let (downhill_v, k, _) = pre_slope();
 
     k.time_spent_going_uphill = 0;
     k.time_spent_going_downhill = k
@@ -174,18 +161,11 @@ pub unsafe extern "C" fn prop_terrain_collision() {
 // Turning in place with both sticks in opposite directions.
 pub unsafe extern "C" fn fast_steer() {
     unsafe {
-        let prince: *mut Prince;
-        let direction: f32;
-        asm!("", out("rcx") prince, out("xmm1") direction);
-
         asm! {
-            "movss dword ptr [rcx+0x78], xmm1",
-            "mulss xmm1, dword ptr [rip+{dt}]",
+            "movss [rcx + 0x78], xmm1",
+            "mulss xmm1, [rip + {dt}]",
             "mulss xmm1, {gkr}",
-            "addss xmm1, dword ptr [rcx+0x6c]",
-
-            in("xmm1") direction,
-            in("rcx") prince,
+            "addss xmm1, [rcx + 0x6c]",
             dt = sym values::DT_TICKS,
             gkr = in(xmm_reg) ps2::g_katamari_rot(),
         }
@@ -205,10 +185,10 @@ pub unsafe extern "C" fn slow_steer() {
         };
 
         asm! {
-            "movss dword ptr [{prince}+0x78], xmm1",
+            "movss [{prince} + 0x78], xmm1",
             "mulss xmm1, xmm0",
-            "mulss xmm1, dword ptr [rip+{dt}]",
-            "addss xmm1, dword ptr [{prince}+0x6c]",
+            "mulss xmm1, [rip + {dt}]",
+            "addss xmm1, [rbx + 0x6c]",
             "pop rbx",
 
             in("xmm0") ps2::g_katamari_rot(),
@@ -226,8 +206,8 @@ pub unsafe extern "C" fn gentle_steer() {
         asm!("mov {}, rbx", out(reg) prince);
 
         asm! {
-            "mulss xmm1, dword ptr [rip+{dt}]",
-            "mulss xmm1, dword ptr [{prince}+0x78]",
+            "mulss xmm1, [rip + {dt}]",
+            "mulss xmm1, [{prince} + 0x78]",
             in("xmm1") ps2::g_katamari_rot(),
             dt = sym values::DT_TICKS,
             prince = in(reg) prince,
@@ -249,10 +229,10 @@ pub unsafe extern "C" fn spin_amount() {
 #[unsafe(naked)]
 pub unsafe extern "C" fn turn_radius() {
     naked_asm! {
-        "movss xmm2, dword ptr [rsi + 0x78]",
-        "mulss xmm2, dword ptr [rip + {dt}]",
-        "lea rdx, qword ptr [rsp + 0x68]",
-        "lea rcx, qword ptr [rbp - 0x60]",
+        "movss xmm2, [rsi + 0x78]",
+        "mulss xmm2, [rip + {dt}]",
+        "lea rdx, [rsp + 0x68]",
+        "lea rcx, [rbp - 0x60]",
         "ret",
         dt = sym values::DT_TICKS,
     }

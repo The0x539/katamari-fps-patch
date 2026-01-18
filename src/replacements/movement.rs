@@ -253,3 +253,16 @@ pub unsafe extern "C" fn friction() {
         dt = sym values::DT_TICKS,
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn push_force() {
+    naked_asm! {
+        "movss xmm1, [rip + {dt}]",
+        "vfmadd213ss xmm6,  xmm1, [r12 + 0x0]",
+        "vfmadd213ss xmm10, xmm1, [r12 + 0x4]",
+        "vfmadd213ss xmm9,  xmm1, [r12 + 0x8]",
+        "vfmadd213ss xmm15, xmm1, [r12 + 0xc]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}

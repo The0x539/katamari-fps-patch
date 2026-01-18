@@ -112,6 +112,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
             katamari_pivot[0x17a..0x187] => movement::bumpy_ride;
             katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
+            speed_thing_2[0xe12..0xe2d] => movement::push_force;
 
             // This causes the giant watermelons to stop rotating their yaw for some reason.
             //copy_matrix => copy_matrix;

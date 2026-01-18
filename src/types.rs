@@ -159,7 +159,7 @@ pub struct Katamari {
     pub x7d0: f32,
     pub _x7d4: Q<40>,
     pub radius_again: f32,
-    pub x800: f32,
+    pub sink_rate: f32,
     pub x804: i16,
     pub x806: i16,
     pub _x808: Q<84>,
@@ -175,8 +175,8 @@ pub struct Katamari {
     pub _x89a: Q<28>,
     pub x8bc: f32,
     pub _x8c0: Q<16>,
-    pub indexed_guy: [IndexedGuy; 64],
-    pub copied_from_indexed_guy: [IndexedGuy; 64],
+    pub attached_things: [AttachedThing; 64],
+    pub attached_things_copy: [AttachedThing; 64],
     pub x38d0: u16,
     pub _x38d2: Q<2>,
     pub x38d4: Mat4,
@@ -310,15 +310,19 @@ impl MotionVectors {
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct IndexedGuy {
-    pub m00: Mat4,
-    x40: Q<16>,
-    pub three_floats: [f32; 3],
+pub struct AttachedThing {
+    pub v_x0: Vec4,
+    pub v_x10: Vec4,
+    pub v_x20: Vec4,
+    pub v_x30: Vec4,
+    pub v_x40: Vec4,
+    pub child: *mut Thing,
+    pub altitude: f32,
     pub x5c: bool,
     x5d: Q<3>,
 }
 
-assert_size!(IndexedGuy, 0x60);
+assert_size!(AttachedThing, 0x60);
 
 #[repr(C)]
 pub struct Prince {
@@ -620,7 +624,7 @@ pub struct CameraTransform {
 assert_size!(CameraTransform, 0x188);
 
 #[repr(C)]
-pub struct Prop {
+pub struct Thing {
     pub mono_ctrl_idx: u16,
     pub mono_name_idx: u16,
     pub alternate_name: u16,
@@ -668,14 +672,14 @@ pub struct Prop {
     pub _x1d0: Q<0xa00>,
 }
 
-assert_size!(Prop, 0xbd0);
-assert_offset!(Prop, has_parent, 0x6);
-assert_offset!(Prop, flags_x8, 0x8);
-assert_offset!(Prop, xb, 0xb);
-assert_offset!(Prop, mono_shake_off_flag, 0x20);
-assert_offset!(Prop, pos_x40, 0x40);
-assert_offset!(Prop, vel_xe0, 0xe0);
-assert_offset!(Prop, m_x190, 0x190);
+assert_size!(Thing, 0xbd0);
+assert_offset!(Thing, has_parent, 0x6);
+assert_offset!(Thing, flags_x8, 0x8);
+assert_offset!(Thing, xb, 0xb);
+assert_offset!(Thing, mono_shake_off_flag, 0x20);
+assert_offset!(Thing, pos_x40, 0x40);
+assert_offset!(Thing, vel_xe0, 0xe0);
+assert_offset!(Thing, m_x190, 0x190);
 
 #[repr(C)]
 pub struct PropConstants {

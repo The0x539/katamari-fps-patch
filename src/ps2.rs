@@ -148,6 +148,12 @@ exports! {
     #[func @ 0xad40]
     fn camera_set_view_mode(p_idx: i32, mode: u8);
 
+    #[func @ 0x28870]
+    fn katamari_queue_things_for_pickup(k: *mut Katamari);
+
+    #[func @ 0x24460]
+    fn katamari_sink_things();
+
     #[var @ 0]
     static base_addr: ();
 

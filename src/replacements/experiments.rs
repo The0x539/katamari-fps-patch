@@ -169,7 +169,7 @@ pub unsafe extern "win64" fn my_big_kahuna(k: *mut Katamari) {
 
         let foo = (*k).speed / (*k).x80;
         (*k).x88 = foo;
-        (*k).x800 = 1.0 - foo * ps2::val_x7b218();
+        (*k).sink_rate = 1.0 - foo * ps2::val_x7b218();
         ps2::gravity_user_3(k);
         (*k).x764.0 = 0; // TODO: identify this field
 

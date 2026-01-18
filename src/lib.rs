@@ -186,6 +186,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_update_katamari_view[0x489..0x495] => abilities::katamari_view_ascend;
             camera_update_katamari_view[0xe7..0xf5] => abilities::katamari_view_descend;
             camera_set_view_mode[0x286..] => 666_i32.to_ne_bytes(); // mov eax, 20 -> mov eax, 666 (frames -> ms)
+
+            // Cheat code to pick up things of any size
+            // katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}
+
+            katamari_sink_things[0x2f..0x3b] => things::sink_rate;
         }
 
         {

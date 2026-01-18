@@ -45,3 +45,16 @@ pub unsafe extern "C" fn animal_walk() {
         dt = sym values::DT_TICKS,
     }
 }
+
+pub unsafe extern "C" fn sink_rate() {
+    unsafe {
+        let k: *mut Katamari;
+        asm!("", out("rdx") k);
+
+        (*k).sink_rate = (*k).sink_rate.powf(values::DT_TICKS);
+
+        // RCX and RAX would theoretically also be good to preserve,
+        // but I think only RDX is strictly necessary based on the caller's register usage.
+        asm!("", in("rdx") k);
+    }
+}

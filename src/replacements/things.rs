@@ -83,6 +83,17 @@ pub unsafe extern "C" fn hop_timer_update() {
     }
 }
 
+#[unsafe(naked)]
+pub unsafe extern "C" fn hop_angle_update() {
+    naked_asm! {
+        "movss xmm2, [rdi + 0x78]",
+        "movss xmm1, [rdi + 0x74]",
+        "vfmadd231ss xmm1, xmm0, [rip + {dt}]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}
+
 pub unsafe extern "C" fn sink_rate() {
     unsafe {
         let k: *mut Katamari;

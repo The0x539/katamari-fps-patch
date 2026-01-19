@@ -193,6 +193,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_sink_things[0x2f..0x3b] => things::sink_rate;
 
             thing_hop[0x10..0x29] => things::hop_timer_update;
+            thing_hop_turn[0x69..0x76] => things::hop_angle_update;
         }
 
         {

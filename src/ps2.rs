@@ -160,6 +160,9 @@ exports! {
     #[func @ 0x44c00]
     fn thing_hop(t: *mut Thing);
 
+    #[func @ 0x45180]
+    fn thing_hop_turn(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

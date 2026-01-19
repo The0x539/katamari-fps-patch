@@ -34,3 +34,6 @@ windows.features = [
 [features]
 default = ["ui"]
 ui = ["dep:eframe", "dep:winit", "dep:winnow"]
+
+[build-dependencies]
+nasm-rs = "0.3.1"

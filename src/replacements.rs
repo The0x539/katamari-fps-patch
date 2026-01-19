@@ -41,6 +41,7 @@ pub(crate) mod values {
     ///
     /// If a value is measured in "units per tick", e.g. velocity,
     /// it should probably be multiplied by this value.
+    #[unsafe(no_mangle)]
     pub static mut DT_TICKS: f32 = 0.5;
 
     /// The duration, in (rounded) *milliseconds*, of the current update.
@@ -48,6 +49,7 @@ pub(crate) mod values {
     /// If the original code uses an integer to count ticks,
     /// then updating it to instead count milliseconds
     /// will require using this value (instead of 1) as an increment/decrement.
+    #[unsafe(no_mangle)]
     pub static mut DT_MILLIS: i16 = 16;
 
     /// The accumulated rounding error of DT_MILLIS.

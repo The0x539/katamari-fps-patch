@@ -194,6 +194,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_hop[0x10..0x29] => things::hop_timer_update;
             thing_hop_turn[0x69..0x76] => things::hop_angle_update;
+            thing_hop_apply_velocity[0xd9..0x14a] => things::hop_position_update;
+            thing_hop_apply_velocity[0x8c..0x9c] => things::hop_gravity;
         }
 
         {

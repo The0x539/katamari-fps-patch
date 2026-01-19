@@ -94,6 +94,32 @@ pub unsafe extern "C" fn hop_angle_update() {
     }
 }
 
+#[unsafe(naked)]
+pub unsafe extern "C" fn hop_position_update() {
+    naked_asm! {
+        "movss xmm15, [rcx + 0x9c]",
+        "movups xmm3, [rcx + 0x90]",
+        "vbroadcastss xmm1, [rip + {dt}]",
+        "vfmadd231ps xmm3, xmm1, [rcx + 0xe0]",
+        "movups [rcx + 0x90], xmm3",
+        "movss [rcx + 0x9c], xmm15",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn hop_gravity() {
+    naked_asm! {
+        "movss xmm3, [rdi + 0x88]",             // xmm3 = t->hop_grav_vel
+        "vfmadd132ss xmm0, xmm3, [rip + {dt}]", // xmm0 = (xmm0 * dt) + xmm3
+        "mulss xmm2, [rdi + 0x28]",
+        "movaps xmm3, xmm1",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}
+
 pub unsafe extern "C" fn sink_rate() {
     unsafe {
         let k: *mut Katamari;

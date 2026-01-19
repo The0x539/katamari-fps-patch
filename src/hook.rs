@@ -39,9 +39,9 @@ pub unsafe fn patch<R>(
 
         mprotect(target_code, w::PAGE_READWRITE, || {
             let target_code = &mut *target_code;
-            target_code.fill(0x90);
             target_code[..patch_code.len()].copy_from_slice(patch_code);
             target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
+            fill_with_nops(&mut target_code[patch_code.len()..]);
         })?;
     }
 
@@ -69,10 +69,10 @@ pub unsafe fn patch_preserving_rax<R>(
             let ([push_rax], target_code) = target_code.split_first_chunk_mut().unwrap();
             *push_rax = 0x50;
 
-            target_code.fill(0x90);
             target_code[..patch_code.len()].copy_from_slice(patch_code);
             target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
             target_code[patch_code.len()] = 0x58;
+            fill_with_nops(&mut target_code[patch_code.len() + 1..]);
         })?;
     }
 
@@ -113,7 +113,7 @@ pub unsafe fn skip_range(target: impl Target, range: std::ops::Range<usize>) -> 
     unsafe {
         let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
         mprotect(target_code, w::PAGE_READWRITE, || {
-            (*target_code).fill(0x90);
+            fill_with_nops(&mut *target_code);
         })?;
     }
 
@@ -231,5 +231,24 @@ unsafe fn mprotect<M, R>(
         let result = f();
         w::VirtualProtect(base, len, old_protection, &mut old_protection)?;
         Ok(result)
+    }
+}
+
+fn fill_with_nops(code: &mut [u8]) {
+    for chunk in code.chunks_mut(9) {
+        let nop: &[u8] = match chunk.len() {
+            0 => &[],
+            1 => &[0x90],
+            2 => &[0x66, 0x90],
+            3 => &[0x0f, 0x1f, 0],
+            4 => &[0x0f, 0x1f, 0x40, 0x00],
+            5 => &[0x0f, 0x1f, 0x44, 0x00, 0x00],
+            6 => &[0x66, 0x0f, 0x1f, 0x44, 0x00, 0x00],
+            7 => &[0x0f, 0x1f, 0x80, 0x00, 0x00, 0x00, 0x00],
+            8 => &[0x0f, 0x1f, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00],
+            9 => &[0x66, 0x0f, 0x1f, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00],
+            10.. => unreachable!(),
+        };
+        chunk.copy_from_slice(nop);
     }
 }

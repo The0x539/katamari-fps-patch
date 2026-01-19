@@ -115,6 +115,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
             speed_thing_2[0xe12..0xe2d] => movement::push_force;
 
+            katamari_bump_thing[0x375..0x382] => movement::bump_velocity;
+
             do_katamari_physics[0x3c9..0x3da] => abilities::spindash_spinning;
 
             katamari_physics_climb[0xb9..0xd2] => movement::climb_ascent_timer;

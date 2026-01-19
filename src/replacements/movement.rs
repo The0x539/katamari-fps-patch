@@ -11,6 +11,7 @@ unsafe extern "C" {
     pub fn climb_ascent_timer();
     pub fn climb_sustain_timer();
     pub fn climbing_ascent();
+    pub fn bump_velocity();
 }
 
 #[inline]

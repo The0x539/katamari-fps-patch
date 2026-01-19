@@ -95,3 +95,12 @@ climbing_ascent:
 	vfnmadd231ss xmm3, xmm5, [DT_TICKS] ; xmm3 -= xmm5 * dt
 	movss [rbx + 0x464], xmm3
 	ret
+
+global bump_velocity
+bump_velocity:
+	divss xmm0, [DT_TICKS]
+	; trampoline:
+	lea r8, [rsp + 0x20 + 8]
+	mov rcx, rsi
+	movss xmm6, [rbp - 0x5d]
+	ret

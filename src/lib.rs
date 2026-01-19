@@ -116,6 +116,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
             speed_thing_2[0xe12..0xe2d] => movement::push_force;
 
+            do_katamari_physics[0x3c9..0x3da] => abilities::spindash_spinning;
+
             katamari_physics_climb[0xb9..0xd2] => movement::climb_ascent_timer;
             katamari_physics_climb[0xd2..] => [0x0F, 0x8E]; // JNE -> JNG
             katamari_physics_climb[0x15..0x26] => movement::climb_sustain_timer;
@@ -213,6 +215,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             dll.thing_reset_hop_timer,
             0x2c..0x3c,
             replacements::things::hop_timer_reset,
+        )?;
+
+        hook::patch_preserving_rax(
+            dll.do_katamari_physics,
+            0x352..0x362,
+            replacements::abilities::spindash_gain_power,
         )?;
     }
 

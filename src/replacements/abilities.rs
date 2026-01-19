@@ -51,3 +51,27 @@ pub unsafe extern "C" fn katamari_view_descend() {
         dt = sym values::DT_MILLIS,
     }
 }
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn spindash_gain_power() {
+    naked_asm! {
+        "movss xmm2, [rbx + 0x420]",
+        "movss xmm0, [rbx + 0x3a7c]",
+        "vfmadd132ss xmm2, xmm0, [rip + {dt}]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn spindash_spinning() {
+    naked_asm! {
+        "lea rcx, [rbx + 0x3a84]",
+        "lea rdx, [rsp + 0x58 + 8]",
+        "movups [rsp + 0x58 + 8], xmm0",
+        // all of that was just a trampoline lmao
+        "mulss xmm2, [rip + {dt}]",
+        "ret",
+        dt = sym values::DT_TICKS,
+    }
+}

@@ -1,16 +1,16 @@
 use super::*;
 
-#[unsafe(naked)]
-pub unsafe extern "C" fn airborne_gravity() {
-    naked_asm! {
-        // xmm5 is currently initialized to the katamari's f32@0x1a0 field,
-        // which seems to be the gravitational acceleration value.
-        "movss xmm1, [rip + {dt}]",
-        "vfmadd213ss xmm5, xmm1, [rbx + 0x2e4]",
-        "movss xmm1, [rbx + 0x2e8]", // trampoline to have enough room to fit the hook
-        "ret",
-        dt = sym values::DT_TICKS,
-    }
+unsafe extern "C" {
+    pub fn airborne_gravity();
+    pub fn bumpy_ride();
+    pub fn rolling_position();
+    pub fn climbing_position();
+    pub fn turn_radius();
+    pub fn friction();
+    pub fn push_force();
+    pub fn climb_ascent_timer();
+    pub fn climb_sustain_timer();
+    pub fn climbing_ascent();
 }
 
 #[inline]
@@ -87,77 +87,6 @@ pub unsafe extern "C" fn downhill() {
     k.motion.downhill += downhill_v * amount;
 }
 
-#[unsafe(naked)]
-pub unsafe extern "C" fn bumpy_ride() {
-    naked_asm! {
-        "mulss xmm6, [rip + {dt}]", // the important bit
-        "movss dword ptr [rdi + 0x39b8], xmm6",
-        // trampoline. extra 8 bytes for this function's return pointer
-        "lea rdx, [rsp + 0x28]",
-        "ret",
-        dt = sym values::DT_TICKS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn rolling_position() {
-    naked_asm! {
-        "movups xmm1, [rbx + 0x2b0]", // xmm1 = k->motion.h (effective velocity, including gravity)
-        "jmp {}",
-        sym increment_position,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn climbing_position() {
-    naked_asm! {
-        "movups xmm1, [rbx + 0x290]", // xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
-        "jmp {}",
-        sym increment_position,
-    }
-}
-
-#[unsafe(naked)]
-unsafe extern "C" fn increment_position() {
-    naked_asm! {
-        // xmm6-8 contain the x/y/z of the "vel" variable,
-        // but reading it back from memory is a lot easier than shuffling those into one XMM register.
-        // Bonus: we can read the version that already includes gravity
-        // xmm0-4 are clobbered by the original code.
-        "movups xmm0, [rbx + 0x460]",      // xmm0 = k->position
-        "movss xmm2, [rbx + 0x46c]",       // xmm2 = k->position.w
-
-        "vbroadcastss xmm3, [rip + {dt}]", // xmm3 = splat(dt)
-        "vfmadd231ps xmm0, xmm1, xmm3",    // xmm0 += xmm1 * xmm3
-
-        "movups [rbx + 0x460], xmm0",      // k->position = xmm0
-        "movss [rbx + 0x46c], xmm2",       // k->position.w = xmm2
-        "ret",
-        dt = sym values::DT_TICKS,
-    }
-}
-
-pub unsafe extern "C" fn prop_terrain_collision() {
-    unsafe {
-        asm! {
-            // the original code, optimized:
-            // calculate the length of k->motion.effective and store it in xmm0
-            // (to then be stored in k.guy_that_gets_divided)
-            "movaps xmm0, xmmword ptr [rdi+0x290]", // v = k->motion.effective
-            "mulps xmm0, xmm1",  // v = v.xyz()
-            "mulps xmm0, xmm0",  // v *= v
-            "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now x*x+y*y, second element is z*z)
-            "haddps xmm0, xmm0", // v = v.xzxz + v.ywyw (first element is now sqrlen)
-            "sqrtss xmm0, xmm0", // v.x = sqrt(v.x)
-
-            "mulss xmm0, dword ptr [rip+{dt}]", // now delta-time it
-
-            in("xmm1") Vec4::XYZ.to_simd(),
-            dt = sym values::DT_TICKS,
-        }
-    }
-}
-
 // Turning in place with both sticks in opposite directions.
 pub unsafe extern "C" fn fast_steer() {
     unsafe {
@@ -222,84 +151,6 @@ pub unsafe extern "C" fn spin_amount() {
         "mulss xmm2, [rip + {dt}]",     // important part: delta-time the "theta" arg
         "jmp {}",
         sym ps2::rotation_from_axis_angle,
-        dt = sym values::DT_TICKS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn turn_radius() {
-    naked_asm! {
-        "movss xmm2, [rsi + 0x78]",
-        "mulss xmm2, [rip + {dt}]",
-        "lea rdx, [rsp + 0x68]",
-        "lea rcx, [rbp - 0x60]",
-        "ret",
-        dt = sym values::DT_TICKS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn friction() {
-    naked_asm! {
-        // xmm12 is the first register to be overwritten after the patched code
-        "movss xmm12, [rip + {dt}]",
-        "vfmadd231ss xmm6, xmm12, [rbx + 0x300]",
-        "vfmadd231ss xmm7, xmm12, [rbx + 0x304]",
-        "vfmadd231ss xmm8, xmm12, [rbx + 0x308]",
-        "ret",
-        dt = sym values::DT_TICKS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn push_force() {
-    naked_asm! {
-        "movss xmm1, [rip + {dt}]",
-        "vfmadd213ss xmm6,  xmm1, [r12 + 0x0]",
-        "vfmadd213ss xmm10, xmm1, [r12 + 0x4]",
-        "vfmadd213ss xmm9,  xmm1, [r12 + 0x8]",
-        "vfmadd213ss xmm15, xmm1, [r12 + 0xc]",
-        "ret",
-        dt = sym values::DT_TICKS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn climb_ascent_timer() {
-    naked_asm! {
-        "mov [rsp + 0xc0 + 8], rsi",
-        "mov si, [rip + {dt}]",
-        "add [rdx + 0x784], si",
-        "xor esi, esi",
-        "cmp word ptr [rdx + 0x784], 1000", // 1 second
-        "ret",
-        dt = sym values::DT_MILLIS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn climb_sustain_timer() {
-    naked_asm! {
-        "movzx eax, word ptr [rdx + 0x786]",
-        "add ax, [rip + {dt}]",
-        "mov [rdx + 0x786], ax",
-        "ret",
-        dt = sym values::DT_MILLIS,
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn climbing_ascent() {
-    // the original code is insanely complex to just subtract climb_amount from position.y
-    // we start with climb_amount stored in xmm5
-    naked_asm! {
-        "mov rsi, [rsp + 0xC0 + 8]",     // annoying thing that was in the middle of the replaced code
-        "movaps xmm6, [rsp + 0xA0 + 8]", // likewise, and this one took way too long to find
-
-        "movss xmm3, [rbx + 0x464]",             // xmm3 = k->position.y
-        "vfnmadd231ss xmm3, xmm5, [rip + {dt}]", // xmm3 -= xmm5 * dt
-        "movss [rbx + 0x464], xmm3",
-        "ret",
         dt = sym values::DT_TICKS,
     }
 }

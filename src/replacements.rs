@@ -99,6 +99,7 @@ pub(crate) mod values {
     #[allow(dead_code)]
     pub const TICK_MS: i16 = 1000 / 30;
 
+    #[unsafe(no_mangle)]
     pub static mut MULTIPLAYER: u8 = 0;
     // TODO: add more stuff here as necessary and update it whenever needed
 

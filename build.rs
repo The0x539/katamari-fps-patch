@@ -7,8 +7,11 @@ fn main() -> Result<(), String> {
         }
     }
 
-    nasm_rs::compile_library(
+    nasm_rs::compile_library_args(
         "native_replacements.lib",
-        &["src/replacements/abilities.asm"],
-    )
+        &["src/replacements/mod.asm"],
+        &["-i", "src/replacements"],
+    )?;
+
+    Ok(())
 }

@@ -1,5 +1,11 @@
 use super::*;
 
+#[link(name = "native_replacements", kind = "static")]
+unsafe extern "C" {
+    pub fn stamina_drain();
+    pub fn update_dash_input_timer();
+}
+
 pub unsafe extern "C" fn stamina_gain() {
     let prince = unsafe {
         let prince: *mut Prince;
@@ -21,34 +27,6 @@ pub unsafe extern "C" fn stamina_gain() {
         stamina += prince.stamina_gain_amount;
         stamina = stamina.min(prince.stamina_limit);
         prince.stamina = stamina as i16;
-    }
-}
-
-pub unsafe extern "C" fn stamina_drain() {
-    unsafe {
-        asm! {
-            "mov ax, word ptr [rdi + 0x47e]",
-            "sub ax, word ptr [rip + {dt}]",
-            "mov word ptr [rdi + 0x47e], ax",
-            "cmp ax, bp",
-            dt = sym values::DT_MILLIS,
-        }
-    }
-}
-
-pub unsafe extern "C" fn update_dash_input_timer() {
-    unsafe {
-        asm! {
-            "mov ax, word ptr [rdi + 0x478]", // ax = prince->dash_input_timer
-            "sub ax, word ptr [rip + {dt}]",  // ax -= DT_MILLIS
-            "jns 2f",                         // if ax < 0 {
-            "xor eax, eax",                   //     eax = 0
-            "2:",                             // }
-            "mov word ptr [rdi + 0x478], ax", // prince->dash_input_timer = ax
-            "cmp byte ptr [rip + {mp}], sil", // annoying trampoline
-            dt = sym values::DT_MILLIS,
-            mp = sym values::MULTIPLAYER,
-        }
     }
 }
 

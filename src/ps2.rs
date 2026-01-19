@@ -154,6 +154,12 @@ exports! {
     #[func @ 0x24460]
     fn katamari_sink_things();
 
+    #[func @ 0x44bb0]
+    fn thing_reset_hop_timer(t: *mut Thing);
+
+    #[func @ 0x44c00]
+    fn thing_hop(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

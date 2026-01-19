@@ -191,6 +191,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}
 
             katamari_sink_things[0x2f..0x3b] => things::sink_rate;
+
+            thing_hop[0x10..0x29] => things::hop_timer_update;
         }
 
         {
@@ -202,6 +204,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             dll.initialize_princes,
             0x3e3,
             replacements::prince_post_init,
+        )?;
+
+        hook::patch_preserving_rax(
+            dll.thing_reset_hop_timer,
+            0x2c..0x3c,
+            replacements::things::hop_timer_reset,
         )?;
     }
 

@@ -48,6 +48,37 @@ pub unsafe fn patch<R>(
     Ok(())
 }
 
+pub unsafe fn patch_preserving_rax<R>(
+    target: impl Target,
+    range: std::ops::Range<usize>,
+    detour: unsafe extern "C" fn() -> R,
+) -> eyre::Result<()> {
+    let target = target.into_target();
+    unsafe {
+        let detour = detour as *const ();
+        let patch_code = patch_asm_bytes();
+        let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
+
+        let i = patch_code
+            .windows(8)
+            .position(|w| w == [0xEE; 8])
+            .unwrap_or(0);
+
+        mprotect(target_code, w::PAGE_READWRITE, || {
+            let target_code = &mut *target_code;
+            let ([push_rax], target_code) = target_code.split_first_chunk_mut().unwrap();
+            *push_rax = 0x50;
+
+            target_code.fill(0x90);
+            target_code[..patch_code.len()].copy_from_slice(patch_code);
+            target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
+            target_code[patch_code.len()] = 0x58;
+        })?;
+    }
+
+    Ok(())
+}
+
 pub unsafe fn raw_patch(
     target: impl Target,
     offset: usize,

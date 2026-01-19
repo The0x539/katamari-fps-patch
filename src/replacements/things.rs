@@ -46,6 +46,43 @@ pub unsafe extern "C" fn animal_walk() {
     }
 }
 
+#[unsafe(naked)]
+pub unsafe extern "C" fn hop_timer_reset() {
+    naked_asm! {
+        // Praying that the byte after this counter is unused,
+        // at least by the NPCs we care about.
+        "mov rax, [rsp + 8]",
+        "mov word ptr [rax + 0x90], 833", // 25 ticks -> 833 ms
+        "mov word ptr [rbx + 0x58e], 1",
+        "ret",
+    }
+}
+
+#[unsafe(naked)]
+pub unsafe extern "C" fn hop_timer_update() {
+    naked_asm! {
+        "mov ax, [rcx + 0x90]",
+        "cmp ax, 0",
+        "jle 2f",
+
+        "sub ax, [rip + {dt}]",
+        "jns 3f",
+        "xor eax, eax",
+        "3:",
+        "mov [rcx + 0x90], ax",
+
+        // the return of the cursed double return
+        "add rsp, 0x28",
+        "pop rbx",
+        "ret",
+
+        "2:",
+        "ret",
+
+        dt = sym values::DT_MILLIS,
+    }
+}
+
 pub unsafe extern "C" fn sink_rate() {
     unsafe {
         let k: *mut Katamari;

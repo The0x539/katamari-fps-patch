@@ -64,7 +64,8 @@ impl FieldType {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Field {
-    pub offset: usize,
+    pub offset: isize,
+    pub sub_offset: Option<isize>,
     pub field_type: FieldType,
     pub name: Option<String>,
 }
@@ -130,7 +131,8 @@ parsers! {
     ));
 
     field: Field = seq!{Field{
-        offset: preceded('x', hex_uint).map(|n: u64| n as usize),
+        offset: preceded('x', hex_uint).map(|n: u64| n as isize),
+        sub_offset: opt(preceded('+', hex_uint).map(|n: u64| n as isize)),
         field_type: preceded(space1, field_type),
         name: opt(preceded(space1, name)),
     }};

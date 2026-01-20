@@ -172,6 +172,9 @@ exports! {
     #[func @ 0x2eb10]
     fn thing_freefall(t: *mut Thing);
 
+    #[func @ 0x367e0]
+    fn thing_random_hop_main(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

@@ -214,6 +214,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // this is another case where I should probably get this using VFMADDPS
             thing_freefall[0x64..0x74] => {}
             thing_freefall[0x201..0x211] => {}
+
+            thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

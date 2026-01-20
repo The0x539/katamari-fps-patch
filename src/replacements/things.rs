@@ -1,5 +1,21 @@
 use super::*;
 
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ExtraThingState {
+    // The vanilla game uses a u8, which isn't quite enough for our purposes
+    pub rng_timer: u16,
+}
+
+impl ExtraThingState {
+    pub const fn new() -> Self {
+        Self { rng_timer: 0 }
+    }
+}
+
+#[unsafe(no_mangle)]
+static mut EXTRA_THING_STATE: [ExtraThingState; 4000] = [ExtraThingState::new(); 4000];
+
 #[link(name = "native_replacements", kind = "static")]
 unsafe extern "C" {
     pub fn melon_spin();
@@ -14,6 +30,8 @@ unsafe extern "C" {
     pub fn freefall_spin_a();
     pub fn freefall_spin_b();
     pub fn freefall_spin_c();
+    pub fn random_hop_motion();
+    // pub fn random_hop_timer();
 }
 
 pub unsafe extern "C" fn sink_rate() {

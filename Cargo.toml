@@ -30,6 +30,7 @@ windows.features = [
   "Win32_System_LibraryLoader",
   "Win32_System_Memory",
 ]
+rand = "0.9.2"
 
 [features]
 default = ["ui"]

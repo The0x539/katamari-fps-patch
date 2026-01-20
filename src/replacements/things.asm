@@ -145,3 +145,17 @@ freefall_spin_c:
 	vfmadd231ss xmm0, xmm1, [DT_TICKS]
 	ret
 	.pi: dd 3.14159265
+
+global random_hop_motion
+random_hop_motion:
+	; We have pretty good freedom with with registers to use here,
+	; as I don't think any subsequent code is dependent on XMM0/1/2.
+	; As such, a simple mnemonic: XMM(n) is the nth derivative.
+	movss xmm2, [rcx + 0x3e0]
+	movss xmm1, [rcx + 0x3d8]
+	movss xmm0, [rcx + 0x94]
+	vfmadd231ss xmm1, xmm2, [DT_TICKS]
+	vfmadd231ss xmm0, xmm1, [DT_TICKS]
+	movss [rcx + 0x3d8], xmm1
+	movss [rcx + 0x94], xmm0
+	ret

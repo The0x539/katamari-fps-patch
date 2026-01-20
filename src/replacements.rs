@@ -86,6 +86,9 @@ pub(crate) mod values {
         }
     }
 
+    #[unsafe(no_mangle)]
+    pub(crate) static mut PTR_THING_GRAVITY: *mut f32 = std::ptr::null_mut();
+
     /// The duration, in (rounded) milliseconds, of *one tick*.
     ///
     /// If the original code uses an integer to count ticks,

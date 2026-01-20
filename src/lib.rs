@@ -199,7 +199,24 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_hop_turn[0x69..0x76] => things::hop_angle_update;
             thing_hop_apply_velocity[0xd9..0x14a] => things::hop_position_update;
             thing_hop_apply_velocity[0x8c..0x9c] => things::hop_gravity;
+
+            // There's probably still more to be done in this function, given its sheer scale,
+            // but this is pretty good for now.
+            thing_freefall[0xa..0x1c] => things::freefall_gravity;
+            thing_freefall[0x46..0x5e] => things::freefall_pos;
+            thing_freefall[0xa5..0xc0] => things::freefall_spin_a;
+            thing_freefall[0x255..0x270] => things::freefall_spin_b;
+            thing_freefall[0x2f1..0x305] => things::freefall_spin_c;
+            // for some reason the compiler was extra silly
+            // and put the x component addition after both ends of the branch
+            // my code just does it alongside the others
+            //
+            // this is another case where I should probably get this using VFMADDPS
+            thing_freefall[0x64..0x74] => {}
+            thing_freefall[0x201..0x211] => {}
         }
+
+        replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();
 
         {
             let n = &mut *ps2::raw::climb_sustain_limit();

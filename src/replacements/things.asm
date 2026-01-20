@@ -1,5 +1,7 @@
 section .text
 
+extern PTR_THING_GRAVITY
+
 global melon_spin
 melon_spin:
 	movss xmm0, [.theta]
@@ -89,3 +91,57 @@ hop_gravity:
 	mulss xmm2, [rdi + 0x28]
 	movaps xmm3, xmm1
 	ret
+
+global freefall_pos
+freefall_pos:
+	movss xmm5, [DT_TICKS]
+	; xmm2 is the w component, so if xmm5 is no bueno, just tamper with this one
+	vfmadd231ss xmm2, xmm5, [rcx + 0xec]
+	vfmadd231ss xmm0, xmm5, [rcx + 0xe4]
+	vfmadd231ss xmm1, xmm5, [rcx + 0xe8]
+
+	; the stupid x component
+	movss xmm3, [rcx + 0x90]
+	vfmadd231ss xmm3, xmm5, [rcx + 0xe0]
+
+	ret
+
+global freefall_gravity
+freefall_gravity:
+	movss xmm0, [rcx + 0xe4]
+	mov rdi, [PTR_THING_GRAVITY]
+	movss xmm4, [rdi]
+	vfmadd231ss xmm0, xmm4, [DT_TICKS]
+	xor edi, edi
+	ret
+
+; TODO: unify these two lmao, damn original compiler made two versions
+; when I have more mental energy it should be possible
+; to replace a slightly larger chunk such that these can use the same registers
+
+global freefall_spin_a
+freefall_spin_a:
+	movzx eax, byte [rcx + 0x3d2] ; an "axis selector" or something
+	movss xmm1, [rcx + 0x3d4]     ; the angular sped
+	movaps xmm0, xmm1             ; two copies of the angular speed; one is used to calc decay
+	movss xmm5, [DT_TICKS]
+	vfmadd123ss xmm0, xmm5, [rcx + 0xa0 + 4*rax] ; xmm0 = (xmm0 * xmm5) + [current angle]
+	ret
+
+global freefall_spin_b
+freefall_spin_b:
+	movzx eax, byte [rcx + 0x3d2] ; an "axis selector" or something
+	movss xmm0, [rcx + 0x3d4]     ; the angular sped
+	movaps xmm1, xmm0             ; two copies of the angular speed; one is used to calc decay
+	movss xmm5, [DT_TICKS]
+	vfmadd123ss xmm1, xmm5, [rcx + 0xa0 + 4*rax] ; xmm0 = (xmm0 * xmm5) + [current angle]
+	ret
+
+	
+global freefall_spin_c
+freefall_spin_c:
+	movss xmm0, [rcx + 0xa4]
+	movss xmm2, [.pi]
+	vfmadd231ss xmm0, xmm1, [DT_TICKS]
+	ret
+	.pi: dd 3.14159265

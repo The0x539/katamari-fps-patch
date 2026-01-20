@@ -169,6 +169,9 @@ exports! {
     #[func @ 0x2af40]
     fn katamari_bump_thing(k: *mut Katamari, t: *mut Thing);
 
+    #[func @ 0x2eb10]
+    fn thing_freefall(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 
@@ -222,6 +225,9 @@ exports! {
 
     #[var @ 0x10eb18]
     static climb_sustain_limit: u32;
+
+    #[var @ 0x15523c]
+    static thing_gravity: f32;
 
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];

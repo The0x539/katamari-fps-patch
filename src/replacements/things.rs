@@ -9,6 +9,11 @@ unsafe extern "C" {
     pub fn hop_angle_update();
     pub fn hop_position_update();
     pub fn hop_gravity();
+    pub fn freefall_gravity();
+    pub fn freefall_pos();
+    pub fn freefall_spin_a();
+    pub fn freefall_spin_b();
+    pub fn freefall_spin_c();
 }
 
 pub unsafe extern "C" fn sink_rate() {

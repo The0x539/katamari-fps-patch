@@ -128,7 +128,7 @@ exports! {
     fn npc_40bb0(p: *mut Thing);
 
     #[func @ 0x31a30]
-    fn npc_update_animal_position(p: *mut Thing, _idk: *mut (), _idk_: bool);
+    fn thing_animal_motion(p: *mut Thing, animal: *mut (), flag: bool);
 
     #[func @ 0x5a970]
     fn rotation_from_axis_angle(out: *mut Mat4, axis: *const Vec4, angle: f32);
@@ -174,6 +174,12 @@ exports! {
 
     #[func @ 0x367e0]
     fn thing_random_hop_main(t: *mut Thing);
+
+    #[func @ 0x3a8f0]
+    fn f32_angle_move_towards(angle: *mut f32, delta: *const f32, target: *const f32);
+
+    #[func @ 0x3e040]
+    fn pursuit_angle_move_towards(t: *mut Thing, pursuit_a: *mut (), angle: f32, flag: bool);
 
     #[var @ 0]
     static base_addr: ();

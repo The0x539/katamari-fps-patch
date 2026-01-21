@@ -178,6 +178,12 @@ unsafe impl<T, U, V, R> Target for extern "win64" fn(T, U, V) -> R {
     }
 }
 
+unsafe impl<T, U, V, W, R> Target for extern "win64" fn(T, U, V, W) -> R {
+    fn into_target(self) -> *mut u8 {
+        self as _
+    }
+}
+
 unsafe extern "C" {
     static hook_start: u8;
     static hook_end: u8;

@@ -20,6 +20,7 @@ static mut EXTRA_THING_STATE: [ExtraThingState; 4000] = [ExtraThingState::new();
 unsafe extern "C" {
     pub fn melon_spin();
     pub fn animal_walk();
+    pub fn animal_turn();
     pub fn hop_timer_reset();
     pub fn hop_timer_update();
     pub fn hop_angle_update();
@@ -32,6 +33,8 @@ unsafe extern "C" {
     pub fn freefall_spin_c();
     pub fn random_hop_motion();
     // pub fn random_hop_timer();
+    pub fn angle_move_towards();
+    pub fn pursuit_angle_move_towards();
 }
 
 pub unsafe extern "C" fn sink_rate() {

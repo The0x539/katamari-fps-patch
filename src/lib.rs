@@ -175,7 +175,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             npc_40bb0[0x7a..0x8a] => melon_spin;
 
-            npc_update_animal_position[0x9e..0xe5] => animal_walk;
+            thing_animal_motion[0x9e..0xe5] => animal_walk;
 
             camera_bear_cow_orbit[0xd7..0xe7] => camera::orbit_a;
             camera_versus_winner_orbit[0x55..0x67] => camera::orbit_b;
@@ -241,6 +241,18 @@ fn install_hooks_impl() -> eyre::Result<()> {
             dll.do_katamari_physics,
             0x352..0x362,
             replacements::abilities::spindash_gain_power,
+        )?;
+
+        hook::patch_preserving_rax(
+            dll.f32_angle_move_towards,
+            0..0x11,
+            replacements::things::angle_move_towards,
+        )?;
+
+        hook::patch_preserving_rax(
+            dll.pursuit_angle_move_towards,
+            0..0x12,
+            replacements::things::pursuit_angle_move_towards,
         )?;
     }
 

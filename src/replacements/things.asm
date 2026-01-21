@@ -159,3 +159,24 @@ random_hop_motion:
 	movss [rcx + 0x3d8], xmm1
 	movss [rcx + 0x94], xmm0
 	ret
+
+; Please tell me there aren't any already-delta-timed uses of this.
+; I'm going to guess not based on the usage of pointers for all the args.
+global angle_move_towards
+angle_move_towards:
+	movss xmm1, [rdx]
+	mulss xmm1, [DT_TICKS]
+	xorps xmm0, xmm0
+	comiss xmm1, xmm0
+	movaps xmm2, xmm1
+	addss xmm2, [rcx]
+	ret
+
+global pursuit_angle_move_towards
+pursuit_angle_move_towards:
+	movss xmm1, [rdx + 0x7c]
+	mulss xmm1, [DT_TICKS]
+	movss xmm0, [rdx + 0x78]
+	movss xmm4, [.neg_tau]
+	ret
+	.neg_tau: dd -6.283185307

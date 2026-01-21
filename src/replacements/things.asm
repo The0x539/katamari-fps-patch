@@ -180,3 +180,19 @@ pursuit_angle_move_towards:
 	movss xmm4, [.neg_tau]
 	ret
 	.neg_tau: dd -6.283185307
+
+global animal_angle_move_towards
+animal_angle_move_towards:
+	movss xmm0, [rdi + 0x7c]
+	mulss xmm0, [DT_TICKS]
+	comiss xmm6, xmm0
+	movss xmm2, [rdi + 0x78]
+	ret
+
+global train_angle_move_towards
+train_angle_move_towards:
+	mov r14, rcx
+	movaps xmm2, xmm1
+	mulss xmm2, [DT_TICKS]
+	addss xmm2, [rdx + 0x10c]
+	ret

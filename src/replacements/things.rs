@@ -35,6 +35,8 @@ unsafe extern "C" {
     // pub fn random_hop_timer();
     pub fn angle_move_towards();
     pub fn pursuit_angle_move_towards();
+    pub fn animal_angle_move_towards();
+    pub fn train_angle_move_towards();
 }
 
 pub unsafe extern "C" fn sink_rate() {

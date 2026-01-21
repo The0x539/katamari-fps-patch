@@ -216,6 +216,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_freefall[0x201..0x211] => {}
 
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
+
+            thing_animal_state_3_turn[0x61..0x6e] => things::animal_angle_move_towards;
+            thing_train_x391b0[0x48..0x56] => things::train_angle_move_towards;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

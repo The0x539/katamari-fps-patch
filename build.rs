@@ -1,5 +1,6 @@
 fn main() -> Result<(), String> {
-    if cfg!(windows) {
+    #[cfg(windows)]
+    {
         let mut vcvars = vcvars::Vcvars::new();
         let path = vcvars.get_cached("PATH").unwrap();
         unsafe {

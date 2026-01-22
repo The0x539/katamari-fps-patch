@@ -22,9 +22,9 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - run: cargo build --no-default-features
+      - run: cargo build --release --no-default-features
 
       - uses: actions/upload-artifact@v6
         with:
-          name: katamari_ffi.dll
-          path: target/${{ matrix.BUILD_TARGET }}/katamari_ffi.dll
+          name: release
+          path: target/release/katamari_ffi.dll

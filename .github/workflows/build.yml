@@ -8,6 +8,7 @@ jobs:
     steps:
       - uses: ilammy/setup-nasm@v1
 
+      - run: rustup override set nightly
       - run: rustup target add x86_64-pc-windows-msvc
 
       - uses: actions/checkout@v6

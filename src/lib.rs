@@ -1,4 +1,3 @@
-#![feature(const_slice_from_ptr_range)]
 #![feature(slice_from_ptr_range)]
 #![feature(portable_simd)]
 

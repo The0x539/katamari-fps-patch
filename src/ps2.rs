@@ -190,6 +190,12 @@ exports! {
     #[func @ 0xc500]
     fn camera_update_xc500(p_idx: i64, cam: *mut Camera, k: *mut Katamari, prince: *const Prince, ordinary: bool);
 
+    #[func @ 0x39ee0]
+    fn thing_flee_state_2(t: *mut Thing);
+
+    #[func @ 0x3a270]
+    fn thing_flee_state_4(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

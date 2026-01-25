@@ -196,3 +196,22 @@ train_angle_move_towards:
 	mulss xmm2, [DT_TICKS]
 	addss xmm2, [rdx + 0x10c]
 	ret
+
+global start_flee_timer
+start_flee_timer:
+	mov eax, 3000 ; 90 ticks -> 3 seconds
+	mov [rdi + 0x124], ax
+	ret
+
+global update_flee_timer
+update_flee_timer:
+	mov ax, [rdx + 0x124]
+	sub ax, [DT_MILLIS]
+	jns .not_negative
+	xor eax, eax
+	.not_negative:
+	mov [rdx + 0x124], ax
+	test byte [rbx + 0x14], 2
+	ret
+
+

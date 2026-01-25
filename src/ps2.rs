@@ -187,6 +187,9 @@ exports! {
     #[func @ 0x391b0]
     fn thing_train_x391b0(t: *mut Thing);
 
+    #[func @ 0xc500]
+    fn camera_update_xc500(p_idx: i64, cam: *mut Camera, k: *mut Katamari, prince: *const Prince, ordinary: bool);
+
     #[var @ 0]
     static base_addr: ();
 

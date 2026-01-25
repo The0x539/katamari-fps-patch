@@ -1,10 +1,11 @@
 extern "win64" fn nil0() {}
-extern "win64" fn nil<T>(_x: T) {}
-extern "win64" fn nil2<T, U>(_x: T, _y: U) {}
-extern "win64" fn nil3<T, U, V>(_x: T, _y: U, _z: V) {}
-extern "win64" fn nil4<T, U, V, W>(_x: T, _y: U, _z: V, _w: W) {}
+extern "win64" fn nil<T>(_: T) {}
+extern "win64" fn nil2<T, U>(_: T, _: U) {}
+extern "win64" fn nil3<T, U, V>(_: T, _: U, _: V) {}
+extern "win64" fn nil4<T, U, V, W>(_: T, _: U, _: V, _: W) {}
+extern "win64" fn nil5<T, U, V, W, X>(_: T, _: U, _: V, _: W, _: X) {}
 
-extern "win64" fn nil2i<T, U>(x: T, _y: U) -> T {
+extern "win64" fn nil2i<T, U>(x: T, _: U) -> T {
     x
 }
 
@@ -30,6 +31,10 @@ impl<T, U, V> Nil for extern "win64" fn(T, U, V) {
 
 impl<T, U, V, W> Nil for extern "win64" fn(T, U, V, W) {
     const NIL: Self = nil4;
+}
+
+impl<T, U, V, W, X> Nil for extern "win64" fn(T, U, V, W, X) {
+    const NIL: Self = nil5;
 }
 
 // the pointer is needed for coherence with the void version

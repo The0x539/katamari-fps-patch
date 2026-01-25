@@ -24,3 +24,17 @@ zoom_out:
 	movss xmm0, [rdi + 0x914]          ; xmm0 = c->zoom_speed
 	vfmadd231ss xmm6, xmm0, [DT_TICKS] ; xmm6 = xmm0 * dt + xmm6
 	ret
+
+global size_threshold_animation_timer
+size_threshold_animation_timer:
+	movss xmm0, [rdx + 0x68]
+	subss xmm0, [DT_TICKS]
+	ret
+
+global size_threshold_animation_spin
+size_threshold_animation_spin:
+	divss xmm1, [rdx + 0x70]
+	movss xmm3, [rdx + 0x978]
+	vfmadd132ss xmm1, xmm3, [DT_TICKS]
+	ret
+

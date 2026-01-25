@@ -189,6 +189,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_update_katamari_view[0xe7..0xf5] => abilities::katamari_view_descend;
             camera_set_view_mode[0x286..] => 666_i32.to_ne_bytes(); // mov eax, 20 -> mov eax, 666 (frames -> ms)
 
+            camera_update_xc500[0x89..0x96] => camera::size_threshold_animation_timer;
+            camera_update_xc500[0x1b0..0x1bd] => camera::size_threshold_animation_spin;
+
             // Cheat code to pick up things of any size
             // katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}
 

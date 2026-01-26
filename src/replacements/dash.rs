@@ -5,26 +5,7 @@ unsafe extern "C" {
     pub fn stamina_gain();
     pub fn stamina_drain();
     pub fn update_dash_input_timer();
-}
-
-pub unsafe extern "C" fn prince_exhausted(p_idx: i32, prince: *mut Prince) {
-    let (prince, katamari) = unsafe { (&mut *prince, &mut *ps2::katamari_array(p_idx)) };
-
-    if !ps2::multiplayer() {
-        prince.ouji_state.dash_pending = false;
-        prince.ouji_state.dash_base_requirement_met = false;
-        prince.ouji_state.dash_spinning = false;
-        prince.ouji_state.dash_stationary_spin = false;
-        prince.dash_input_counter = 0;
-        katamari.spinning_in_place = false;
-    }
-
-    if prince.prevent_dashing {
-        prince.exhaustion_timer -= values::dt_millis();
-        if prince.exhaustion_timer <= 0 {
-            ps2::prince_reset_exhaustion(prince);
-        }
-    }
+    pub fn prince_exhausted();
 }
 
 pub unsafe extern "C" fn dash_state_machine() {

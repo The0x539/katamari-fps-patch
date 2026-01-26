@@ -25,14 +25,12 @@ global katamari_view_ascend
 katamari_view_ascend:
 	mov eax, ebx
 	add eax, [DT_MILLIS]
-	movaps xmm6, xmm0
-	mov [rsi + 0x884], eax
+	movaps xmm6, xmm0 ; trampoline
 	ret
 
 global katamari_view_descend
 katamari_view_descend:
-	mov edi, [rsi + 0x884]
-	mov ebx, [rsi + 0x888]
+	mov ebx, [rsi + 0x888] ; trampoline
 	add edi, [DT_MILLIS]
 	ret
 

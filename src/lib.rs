@@ -151,9 +151,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             speed_thing_2[0x42a..0x42f] => movement::turn_radius;
 
-            // For some reason, replacing a small part of this function (0x48..0x6a)
-            // just broke it entirely.
-            prince_exhausted => dash::prince_exhausted;
+            prince_exhausted[0x51..0x58] => dash::prince_exhausted;
 
             splash[0x3c1..0x5ad] => cacophony::splash;
 
@@ -169,7 +167,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             //do_katamari_physics[0x4f1..0x4fd] => {}
             //some_sort_of_collision_guy[0xd..0x7e] => good_night;
 
-            calculate_gravity[0x12d..0x13d] => movement::airborne_gravity;
+            calculate_gravity[0x12d..0x135] => movement::airborne_gravity;
 
             npc_40bb0[0x7a..0x8a] => things::melon_spin;
 
@@ -182,24 +180,26 @@ fn install_hooks_impl() -> eyre::Result<()> {
             tick_player[0x113..0x121] => abilities::flip_duration;
             prince_flip[0x62..0x73] => abilities::flip_timer;
             prince_flip[0x303..] => [0x7F]; // JNZ -> JG
-            // TODO: go back and figure out if any other branch fixes would be simplified by the "raw" patch
 
-            camera_update_katamari_view[0x489..0x495] => abilities::katamari_view_ascend;
-            camera_update_katamari_view[0xe7..0xf5] => abilities::katamari_view_descend;
+            camera_update_katamari_view[0x489..0x48f] => abilities::katamari_view_ascend;
+            camera_update_katamari_view[0xed..0xf5] => abilities::katamari_view_descend;
             camera_set_view_mode[0x286..] => 666_i32.to_ne_bytes(); // mov eax, 20 -> mov eax, 666 (frames -> ms)
 
-            camera_update_xc500[0x89..0x96] => camera::size_threshold_animation_timer;
-            camera_update_xc500[0x1b0..0x1bd] => camera::size_threshold_animation_spin;
+            camera_update_xc500[0x8e..0x96] => camera::size_threshold_animation_timer;
+            camera_update_xc500[0x1b5..0x1bd] => camera::size_threshold_animation_spin;
 
             // Cheat code to pick up things of any size
             // katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}
 
-            katamari_sink_things[0x2f..0x3b] => things::sink_rate;
+            // TODO: I had a very hard time figuring out where to put this hook,
+            // but that was before the 12->5 byte hook shrink.
+            // I can probably find a better spot now.
+            katamari_sink_things[0x2f..0x34] => things::sink_rate;
 
             thing_hop[0x10..0x29] => things::hop_timer_update;
             thing_hop_turn[0x69..0x76] => things::hop_angle_update;
             thing_hop_apply_velocity[0xd9..0x14a] => things::hop_position_update;
-            thing_hop_apply_velocity[0x8c..0x9c] => things::hop_gravity;
+            thing_hop_apply_velocity[0x8c..0x94] => things::hop_gravity;
 
             // There's probably still more to be done in this function, given its sheer scale,
             // but this is pretty good for now.

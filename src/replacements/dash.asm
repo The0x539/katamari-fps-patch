@@ -20,3 +20,9 @@ update_dash_input_timer:
 	.a:                 ; }
 	mov [rsp + 0x90 + 8], rbx ; trampoline
 	ret
+
+global prince_exhausted
+prince_exhausted:
+	mov cx, [DT_MILLIS]
+	sub [rdx + 0x480], cx
+	ret

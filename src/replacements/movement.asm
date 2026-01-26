@@ -6,7 +6,6 @@ airborne_gravity:
 	; which seems to be the gravitational acceleration value.
 	movss xmm1, [DT_TICKS]
 	vfmadd213ss xmm5, xmm1, [rbx + 0x2e4]
-	movss xmm1, [rbx + 0x2e8] ; trampoline to have enough room to fit the hook
 	ret
 
 global bumpy_ride

@@ -85,8 +85,6 @@ global hop_gravity
 hop_gravity:
 	movss xmm3, [rdi + 0x88]           ; xmm3 = t->hop_grav_vel
 	vfmadd132ss xmm0, xmm3, [DT_TICKS] ; xmm0 = (xmm0 * dt) + xmm3
-	mulss xmm2, [rdi + 0x28]
-	movaps xmm3, xmm1
 	ret
 
 global freefall_pos

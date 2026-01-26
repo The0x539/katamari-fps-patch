@@ -187,6 +187,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             camera_update_xc500[0x8e..0x96] => camera::size_threshold_animation_timer;
             camera_update_xc500[0x1b5..0x1bd] => camera::size_threshold_animation_spin;
+            // This one adds the vector @ 0x50 to the vector @ 0x10
+            camera_update_xc500[0xa5..0xf5] => camera::size_threshold_animation_other_zoom;
+            // This one adds the vector @ 0x40 to the vector @ 0x00
+            camera_update_xc500[0xf5..0x148] => camera::size_threshold_animation_zoom;
 
             // Cheat code to pick up things of any size
             // katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}

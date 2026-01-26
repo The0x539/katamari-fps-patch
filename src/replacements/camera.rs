@@ -4,4 +4,6 @@ unsafe extern "C" {
     pub fn zoom_out();
     pub fn size_threshold_animation_timer();
     pub fn size_threshold_animation_spin();
+    pub fn size_threshold_animation_zoom();
+    pub fn size_threshold_animation_other_zoom();
 }

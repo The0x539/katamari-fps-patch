@@ -12,6 +12,10 @@ unsafe extern "C" {
     pub fn climb_sustain_timer();
     pub fn climbing_ascent();
     pub fn bump_velocity();
+    pub fn spin_amount();
+
+    // Turning in place with both sticks in opposite directions.
+    pub fn fast_steer();
 }
 
 #[inline]
@@ -88,20 +92,6 @@ pub unsafe extern "C" fn downhill() {
     k.motion.downhill += downhill_v * amount;
 }
 
-// Turning in place with both sticks in opposite directions.
-pub unsafe extern "C" fn fast_steer() {
-    unsafe {
-        asm! {
-            "movss [rcx + 0x78], xmm1",
-            "mulss xmm1, [rip + {dt}]",
-            "mulss xmm1, {gkr}",
-            "addss xmm1, [rcx + 0x6c]",
-            dt = sym values::DT_TICKS,
-            gkr = in(xmm_reg) ps2::g_katamari_rot(),
-        }
-    }
-}
-
 // Turning in place with one stick neutral and one stick forward or backward.
 pub unsafe extern "C" fn slow_steer() {
     unsafe {
@@ -142,16 +132,5 @@ pub unsafe extern "C" fn gentle_steer() {
             dt = sym values::DT_TICKS,
             prince = in(reg) prince,
         }
-    }
-}
-
-#[unsafe(naked)]
-pub unsafe extern "C" fn spin_amount() {
-    naked_asm! {
-        "movss [rsp + 0x2c + 8], xmm9", // trampoline: finish storing the roll direction on the stack (what a waste)
-        "mulss xmm2, [rip + {dt}]",     // important part: delta-time the "theta" arg
-        "jmp {}",
-        sym ps2::rotation_from_axis_angle,
-        dt = sym values::DT_TICKS,
     }
 }

@@ -45,10 +45,7 @@ spindash_gain_power:
 
 global spindash_spinning
 spindash_spinning:
-	lea rcx, [rbx + 0x3a84]
-	lea rdx, [rsp + 0x58 + 8]
-	movups [rsp + 0x58 + 8], xmm0
-	; all of that was just a trampoline lmao
+	movups [rsp + 0x58 + 8], xmm0 ; trampoline
 	mulss xmm2, [DT_TICKS]
 	ret
 

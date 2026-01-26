@@ -1,4 +1,4 @@
-use std::arch::{asm, naked_asm};
+use std::arch::asm;
 use std::f32::consts::PI;
 
 use crate::ps2;

@@ -11,10 +11,8 @@ airborne_gravity:
 
 global bumpy_ride
 bumpy_ride:
-	mulss xmm6, [DT_TICKS] ; the important bit
+	mulss xmm6, [DT_TICKS]
 	movss [rdi + 0x39b8], xmm6
-	; trampoline. extra 8 bytes for this function's return pointer
-	lea rdx, [rsp + 0x28]
 	ret
 
 global climbing_position
@@ -93,9 +91,18 @@ climbing_ascent:
 
 global bump_velocity
 bump_velocity:
-	divss xmm0, [DT_TICKS]
-	; trampoline:
-	lea r8, [rsp + 0x20 + 8]
-	mov rcx, rsi
-	movss xmm6, [rbp - 0x5d]
+	divss xmm0, [DT_TICKS]   ; important part
+	lea r8, [rsp + 0x20 + 8] ; trampoline
+	ret
+
+global spin_amount
+spin_amount:
+	movss [rsp + 0x2c + 8], xmm9 ; trampoline: finish storing the roll direction on the stack (what a waste)
+	mulss xmm2, [DT_TICKS]       ; important part: delta-time the "theta" arg
+	ret
+
+global fast_steer
+fast_steer:
+	mulss xmm1, [DT_TICKS]
+	addss xmm1, [rcx + 0x6c]
 	ret

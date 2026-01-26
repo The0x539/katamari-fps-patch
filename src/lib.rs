@@ -108,16 +108,15 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_big_kahuna[0x3ac..0x40e] => movement::climbing_position;
             katamari_physics_climb[0x259..0x2d7] => movement::climbing_ascent;
 
-            katamari_physics_roll[0x254..0x260] => movement::spin_amount;
-            // TODO: Emit a more visible complaint when the patched range is smaller than needed for the hook.
-            katamari_pivot[0x17a..0x187] => movement::bumpy_ride;
+            katamari_physics_roll[0x254..0x25b] => movement::spin_amount;
+            katamari_pivot[0x17a..0x182] => movement::bumpy_ride;
             katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
             speed_thing_2[0xe12..0xe2d] => movement::push_force;
 
-            katamari_bump_thing[0x375..0x382] => movement::bump_velocity;
+            katamari_bump_thing[0x375..0x37a] => movement::bump_velocity;
 
             do_katamari_physics[0x352..0x362] => abilities::spindash_gain_power;
-            do_katamari_physics[0x3c9..0x3da] => abilities::spindash_spinning;
+            do_katamari_physics[0x3d5..0x3da] => abilities::spindash_spinning;
 
             katamari_physics_climb[0xb9..0xd2] => movement::climb_ascent_timer;
             katamari_physics_climb[0xd2..] => [0x0F, 0x8E]; // JNE -> JNG
@@ -130,9 +129,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             calculate_gravity[0x688..0x820] => movement::uphill;
             calculate_gravity[0x607..0x683] => movement::downhill;
 
-            // TODO: determine if it would be better to just edit g_katamariRot.
-            // Does anyone set it? Or does the game use it as a constant?
-            handle_turn[0xa8..0xba] => movement::fast_steer;
+            handle_turn[0xb5..0xba] => movement::fast_steer;
 
             // The instructions in play here are identical in all four of these cases,
             // aside from a RIP-relative offset for loading g_katamariRot.
@@ -141,7 +138,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             actually_apply_player_input_force_2[0x215..0x227] => movement::slow_steer;
             actually_apply_player_input_force_2[0x15f..0x171] => movement::slow_steer;
 
-            gentle_steering [0x248..0x255] => movement::gentle_steer;
+            gentle_steering[0x248..0x255] => movement::gentle_steer;
 
             ontick_update_angle_guy[0x109..0x14e] => cacophony::sfx_npc_approaching;
 

@@ -127,42 +127,42 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // This causes the giant watermelons to stop rotating their yaw for some reason.
             //copy_matrix => copy_matrix;
 
-            calculate_gravity[0x688..0x820] => uphill;
-            calculate_gravity[0x607..0x683] => downhill;
+            calculate_gravity[0x688..0x820] => movement::uphill;
+            calculate_gravity[0x607..0x683] => movement::downhill;
 
             // TODO: determine if it would be better to just edit g_katamariRot.
             // Does anyone set it? Or does the game use it as a constant?
-            handle_turn[0xa8..0xba] => fast_steer;
+            handle_turn[0xa8..0xba] => movement::fast_steer;
 
             // The instructions in play here are identical in all four of these cases,
             // aside from a RIP-relative offset for loading g_katamariRot.
-            actually_apply_player_input_force_2[0x36f..0x381] => slow_steer;
-            actually_apply_player_input_force_2[0x2c7..0x2d9] => slow_steer;
-            actually_apply_player_input_force_2[0x215..0x227] => slow_steer;
-            actually_apply_player_input_force_2[0x15f..0x171] => slow_steer;
+            actually_apply_player_input_force_2[0x36f..0x381] => movement::slow_steer;
+            actually_apply_player_input_force_2[0x2c7..0x2d9] => movement::slow_steer;
+            actually_apply_player_input_force_2[0x215..0x227] => movement::slow_steer;
+            actually_apply_player_input_force_2[0x15f..0x171] => movement::slow_steer;
 
-            gentle_steering [0x248..0x255] => gentle_steer;
+            gentle_steering [0x248..0x255] => movement::gentle_steer;
 
-            ontick_update_angle_guy[0x109..0x14e] => sfx_npc_approaching;
+            ontick_update_angle_guy[0x109..0x14e] => cacophony::sfx_npc_approaching;
 
             //prince_flip[0x305..0x35b] => prince_flip;
-            tick_player[0x131..0x188] => stamina_gain;
-            prince_handle_dash[0x16f..0x17d] => stamina_drain;
-            prince_handle_dash[0x404..0x412] => update_dash_input_timer;
-            speed_thing_2[0x143..0x21f] => dash_state_machine;
+            tick_player[0x131..0x188] => dash::stamina_gain;
+            prince_handle_dash[0x16f..0x17d] => dash::stamina_drain;
+            prince_handle_dash[0x404..0x412] => dash::update_dash_input_timer;
+            speed_thing_2[0x143..0x21f] => dash::dash_state_machine;
 
-            speed_thing_2[0x42a..0x438] => turn_radius;
+            speed_thing_2[0x42a..0x438] => movement::turn_radius;
 
             // For some reason, replacing a small part of this function (0x48..0x6a)
             // just broke it entirely.
-            prince_exhausted => prince_exhausted;
+            prince_exhausted => dash::prince_exhausted;
 
-            splash[0x3c1..0x5ad] => splash;
+            splash[0x3c1..0x5ad] => cacophony::splash;
 
             // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
-            gunshot[0x1cb..0x2c7] => bang;
+            gunshot[0x1cb..0x2c7] => cacophony::bang;
             // This handles the local cooldown
-            gunshot[0xd5..0x10a] => bang2;
+            gunshot[0xd5..0x10a] => cacophony::bang2;
             // Remove a weird remaining increment of the counter, since my code handles it
             gunshot[0x1bb..0x1be] => {}
 
@@ -171,11 +171,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
             //do_katamari_physics[0x4f1..0x4fd] => {}
             //some_sort_of_collision_guy[0xd..0x7e] => good_night;
 
-            calculate_gravity[0x12d..0x13d] => airborne_gravity;
+            calculate_gravity[0x12d..0x13d] => movement::airborne_gravity;
 
-            npc_40bb0[0x7a..0x8a] => melon_spin;
+            npc_40bb0[0x7a..0x8a] => things::melon_spin;
 
-            thing_animal_motion[0x9e..0xe5] => animal_walk;
+            thing_animal_motion[0x9e..0xe5] => things::animal_walk;
 
             camera_bear_cow_orbit[0xd7..0xe7] => camera::orbit_a;
             camera_versus_winner_orbit[0x55..0x67] => camera::orbit_b;

@@ -116,6 +116,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             katamari_bump_thing[0x375..0x382] => movement::bump_velocity;
 
+            do_katamari_physics[0x352..0x362] => abilities::spindash_gain_power;
             do_katamari_physics[0x3c9..0x3da] => abilities::spindash_spinning;
 
             katamari_physics_climb[0xb9..0xd2] => movement::climb_ascent_timer;
@@ -218,6 +219,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_freefall[0x201..0x211] => {}
 
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
+            thing_reset_hop_timer[0x2c..0x3c] => things::hop_timer_reset;
 
             thing_animal_state_3_turn[0x61..0x6e] => things::animal_angle_move_towards;
             // This isn't working. There's something missing. More blood must be shed.
@@ -232,6 +234,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
                 0x48, 0x8b, 0x1d, 0x05, 0xb2, 0xcf, 0x00, // mov rbx, [DLL + 0xD354C0]
             ];
             thing_flee_state_4[0x4b..0x59] => things::update_flee_timer;
+
+            f32_angle_move_towards[0..0x11] => things::angle_move_towards;
+            pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();
@@ -245,30 +250,6 @@ fn install_hooks_impl() -> eyre::Result<()> {
             dll.initialize_princes,
             0x3e3,
             replacements::prince_post_init,
-        )?;
-
-        hook::patch(
-            dll.thing_reset_hop_timer,
-            0x2c..0x3c,
-            replacements::things::hop_timer_reset,
-        )?;
-
-        hook::patch(
-            dll.do_katamari_physics,
-            0x352..0x362,
-            replacements::abilities::spindash_gain_power,
-        )?;
-
-        hook::patch(
-            dll.f32_angle_move_towards,
-            0..0x11,
-            replacements::things::angle_move_towards,
-        )?;
-
-        hook::patch(
-            dll.pursuit_angle_move_towards,
-            0..0x12,
-            replacements::things::pursuit_angle_move_towards,
         )?;
     }
 

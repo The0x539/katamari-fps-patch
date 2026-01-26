@@ -13,6 +13,8 @@ pub mod movement;
 pub mod things;
 
 pub(crate) mod values {
+    use crate::types::Vec4;
+
     /// Let a "tick" refer to a 1/30 second duration.
     /// Let an "update" refer to one call of the Tick() function from PS2KatamariSimulation.dll.
     ///
@@ -35,8 +37,10 @@ pub(crate) mod values {
     ///
     /// If a value is measured in "units per tick", e.g. velocity,
     /// it should probably be multiplied by this value.
+    ///
+    /// This value is four
     #[unsafe(no_mangle)]
-    pub static mut DT_TICKS: f32 = 0.5;
+    pub static mut DT_TICKS: Vec4 = Vec4::splat3(0.5);
 
     /// The duration, in (rounded) *milliseconds*, of the current update.
     ///
@@ -52,7 +56,8 @@ pub(crate) mod values {
     pub fn set_dt(delta: f32) {
         unsafe {
             DT_SECONDS = delta;
-            DT_TICKS = delta * 1000.0 / 30.0;
+            let dt_ticks = delta * 1000.0 / 30.0;
+            DT_TICKS = Vec4::splat3(dt_ticks);
 
             let millis = delta * 1000.0;
             DT_MILLIS = millis.floor() as i16;
@@ -75,7 +80,7 @@ pub(crate) mod values {
             // We can leave x/y/z untouched and put a value in w that results in an appropriate overall product.
             let smoothing = &mut *crate::ps2::raw::camera_smoothing();
             let vanilla_t = smoothing.x * smoothing.y * smoothing.z;
-            let desired_t = 1.0 - (1.0 - vanilla_t).powf(DT_TICKS);
+            let desired_t = 1.0 - (1.0 - vanilla_t).powf(dt_ticks);
             smoothing.w = (desired_t / vanilla_t).clamp(0.01, 1.0);
         }
     }
@@ -108,7 +113,7 @@ pub(crate) mod values {
 
     #[inline]
     pub(super) fn dt_ticks() -> f32 {
-        unsafe { DT_TICKS }
+        unsafe { DT_TICKS.x }
     }
 
     #[inline]

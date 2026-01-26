@@ -736,6 +736,16 @@ impl Vec4 {
     }
 
     #[inline]
+    pub const fn splat3(v: f32) -> Self {
+        Self {
+            x: v,
+            y: v,
+            z: v,
+            w: 0.0,
+        }
+    }
+
+    #[inline]
     pub const fn to_array(self) -> [f32; 4] {
         [self.x, self.y, self.z, self.w]
     }

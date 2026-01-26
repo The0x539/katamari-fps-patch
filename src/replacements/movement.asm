@@ -17,15 +17,15 @@ bumpy_ride:
 	lea rdx, [rsp + 0x28]
 	ret
 
-global rolling_position
-rolling_position:
-	movups xmm1, [rbx + 0x2b0] ; xmm1 = k->motion.h (effective velocity, including gravity)
-	jmp increment_position
-
 global climbing_position
 climbing_position:
         movups xmm1, [rbx + 0x290] ; xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
-        jmp increment_position
+	jmp increment_position
+
+global rolling_position
+rolling_position:
+	movups xmm1, [rbx + 0x2b0] ; xmm1 = k->motion.h (effective velocity, including gravity)
+	; fall through to increment_position
 
 increment_position:
 	; xmm6-8 contain the x/y/z of the "vel" variable,
@@ -33,13 +33,8 @@ increment_position:
 	; Bonus: we can read the version that already includes gravity
 	; xmm0-4 are clobbered by the original code.
 	movups xmm0, [rbx + 0x460]    ; xmm0 = k->position
-	movss xmm2, [rbx + 0x46c]     ; xmm2 = k->position.w
-
-	vbroadcastss xmm3, [DT_TICKS] ; xmm3 = splat(dt)
-	vfmadd231ps xmm0, xmm1, xmm3  ; xmm0 += xmm1 * xmm3
-
+	vfmadd231ps xmm0, xmm1, [DT_TICKS] ; xmm0 += xmm1 * dt
 	movups [rbx + 0x460], xmm0    ; k->position = xmm0
-	movss [rbx + 0x46c], xmm2     ; k->position.w = xmm2
 	ret
 
 global turn_radius

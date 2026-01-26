@@ -75,12 +75,10 @@ hop_angle_update:
 
 global hop_position_update
 hop_position_update:
-	movss xmm15, [rcx + 0x9c]
 	movups xmm3, [rcx + 0x90]
-	vbroadcastss xmm1, [DT_TICKS]
+	movups xmm1, [DT_TICKS]
 	vfmadd231ps xmm3, xmm1, [rcx + 0xe0]
 	movups [rcx + 0x90], xmm3
-	movss [rcx + 0x9c], xmm15
 	ret
 
 global hop_gravity

@@ -46,7 +46,7 @@ pub unsafe extern "C" fn sink_rate() {
         let k: *mut Katamari;
         asm!("", out("rdx") k);
 
-        (*k).sink_rate = (*k).sink_rate.powf(values::DT_TICKS);
+        (*k).sink_rate = (*k).sink_rate.powf(values::dt_ticks());
 
         // RCX and RAX would theoretically also be good to preserve,
         // but I think only RDX is strictly necessary based on the caller's register usage.

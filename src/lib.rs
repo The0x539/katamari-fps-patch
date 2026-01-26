@@ -226,14 +226,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_train_x391b0[0x48..0x56] => things::train_angle_move_towards;
 
             thing_flee_state_2[0x64..0x70] => things::start_flee_timer;
-            // my worst hack yet: move the instructions, including a RIP-relative offset,
-            // backward (covering a no-longer-needed DEC AX) to make room for my jump
-            // encoding of the offset determined using x64dbg's assembler
-            thing_flee_state_4[0x3f..] => [
-                0x48, 0x89, 0x5c, 0x24, 0x20,             // mov [rsp + 0x20], rbx
-                0x48, 0x8b, 0x1d, 0x05, 0xb2, 0xcf, 0x00, // mov rbx, [DLL + 0xD354C0]
-            ];
-            thing_flee_state_4[0x4b..0x59] => things::update_flee_timer;
+            thing_flee_state_4[0x3f..0x47] => things::update_flee_timer;
 
             f32_angle_move_towards[0..0x11] => things::angle_move_towards;
             pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;

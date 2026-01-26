@@ -188,13 +188,11 @@ start_flee_timer:
 
 global update_flee_timer
 update_flee_timer:
-	mov ax, [rdx + 0x124]
 	sub ax, [DT_MILLIS]
 	jns .not_negative
 	xor eax, eax
 	.not_negative:
-	mov [rdx + 0x124], ax
-	test byte [rbx + 0x14], 2
+	mov [rsp + 0x20 + 8], rbx ; trampoline
 	ret
 
 

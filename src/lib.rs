@@ -203,10 +203,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             // There's probably still more to be done in this function, given its sheer scale,
             // but this is pretty good for now.
-            thing_freefall[0xa..0x1c] => things::freefall_gravity;
+            thing_freefall[0x12..0x1c] => things::freefall_gravity;
             thing_freefall[0x46..0x5e] => things::freefall_pos;
-            thing_freefall[0xa5..0xc0] => things::freefall_spin_a;
-            thing_freefall[0x255..0x270] => things::freefall_spin_b;
+            thing_freefall[0xb7..0xc0] => things::freefall_spin_a;
+            thing_freefall[0x267..0x270] => things::freefall_spin_b;
             thing_freefall[0x2f1..0x305] => things::freefall_spin_c;
             // for some reason the compiler was extra silly
             // and put the x component addition after both ends of the branch
@@ -217,7 +217,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_freefall[0x201..0x211] => {}
 
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
-            thing_reset_hop_timer[0x2c..0x3c] => things::hop_timer_reset;
+            thing_reset_hop_timer[0x2c..0x33] => things::hop_timer_reset;
+
+            // Hooks below this line still need to be analyzed for improvements with the smaller hook.
 
             thing_animal_state_3_turn[0x61..0x6e] => things::animal_angle_move_towards;
             // This isn't working. There's something missing. More blood must be shed.

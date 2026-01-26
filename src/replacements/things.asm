@@ -43,7 +43,6 @@ hop_timer_reset:
 	; Praying that the byte after this counter is unused,
 	; at least by the NPCs we care about.
 	mov word [rax + 0x90], 833 ; 25 ticks -> 833 ms
-	mov word [rbx + 0x58e], 1
 	ret
 
 global hop_timer_update
@@ -103,31 +102,20 @@ freefall_pos:
 
 global freefall_gravity
 freefall_gravity:
-	movss xmm0, [rcx + 0xe4]
 	mov rdi, [PTR_THING_GRAVITY]
 	movss xmm4, [rdi]
 	vfmadd231ss xmm0, xmm4, [DT_TICKS]
 	xor edi, edi
 	ret
 
-; TODO: unify these two lmao, damn original compiler made two versions
-; when I have more mental energy it should be possible
-; to replace a slightly larger chunk such that these can use the same registers
-
 global freefall_spin_a
 freefall_spin_a:
-	movzx eax, byte [rcx + 0x3d2] ; an "axis selector" or something
-	movss xmm1, [rcx + 0x3d4]     ; the angular sped
-	movaps xmm0, xmm1             ; two copies of the angular speed; one is used to calc decay
 	movss xmm5, [DT_TICKS]
 	vfmadd123ss xmm0, xmm5, [rcx + 0xa0 + 4*rax] ; xmm0 = (xmm0 * xmm5) + [current angle]
 	ret
 
 global freefall_spin_b
 freefall_spin_b:
-	movzx eax, byte [rcx + 0x3d2] ; an "axis selector" or something
-	movss xmm0, [rcx + 0x3d4]     ; the angular sped
-	movaps xmm1, xmm0             ; two copies of the angular speed; one is used to calc decay
 	movss xmm5, [DT_TICKS]
 	vfmadd123ss xmm1, xmm5, [rcx + 0xa0 + 4*rax] ; xmm0 = (xmm0 * xmm5) + [current angle]
 	ret

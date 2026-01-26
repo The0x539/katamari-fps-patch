@@ -247,25 +247,25 @@ fn install_hooks_impl() -> eyre::Result<()> {
             replacements::prince_post_init,
         )?;
 
-        hook::patch_preserving_rax(
+        hook::patch(
             dll.thing_reset_hop_timer,
             0x2c..0x3c,
             replacements::things::hop_timer_reset,
         )?;
 
-        hook::patch_preserving_rax(
+        hook::patch(
             dll.do_katamari_physics,
             0x352..0x362,
             replacements::abilities::spindash_gain_power,
         )?;
 
-        hook::patch_preserving_rax(
+        hook::patch(
             dll.f32_angle_move_towards,
             0..0x11,
             replacements::things::angle_move_towards,
         )?;
 
-        hook::patch_preserving_rax(
+        hook::patch(
             dll.pursuit_angle_move_towards,
             0..0x12,
             replacements::things::pursuit_angle_move_towards,

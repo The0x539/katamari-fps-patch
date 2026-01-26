@@ -28,19 +28,14 @@ pub unsafe fn patch<R>(
 ) -> eyre::Result<()> {
     let target = target.into_target();
     unsafe {
-        let detour = detour as *const ();
-        let patch_code = patch_asm_bytes();
+        let detour = detour as *const u8;
         let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
 
-        let i = patch_code
-            .windows(8)
-            .position(|w| w == [0xEE; 8])
-            .unwrap_or(0);
+        let patch_code = generate_call(target_code.cast(), detour);
 
         mprotect(target_code, w::PAGE_READWRITE, || {
             let target_code = &mut *target_code;
-            target_code[..patch_code.len()].copy_from_slice(patch_code);
-            target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
+            target_code[..patch_code.len()].copy_from_slice(&patch_code);
             fill_with_nops(&mut target_code[patch_code.len()..]);
         })?;
     }
@@ -48,35 +43,24 @@ pub unsafe fn patch<R>(
     Ok(())
 }
 
-pub unsafe fn patch_preserving_rax<R>(
-    target: impl Target,
-    range: std::ops::Range<usize>,
-    detour: unsafe extern "C" fn() -> R,
-) -> eyre::Result<()> {
-    let target = target.into_target();
-    unsafe {
-        let detour = detour as *const ();
-        let patch_code = patch_asm_bytes();
-        let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
-
-        let i = patch_code
-            .windows(8)
-            .position(|w| w == [0xEE; 8])
-            .unwrap_or(0);
-
-        mprotect(target_code, w::PAGE_READWRITE, || {
-            let target_code = &mut *target_code;
-            let ([push_rax], target_code) = target_code.split_first_chunk_mut().unwrap();
-            *push_rax = 0x50;
-
-            target_code[..patch_code.len()].copy_from_slice(patch_code);
-            target_code[i..][..8].copy_from_slice(&detour.addr().to_ne_bytes());
-            target_code[patch_code.len()] = 0x58;
-            fill_with_nops(&mut target_code[patch_code.len() + 1..]);
-        })?;
-    }
-
-    Ok(())
+unsafe fn generate_call(call_addr: *const u8, target_addr: *const u8) -> [u8; 5] {
+    // The two DLLs of interest here are loaded into memory in quick succession,
+    // and no other process is expected to load either of them,
+    // so we can rely on them both loading into memory close enough for 32-bit relative addressing
+    // (with decent confidence, at least)
+    let rel32 = unsafe {
+        let return_addr: *const u8 = call_addr.add(5);
+        let rel64: isize = target_addr.byte_offset_from(return_addr);
+        i32::try_from(rel64).unwrap_or_else(|_| {
+            println!("could not make rel32 address");
+            std::thread::sleep(std::time::Duration::from_secs(5));
+            std::process::exit(1)
+        })
+    };
+    let mut code = [0_u8; 5];
+    code[0] = 0xE8; // CALL rel32
+    code[1..].copy_from_slice(&rel32.to_ne_bytes());
+    code
 }
 
 pub unsafe fn raw_patch(
@@ -193,8 +177,6 @@ unsafe impl<T, U, V, W, X, R> Target for extern "win64" fn(T, U, V, W, X) -> R {
 unsafe extern "C" {
     static hook_start: u8;
     static hook_end: u8;
-    static patch_start: u8;
-    static patch_end: u8;
 }
 
 core::arch::global_asm! {
@@ -206,25 +188,12 @@ core::arch::global_asm! {
     "mov rax, 0xEEEEEEEEEEEEEEEE",
     "jmp rax",
     "hook_end:",
-
-    "patch_start:",
-    "mov rax, 0xEEEEEEEEEEEEEEEE",
-    "call rax",
-    "patch_end:",
 }
 
 fn hook_asm_bytes() -> &'static [u8] {
     unsafe {
         let start = &raw const hook_start;
         let end = start.with_addr((&raw const hook_end).addr());
-        std::slice::from_ptr_range(start..end)
-    }
-}
-
-fn patch_asm_bytes() -> &'static [u8] {
-    unsafe {
-        let start = &raw const patch_start;
-        let end = start.with_addr((&raw const patch_end).addr());
         std::slice::from_ptr_range(start..end)
     }
 }

@@ -42,7 +42,6 @@ global hop_timer_reset
 hop_timer_reset:
 	; Praying that the byte after this counter is unused,
 	; at least by the NPCs we care about.
-	mov rax, [rsp + 8]
 	mov word [rax + 0x90], 833 ; 25 ticks -> 833 ms
 	mov word [rbx + 0x58e], 1
 	ret

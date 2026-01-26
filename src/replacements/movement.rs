@@ -14,8 +14,8 @@ unsafe extern "C" {
     pub fn bump_velocity();
     pub fn spin_amount();
 
-    // Turning in place with both sticks in opposite directions.
-    pub fn fast_steer();
+    pub fn steer_rbx();
+    pub fn steer_rcx();
 }
 
 #[inline]
@@ -90,47 +90,4 @@ pub unsafe extern "C" fn downhill() {
 
     let amount = time_factor * (k.diameter_cm / 50.0) * values::dt_ticks();
     k.motion.downhill += downhill_v * amount;
-}
-
-// Turning in place with one stick neutral and one stick forward or backward.
-pub unsafe extern "C" fn slow_steer() {
-    unsafe {
-        let prince: *mut Prince;
-        let direction: f32;
-        asm! {
-            "push rbx",
-            "mov {}, rbx",
-            out(reg) prince,
-            out("xmm1") direction,
-        };
-
-        asm! {
-            "movss [{prince} + 0x78], xmm1",
-            "mulss xmm1, xmm0",
-            "mulss xmm1, [rip + {dt}]",
-            "addss xmm1, [rbx + 0x6c]",
-            "pop rbx",
-
-            in("xmm0") ps2::g_katamari_rot(),
-            in("xmm1") direction,
-            dt = sym values::DT_TICKS,
-            prince = in(reg) prince,
-        }
-    }
-}
-
-// Steering while moving.
-pub unsafe extern "C" fn gentle_steer() {
-    unsafe {
-        let prince: *mut Prince;
-        asm!("mov {}, rbx", out(reg) prince);
-
-        asm! {
-            "mulss xmm1, [rip + {dt}]",
-            "mulss xmm1, [{prince} + 0x78]",
-            in("xmm1") ps2::g_katamari_rot(),
-            dt = sym values::DT_TICKS,
-            prince = in(reg) prince,
-        }
-    }
 }

@@ -39,8 +39,6 @@ global turn_radius
 turn_radius:
 	movss xmm2, [rsi + 0x78]
 	mulss xmm2, [DT_TICKS]
-	lea rdx, [rsp + 0x68]
-	lea rcx, [rbp - 0x60]
 	ret
 
 global friction
@@ -101,8 +99,14 @@ spin_amount:
 	mulss xmm2, [DT_TICKS]       ; important part: delta-time the "theta" arg
 	ret
 
-global fast_steer
-fast_steer:
+global steer_rbx
+steer_rbx:
+	mulss xmm1, [DT_TICKS]
+	addss xmm1, [rbx + 0x6c]
+	ret
+
+global steer_rcx
+steer_rcx:
 	mulss xmm1, [DT_TICKS]
 	addss xmm1, [rcx + 0x6c]
 	ret

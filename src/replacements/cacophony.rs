@@ -12,8 +12,7 @@ pub unsafe extern "C" fn sfx_npc_approaching() {
         let i = ps2::current_player_index();
         let k = ps2::katamari_array(i);
 
-        (*k).sfx_0x2d_timer -= (ps2::delta_time() * 1000.0) as i16;
-        // println!("{}", (*k).sfx_0x2d_timer);
+        (*k).sfx_0x2d_timer -= values::dt_millis();
         if (*k).sfx_0x2d_timer < 0 {
             if ps2::allow_sfx() && ps2::val_x0ff0f6() == 0 {
                 ps2::cb::play_sound_fx(0x2d, 1.0, 0);

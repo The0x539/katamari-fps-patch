@@ -129,26 +129,27 @@ fn install_hooks_impl() -> eyre::Result<()> {
             calculate_gravity[0x688..0x820] => movement::uphill;
             calculate_gravity[0x607..0x683] => movement::downhill;
 
-            handle_turn[0xb5..0xba] => movement::fast_steer;
+            // Steering with both sticks.
+            handle_turn[0xb5..0xba] => movement::steer_rcx;
 
-            // The instructions in play here are identical in all four of these cases,
-            // aside from a RIP-relative offset for loading g_katamariRot.
-            actually_apply_player_input_force_2[0x36f..0x381] => movement::slow_steer;
-            actually_apply_player_input_force_2[0x2c7..0x2d9] => movement::slow_steer;
-            actually_apply_player_input_force_2[0x215..0x227] => movement::slow_steer;
-            actually_apply_player_input_force_2[0x15f..0x171] => movement::slow_steer;
+            // Steering with one stick.
+            actually_apply_player_input_force_2[0x37c..0x381] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x2d4..0x2d9] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x222..0x227] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x16c..0x171] => movement::steer_rbx;
 
-            gentle_steering[0x248..0x255] => movement::gentle_steer;
+            // Steering while still pushing forward.
+            gentle_steering[0x25d..0x262] => movement::steer_rbx;
 
             ontick_update_angle_guy[0x109..0x14e] => cacophony::sfx_npc_approaching;
 
             //prince_flip[0x305..0x35b] => prince_flip;
-            tick_player[0x131..0x188] => dash::stamina_gain;
-            prince_handle_dash[0x16f..0x17d] => dash::stamina_drain;
-            prince_handle_dash[0x404..0x412] => dash::update_dash_input_timer;
+            tick_player[0x13a..0x141] => dash::stamina_gain;
+            prince_handle_dash[0x16f..0x176] => dash::stamina_drain;
+            prince_handle_dash[0x3f9..0x404] => dash::update_dash_input_timer;
             speed_thing_2[0x143..0x21f] => dash::dash_state_machine;
 
-            speed_thing_2[0x42a..0x438] => movement::turn_radius;
+            speed_thing_2[0x42a..0x42f] => movement::turn_radius;
 
             // For some reason, replacing a small part of this function (0x48..0x6a)
             // just broke it entirely.

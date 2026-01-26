@@ -2,32 +2,9 @@ use super::*;
 
 #[link(name = "native_replacements", kind = "static")]
 unsafe extern "C" {
+    pub fn stamina_gain();
     pub fn stamina_drain();
     pub fn update_dash_input_timer();
-}
-
-pub unsafe extern "C" fn stamina_gain() {
-    let prince = unsafe {
-        let prince: *mut Prince;
-        asm!("mov rcx, rbx", out("rcx") prince);
-        &mut *prince
-    };
-
-    if prince.ouji_state.dash_spinning {
-        prince.stamina_gain_timer = 0;
-        return;
-    }
-
-    prince.stamina_gain_timer += values::dt_millis();
-
-    if prince.stamina_gain_timer as i32 > prince.stamina_gain_interval {
-        prince.stamina_gain_timer = 0;
-
-        let mut stamina = prince.stamina as i32;
-        stamina += prince.stamina_gain_amount;
-        stamina = stamina.min(prince.stamina_limit);
-        prince.stamina = stamina as i16;
-    }
 }
 
 pub unsafe extern "C" fn prince_exhausted(p_idx: i32, prince: *mut Prince) {

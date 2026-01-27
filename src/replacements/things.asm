@@ -240,3 +240,10 @@ elevator_height_update:
 	vfmadd123ss xmm0, xmm2, [rbx + 0x20]
 	ret
 
+global teddy_bear_bowl_spin
+teddy_bear_bowl_spin:
+	movss xmm1, [.theta]
+	vfmadd231ss xmm0, xmm1, [DT_TICKS]
+	ret
+	.theta: dd 0.05
+

@@ -211,6 +211,9 @@ exports! {
     #[func @ 0x3fd30]
     fn thing_machine_22_state_6(t: *mut Thing);
 
+    #[func @ 0x40a60]
+    fn thing_machine_20_state_1(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

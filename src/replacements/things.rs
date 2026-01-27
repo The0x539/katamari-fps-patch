@@ -44,6 +44,7 @@ unsafe extern "C" {
     pub fn elevator_timer_reset();
     pub fn elevator_timer_update();
     pub fn elevator_height_update();
+    pub fn teddy_bear_bowl_spin();
 }
 
 pub unsafe extern "C" fn sink_rate() {

@@ -246,6 +246,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_machine_22_state_6[0xd4..0xd9] => things::elevator_height_update;
             thing_machine_22_state_6[0x63..0x68] => things::elevator_height_update;
 
+            thing_machine_20_state_1[0x51..0x59] => things::teddy_bear_bowl_spin;
+
             katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;
             katamari_collide_with_wall[0x7e2..0x7e9] => stereo_haptics::wall_bump_hook;
             katamari_bump_thing[0..5] => stereo_haptics::thing_bump_hook;

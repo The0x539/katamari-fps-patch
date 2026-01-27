@@ -213,3 +213,30 @@ sine_bob:
 	vfmadd123ss xmm0, xmm1, [rbx + 0x10]
 	ret
 
+global elevator_timer_reset
+elevator_timer_reset:
+	; the trampoline instruction is written differently in each case in the original code,
+	; but this does work in both cases
+	inc byte [rbx + 0x2] ; state += 1
+	imul eax, 1000
+	xor edx, edx
+	idiv dword [.thirty]
+	mov [rbx + 0x2c], eax
+	ret
+	.thirty: dd 30
+
+global elevator_timer_update
+elevator_timer_update:
+	sub eax, [DT_MILLIS]
+	jns .not_negative
+	xor eax, eax
+	.not_negative:
+	mov [rbx + 0x2c], eax
+	ret
+
+global elevator_height_update
+elevator_height_update:
+	movss xmm2, [DT_TICKS]
+	vfmadd123ss xmm0, xmm2, [rbx + 0x20]
+	ret
+

@@ -240,6 +240,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_machine_22_state_2[0x30..0x35] => things::sine_bob;
             thing_machine_22_state_3[0x58..0x7f] => things::other_hop_gravity;
 
+            thing_machine_22_state_6[0x1b1..0x1bb] => things::elevator_timer_reset;
+            thing_machine_22_state_6[0x164..0x16a] => things::elevator_timer_reset;
+            thing_machine_22_state_6[0xbf..0xc4] => things::elevator_timer_update;
+            thing_machine_22_state_6[0xd4..0xd9] => things::elevator_height_update;
+            thing_machine_22_state_6[0x63..0x68] => things::elevator_height_update;
+
             katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;
             katamari_collide_with_wall[0x7e2..0x7e9] => stereo_haptics::wall_bump_hook;
             katamari_bump_thing[0..5] => stereo_haptics::thing_bump_hook;

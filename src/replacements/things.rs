@@ -41,6 +41,9 @@ unsafe extern "C" {
     pub fn update_flee_timer();
     pub fn other_hop_gravity();
     pub fn sine_bob();
+    pub fn elevator_timer_reset();
+    pub fn elevator_timer_update();
+    pub fn elevator_height_update();
 }
 
 pub unsafe extern "C" fn sink_rate() {

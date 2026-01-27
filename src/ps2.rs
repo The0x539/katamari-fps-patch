@@ -217,6 +217,9 @@ exports! {
     #[func @ 0x2f100]
     fn thing_basic_gravity(t: *mut Thing);
 
+    #[func @ 0x25590]
+    fn camera_main();
+
     #[var @ 0]
     static base_addr: ();
 
@@ -273,6 +276,12 @@ exports! {
 
     #[var @ 0x15523c]
     static thing_gravity: f32;
+
+    #[var @ 0xd34c28]
+    static angel_zoom_distance: f32;
+
+    #[var @ 0xd34c2c]
+    static angel_zoom_rate: f32;
 
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];

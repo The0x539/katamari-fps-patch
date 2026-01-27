@@ -40,6 +40,7 @@ unsafe extern "C" {
     pub fn start_flee_timer();
     pub fn update_flee_timer();
     pub fn other_hop_gravity();
+    pub fn sine_bob();
 }
 
 pub unsafe extern "C" fn sink_rate() {

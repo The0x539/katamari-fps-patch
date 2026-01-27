@@ -207,4 +207,9 @@ update_flee_timer:
 	mov [rsp + 0x20 + 8], rbx ; trampoline
 	ret
 
+global sine_bob
+sine_bob:
+	movss xmm1, [DT_TICKS]
+	vfmadd123ss xmm0, xmm1, [rbx + 0x10]
+	ret
 

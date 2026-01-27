@@ -237,6 +237,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             // Hooks below this line are newer than the "hooks above this line" comment.
 
+            thing_machine_22_state_2[0x30..0x35] => things::sine_bob;
             thing_machine_22_state_3[0x58..0x7f] => things::other_hop_gravity;
 
             katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;

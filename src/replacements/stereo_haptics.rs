@@ -13,6 +13,10 @@ unsafe extern "C" fn get_rumble_bias(p_idx: usize) -> f32 {
 }
 
 fn on_bump(katamari: &Katamari, direction: Vec2) {
+    if direction.sqrlen() < 0.1 {
+        return;
+    }
+
     // Consider a view of the katamari and the bumped thing, from above.
     // Consider a unit circle drawn around the center of the katamari.
     // Consider the thing's position (relative to the katamari), projected onto that circle.

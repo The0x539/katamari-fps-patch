@@ -76,7 +76,8 @@ pub unsafe extern "C" fn wall_bump_hook() {
 pub unsafe extern "C" fn thing_bump_hook() {
     naked_asm! {
         "mov [rsp + 0x18 + 8], rbx", // trampoline
-        "jmp {}",
+        "call {}",
+        "ret",
         sym thing_bump_hook_impl,
     }
 }

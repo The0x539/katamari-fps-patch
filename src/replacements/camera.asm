@@ -51,3 +51,16 @@ size_threshold_animation_other_zoom:
 	vfmadd231ps xmm0, xmm1, [DT_TICKS]
 	movups [rdx + 0x10], xmm0
 	ret
+
+; this isn't quite mathematically correct, but I am *way* too tired
+; to figure out the analytical representation of what the original code doing.
+; basically, it's similar to lerp smoothing,
+; but there's a division by the number of ticks remaining in the mission timer,
+; meaning the fade-to-white accelerates as the timer counts down towards zero.
+;
+; I'm hoping the difference between that behavior and my delta-timed version is small.
+global angel_fade
+angel_fade:
+	vfmadd231ss xmm2, xmm1, [DT_TICKS]
+	comiss xmm2, xmm7 ; trampoline
+	ret

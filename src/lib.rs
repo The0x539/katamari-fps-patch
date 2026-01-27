@@ -251,6 +251,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_basic_gravity[0x21..0xac] => things::basic_gravity;
 
             camera_main[0x1a3..0x1bb] => camera::angel_zoom;
+            camera_main[0x22a..0x231] => camera::angel_fade;
 
             katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;
             katamari_collide_with_wall[0x7e2..0x7e9] => stereo_haptics::wall_bump_hook;

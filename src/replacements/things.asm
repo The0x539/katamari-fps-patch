@@ -247,3 +247,22 @@ teddy_bear_bowl_spin:
 	ret
 	.theta: dd 0.05
 
+global basic_gravity
+basic_gravity:
+	mov [rsp + 0x80 + 8], rsi ; trampoline
+
+	; acceleration (xmm0 currently contains gravity)
+	movups xmm1, [DT_TICKS] ; (we'll be using the whole vector soon)
+	vfmadd123ss xmm0, xmm1, [rcx + 0xe4]
+	movss [rcx + 0xe4], xmm0
+
+	movaps xmm0, [rcx + 0x90]
+	vfmadd231ps xmm0, xmm1, [rcx + 0xe0]
+	movaps [rcx + 0x90], xmm0
+
+	; the original function puts the final result back on the stack,
+	; but I don't think it's actually used at any point lmao
+	;movups [rsp + 0x20 + 8], xmm0
+
+	ret
+

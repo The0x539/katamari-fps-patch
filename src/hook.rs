@@ -21,10 +21,10 @@ pub unsafe fn install(target: impl Target, detour: *const u8) -> eyre::Result<()
     Ok(())
 }
 
-pub unsafe fn patch<R>(
+pub unsafe fn patch(
     target: impl Target,
     range: std::ops::Range<usize>,
-    detour: unsafe extern "C" fn() -> R,
+    detour: *const (),
 ) -> eyre::Result<()> {
     let target = target.into_target();
     unsafe {

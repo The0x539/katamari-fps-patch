@@ -775,9 +775,17 @@ impl Vec4 {
         Self::new(self.x, self.y, self.z, 0.0)
     }
 
+    // TODO: I accidentally wrote this as x0yz earlier.
+    // Could this be the reason my full-function replacement for big_kahuna didn't work?
+    // Needs re-investigation
     #[inline]
     pub fn x0zw(&self) -> Self {
-        Self::new(self.x, 0.0, self.y, self.z)
+        Self::new(self.x, 0.0, self.z, self.w)
+    }
+
+    #[inline]
+    pub fn xz(&self) -> Vec2 {
+        Vec2::new(self.x, self.z)
     }
 }
 
@@ -855,4 +863,53 @@ impl Mat4 {
             Vec4::new(0.0, 0.0, 0.0, 1.0),
         ],
     };
+}
+
+#[derive(Debug, Default, Copy, Clone)]
+pub struct Vec2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Vec2 {
+    #[inline]
+    pub const fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
+
+    #[inline]
+    pub const fn dot(self, other: Self) -> f32 {
+        self.x * other.x + self.y * other.y
+    }
+
+    #[inline]
+    pub const fn sqrlen(&self) -> f32 {
+        self.dot(*self)
+    }
+
+    #[inline]
+    pub fn len(&self) -> f32 {
+        self.sqrlen().sqrt()
+    }
+
+    #[inline]
+    pub fn norm(&self) -> Self {
+        *self / self.len()
+    }
+}
+
+impl Sub for Vec2 {
+    type Output = Self;
+    #[inline]
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl Div<f32> for Vec2 {
+    type Output = Self;
+    #[inline]
+    fn div(self, rhs: f32) -> Self {
+        Self::new(self.x / rhs, self.y / rhs)
+    }
 }

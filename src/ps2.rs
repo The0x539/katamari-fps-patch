@@ -196,6 +196,12 @@ exports! {
     #[func @ 0x3a270]
     fn thing_flee_state_4(t: *mut Thing);
 
+    #[func @ 0x28ef0]
+    fn katamari_attach_thing_x28ef0(k: *mut Katamari, t: *mut Thing);
+
+    #[func @ 0x15950]
+    fn katamari_collide_with_wall(_rcx: usize, k: *mut Katamari);
+
     #[var @ 0]
     static base_addr: ();
 

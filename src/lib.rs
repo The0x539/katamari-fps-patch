@@ -89,7 +89,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
                 $func:ident[$range:expr] => $($replacement:ident)::*;
                 $($tt:tt)*
             ) => {
-                hook::patch(dll.$func, $range, replacements::$($replacement)::*)?;
+                hook::patch(dll.$func, $range, replacements::$($replacement)::* as _)?;
                 patches!($($tt)*);
             };
 
@@ -234,6 +234,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             f32_angle_move_towards[0..0x11] => things::angle_move_towards;
             pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;
+
+            katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;
+            katamari_collide_with_wall[0x7e2..0x7e9] => stereo_haptics::wall_bump_hook;
+            katamari_bump_thing[0..5] => stereo_haptics::thing_bump_hook;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

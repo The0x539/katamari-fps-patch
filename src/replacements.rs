@@ -1,4 +1,4 @@
-use std::arch::asm;
+use std::arch::{asm, naked_asm};
 use std::f32::consts::PI;
 
 use crate::ps2;
@@ -10,6 +10,7 @@ pub mod camera;
 pub mod dash;
 pub mod experiments;
 pub mod movement;
+pub mod stereo_haptics;
 pub mod things;
 
 pub(crate) mod values {

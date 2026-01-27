@@ -86,6 +86,18 @@ hop_gravity:
 	vfmadd132ss xmm0, xmm3, [DT_TICKS] ; xmm0 = (xmm0 * dt) + xmm3
 	ret
 
+; TODO: Maybe combine the preceding two functions into one, like this one?
+global other_hop_gravity
+other_hop_gravity:
+	movss xmm1, [DT_TICKS]
+	movss xmm0, [rdx + 0x14]
+	vfmadd123ss xmm0, xmm1, [rdx + 0x10] ; xmm0 = (dt * accel) + velocity
+	mov [rsp + 0xf8 + 8], rdi ; 'trampoline'?
+	movss [rdx + 0x10], xmm0 ; store new velocity
+	vfmadd123ss xmm0, xmm1, [rbx + 0x94] ; xmm0 = (dt * velocity) + position (bonus surprise switch to rbx)
+	movss [rbx + 0x94], xmm0 ; store new position
+	ret
+
 global freefall_pos
 freefall_pos:
 	movss xmm5, [DT_TICKS]

@@ -39,6 +39,7 @@ unsafe extern "C" {
     pub fn train_angle_move_towards();
     pub fn start_flee_timer();
     pub fn update_flee_timer();
+    pub fn other_hop_gravity();
 }
 
 pub unsafe extern "C" fn sink_rate() {

@@ -202,6 +202,9 @@ exports! {
     #[func @ 0x15950]
     fn katamari_collide_with_wall(_rcx: usize, k: *mut Katamari);
 
+    #[func @ 0x3f590]
+    fn thing_machine_22_state_3(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

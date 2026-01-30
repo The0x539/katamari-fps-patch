@@ -125,8 +125,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_climb[0x15..0x26] => movement::climb_sustain_timer;
             katamari_physics_climb[0x7F..0x90] => movement::climb_sustain_timer;
 
-            // This causes the giant watermelons to stop rotating their yaw for some reason.
-            //copy_matrix => copy_matrix;
+            copy_matrix => copy_matrix;
 
             calculate_gravity[0x688..0x820] => movement::uphill;
             calculate_gravity[0x607..0x683] => movement::downhill;

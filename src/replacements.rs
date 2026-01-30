@@ -146,13 +146,9 @@ pub unsafe extern "C" fn prince_post_init() {
     }
 }
 
-pub unsafe extern "C" fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4 {
-    unsafe {
-        // compiles to two ymmword load/store pairs
-        // TODO: make sure clobbering ymm0/ymm1 is okay for the caller...
-        *dst = *src;
-        dst
-    }
+#[link(name = "native_replacements", kind = "static")]
+unsafe extern "C" {
+    pub fn copy_matrix(dst: *mut Mat4, src: *const Mat4) -> *mut Mat4;
 }
 
 pub const fn shuf(x: u8, y: u8, z: u8, w: u8) -> u8 {

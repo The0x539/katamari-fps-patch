@@ -10,7 +10,7 @@ fn main() -> Result<(), String> {
 
     nasm_rs::compile_library_args(
         "native_replacements.lib",
-        &["src/replacements/mod.asm"],
+        &["src/replacements/mod.asm", "src/hook/entry.asm"],
         &["-i", "src/replacements"],
     )?;
 

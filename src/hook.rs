@@ -1,5 +1,7 @@
 use crate::w;
 
+pub mod entry;
+
 pub unsafe fn install(target: impl Target, detour: *const u8) -> eyre::Result<()> {
     let target = target.into_target();
     unsafe {
@@ -28,10 +30,10 @@ pub unsafe fn patch(
 ) -> eyre::Result<()> {
     let target = target.into_target();
     unsafe {
-        let detour = detour as *const u8;
         let target_code = std::ptr::slice_from_raw_parts_mut(target.add(range.start), range.len());
 
-        let patch_code = generate_call(target_code.cast(), detour);
+        let patch_code = generate_call(target_code.cast(), entry::TRAMPOLINE_PHASE1);
+        entry::register(target_code.get_unchecked_mut(patch_code.len()), detour);
 
         mprotect(target_code, w::PAGE_READWRITE, || {
             let target_code = &mut *target_code;
@@ -44,10 +46,16 @@ pub unsafe fn patch(
 }
 
 unsafe fn generate_call(call_addr: *const u8, target_addr: *const u8) -> [u8; 5] {
-    // The two DLLs of interest here are loaded into memory in quick succession,
-    // and no other process is expected to load either of them,
-    // so we can rely on them both loading into memory close enough for 32-bit relative addressing
-    // (with decent confidence, at least)
+    // This mechanism relies on the two addresses being nearby enough for 32-bit relative addressing.
+    // Originally, this mod just assumed both relevant DLLs would be loaded within a suitable range.
+    //
+    // This assumption was semi-reliable, but would sometimes break upon recompiling mods
+    // or when several other programs were open (complicating the shared library address space).
+    //
+    // Now we only use this to call a single small trampoline function,
+    // which lives inside the patched DLL so as to always be within rel32 range.
+    // "Phase 1" of the trampoline performs an absolute jump to "phase 2".
+    // Phase 2 uses the return address as a key to look up which actual-target function to jump to.
     let rel32 = unsafe {
         let return_addr: *const u8 = call_addr.add(5);
         let rel64: isize = target_addr.byte_offset_from(return_addr);
@@ -136,6 +144,12 @@ pub unsafe fn postfix(
 
 pub unsafe trait Target {
     fn into_target(self) -> *mut u8;
+}
+
+unsafe impl Target for *mut u8 {
+    fn into_target(self) -> *mut u8 {
+        self
+    }
 }
 
 unsafe impl<R> Target for extern "win64" fn() -> R {

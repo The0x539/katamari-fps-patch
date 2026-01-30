@@ -1,5 +1,6 @@
 #![feature(slice_from_ptr_range)]
 #![feature(portable_simd)]
+#![feature(slice_ptr_get)]
 
 #[macro_use]
 pub mod macros;
@@ -55,6 +56,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             .wrap_err("LoadLibrary failed")?;
 
         ps2::link(module);
+        hook::entry::init(module);
 
         let dll = ps2::DLL;
 

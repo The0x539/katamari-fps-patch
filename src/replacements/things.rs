@@ -46,6 +46,7 @@ unsafe extern "C" {
     pub fn elevator_height_update();
     pub fn teddy_bear_bowl_spin();
     pub fn basic_gravity();
+    pub fn wobble_rate();
 }
 
 pub unsafe extern "C" fn sink_rate() {

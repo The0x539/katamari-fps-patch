@@ -266,3 +266,8 @@ basic_gravity:
 
 	ret
 
+global wobble_rate
+wobble_rate:
+	movss xmm2, [rsi + 0x4]
+	mulss xmm2, [DT_TICKS]
+	ret

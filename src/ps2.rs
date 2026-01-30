@@ -220,6 +220,9 @@ exports! {
     #[func @ 0x25590]
     fn camera_main();
 
+    #[func @ 0x32cc0]
+    fn thing_wobble_state_1(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

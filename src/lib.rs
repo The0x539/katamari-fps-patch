@@ -250,6 +250,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_basic_gravity[0x21..0xac] => things::basic_gravity;
 
+            thing_wobble_state_1[0x5cb..0x5d0] => things::wobble_rate;
+
             camera_main[0x1a3..0x1bb] => camera::angel_zoom;
             camera_main[0x22a..0x231] => camera::angel_fade;
 

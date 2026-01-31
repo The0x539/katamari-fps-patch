@@ -39,6 +39,15 @@ impl<T, U> Nil for extern "win64" fn(*mut T, U) -> *mut T {
     const NIL: Self = nil2i;
 }
 
+impl<T, U> Nil for extern "win64" fn(*mut T, U) -> i32 {
+    const NIL: Self = {
+        extern "win64" fn nil<T, U>(_: *mut T, _: U) -> i32 {
+            0
+        }
+        nil
+    };
+}
+
 impl<T> Nil for *mut T {
     const NIL: Self = std::ptr::null_mut();
 }

@@ -280,3 +280,9 @@ flee_timer_update:
 	.not_negative:
 	mov [rdx + 0x30], ax
 	ret
+
+global update_collision_cooldown
+update_collision_cooldown:
+	sub ax, [DT_MILLIS]
+	mov [rbx], ax
+	ret

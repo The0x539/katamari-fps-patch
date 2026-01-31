@@ -55,6 +55,7 @@ unsafe extern "C" {
     pub fn basic_gravity();
     pub fn wobble_rate();
     pub fn flee_timer_update();
+    pub fn update_collision_cooldown();
 }
 
 pub unsafe extern "C" fn sink_rate() {

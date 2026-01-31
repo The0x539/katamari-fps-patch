@@ -97,10 +97,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             // EXTREMELY sketchy, but handy for e.g. changing a Jcc into another Jcc
             (
-                $func:ident[$offset:literal..] => $replacement:expr;
+                $func:ident[$offset:literal $(+ $extra:literal)? ..] => $replacement:expr;
                 $($tt:tt)*
             ) => {
-                hook::raw_patch(dll.$func, $offset, &$replacement)?;
+                hook::raw_patch(dll.$func, $offset $(+ $extra)?, &$replacement)?;
                 patches!($($tt)*);
             };
         }
@@ -271,6 +271,14 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_getup_flee_state_2[0x385..] => 667_u32.to_ne_bytes(); // 20 ticks -> ⅔ seconds
             thing_getup_flee_state_3a[0x9..0x10] => things::flee_timer_update;
             thing_getup_flee_state_3b[0x9..0x10] => things::flee_timer_update;
+
+            katamari_queue_things_for_pickup[0x20f..0x215] => things::update_collision_cooldown;
+
+            katamari_flip_thing[0x174+1..] => 1000_u32.to_ne_bytes(); // NPC collision cooldown: 1 second
+            x27170[0x233+1..] => 333_u32.to_ne_bytes();               // NPC collision cooldown: ⅓ second
+            katamari_bump_thing[0x181+1..] => 333_u32.to_ne_bytes();
+            katamari_hit_test[0x15d0+1..] => 333_u32.to_ne_bytes();
+            katamari_x28e00[0xd5+1..] => 167_u32.to_ne_bytes();       // NPC collision cooldown: ⅙ second
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

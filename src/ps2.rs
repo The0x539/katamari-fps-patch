@@ -244,6 +244,18 @@ exports! {
     #[func @ 0x35c10]
     fn thing_getup_flee_state_3b(t: *mut Thing, flee: *mut ());
 
+    #[func @ 0x2b420]
+    fn katamari_flip_thing(k: *mut Katamari, t: *mut Thing);
+
+    #[func @ 0x27170]
+    fn x27170(v: *mut Vec4, k: *mut Katamari, t: *mut Thing, n: f32);
+
+    #[func @ 0x29480]
+    fn katamari_hit_test(k: *mut Katamari, t: *mut Thing) -> i32;
+
+    #[func @ 0x28e00]
+    fn katamari_x28e00(k: *mut Katamari, t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

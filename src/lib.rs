@@ -286,6 +286,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_hit_test[0x15d0+1..] => 333_u32.to_ne_bytes();
             katamari_x28e00[0xd5+1..] => 167_u32.to_ne_bytes();       // NPC collision cooldown: ⅙ second
 
+            thing_getup_flee_state_1[0..0x17] => things::spin_before_getup;
             thing_getup_flee_state_2[0x3a..0x64] => things::getup_hop_gravity;
 
             thing_getup_flee_state_4a[0x9e..0x10c] => things::flee_velocity_1;

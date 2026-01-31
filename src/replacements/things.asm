@@ -353,5 +353,13 @@ flee_velocity_3:
 global flee_velocity_spin
 flee_velocity_spin:
 	movss xmm3, [DT_TICKS]
-	; vfmadd231ss xmm6, xmm3, [rsi + 0x64]
+	vfmadd231ss xmm6, xmm3, [rsi + 0x64]
 	ret
+
+global spin_before_getup
+spin_before_getup:
+	movss xmm1, [rcx + 0xa4]
+	movss xmm0, [DT_TICKS]
+	vfmadd231ss xmm1, xmm0, [.theta]
+	ret
+	.theta: dd 0.15

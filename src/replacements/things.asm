@@ -304,3 +304,9 @@ getup_hop_gravity:
 	ret
 	.accel: dd -0.72
 	.rate: dd 0.8
+
+global flee_timer_update_state4
+flee_timer_update_state4:
+	mov ax, [DT_MILLIS]
+	neg ax
+	ret

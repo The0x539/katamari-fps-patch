@@ -244,6 +244,12 @@ exports! {
     #[func @ 0x35c10]
     fn thing_getup_flee_state_3b(t: *mut Thing, flee: *mut ());
 
+    #[func @ 0x356e0]
+    fn thing_getup_flee_state_4a(t: *mut Thing, flee: *mut ());
+
+    #[func @ 0x35c80]
+    fn thing_getup_flee_state_4b(t: *mut Thing, flee: *mut ());
+
     #[func @ 0x2b420]
     fn katamari_flip_thing(k: *mut Katamari, t: *mut Thing);
 

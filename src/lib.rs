@@ -269,8 +269,14 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_getup_flee_state_0[0x2d..0x35] => things::flee_timer_start;
             thing_getup_flee_state_1[0x3f..0x46] => things::flee_timer_update;
             thing_getup_flee_state_2[0x385..] => 667_u32.to_ne_bytes(); // 20 ticks -> ⅔ seconds
+
             thing_getup_flee_state_3a[0x9..0x10] => things::flee_timer_update;
             thing_getup_flee_state_3b[0x9..0x10] => things::flee_timer_update;
+            thing_getup_flee_state_3a[0x14+1..] => 1000_u32.to_ne_bytes(); // 1 second
+            thing_getup_flee_state_3b[0x14+1..] => 1000_u32.to_ne_bytes();
+
+            thing_getup_flee_state_4a[0x4f2..0x4f7] => things::flee_timer_update_state4;
+            thing_getup_flee_state_4b[0x1ab..0x1b0] => things::flee_timer_update_state4;
 
             katamari_queue_things_for_pickup[0x20f..0x215] => things::update_collision_cooldown;
 

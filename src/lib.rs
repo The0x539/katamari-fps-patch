@@ -279,6 +279,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_bump_thing[0x181+1..] => 333_u32.to_ne_bytes();
             katamari_hit_test[0x15d0+1..] => 333_u32.to_ne_bytes();
             katamari_x28e00[0xd5+1..] => 167_u32.to_ne_bytes();       // NPC collision cooldown: ⅙ second
+
+            thing_getup_flee_state_2[0x3a..0x64] => things::getup_hop_gravity;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

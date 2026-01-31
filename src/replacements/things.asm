@@ -286,3 +286,21 @@ update_collision_cooldown:
 	sub ax, [DT_MILLIS]
 	mov [rbx], ax
 	ret
+
+global getup_hop_gravity
+getup_hop_gravity:
+	movss xmm0, [.accel]
+	movss xmm1, [DT_TICKS]
+
+	; update velocity
+	vfmadd123ss xmm0, xmm1, [rdx + 0x28] ; vel = (accel * dt) + vel
+	movss [rdx + 0x28], xmm0
+
+	; update position
+	mulss xmm0, [.rate]
+	vfmadd123ss xmm0, xmm1, [rcx + 0x94] ; pos = (vel * 0.8 * dt) + pos
+	movss [rcx + 0x94], xmm0
+
+	ret
+	.accel: dd -0.72
+	.rate: dd 0.8

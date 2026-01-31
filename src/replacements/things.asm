@@ -271,3 +271,12 @@ wobble_rate:
 	movss xmm2, [rsi + 0x4]
 	mulss xmm2, [DT_TICKS]
 	ret
+
+global flee_timer_update
+flee_timer_update:
+	sub ax, [DT_MILLIS]
+	jns .not_negative
+	xor eax, eax
+	.not_negative:
+	mov [rdx + 0x30], ax
+	ret

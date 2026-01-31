@@ -226,6 +226,24 @@ exports! {
     #[func @ 0x36730]
     fn thing_start_rng_timer(t: *mut Thing);
 
+    #[func @ 0x36a10]
+    fn thing_x36a10(t: *mut Thing);
+
+    #[func @ 0x35230]
+    fn thing_getup_flee_state_0(t: *mut Thing, flee: *mut ());
+
+    #[func @ 0x35270]
+    fn thing_getup_flee_state_1(t: *mut Thing, flee: *mut ());
+
+    #[func @ 0x352e0]
+    fn thing_getup_flee_state_2(t: *mut Thing, flee: *mut ());
+
+    #[func @ 0x356a0]
+    fn thing_getup_flee_state_3a(t: *mut Thing, flee: *mut ());
+
+    #[func @ 0x35c10]
+    fn thing_getup_flee_state_3b(t: *mut Thing, flee: *mut ());
+
     #[var @ 0]
     static base_addr: ();
 

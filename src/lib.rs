@@ -262,6 +262,15 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_start_rng_timer[0x59..0x63] => things::start_rng_timer;
             thing_random_hop_main[0x1bf..0x1c7] => things::fish_timer_decrement;
+
+            thing_x36a10[0x2c5..0x2cb] => things::getup_timer_update;
+            thing_x36a10[0x32f..0x336] => things::getup_timer_check;
+
+            thing_getup_flee_state_0[0x2d..0x35] => things::flee_timer_start;
+            thing_getup_flee_state_1[0x3f..0x46] => things::flee_timer_update;
+            thing_getup_flee_state_2[0x385..] => 667_u32.to_ne_bytes(); // 20 ticks -> ⅔ seconds
+            thing_getup_flee_state_3a[0x9..0x10] => things::flee_timer_update;
+            thing_getup_flee_state_3b[0x9..0x10] => things::flee_timer_update;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

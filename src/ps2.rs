@@ -223,6 +223,9 @@ exports! {
     #[func @ 0x32cc0]
     fn thing_wobble_state_1(t: *mut Thing);
 
+    #[func @ 0x36730]
+    fn thing_start_rng_timer(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

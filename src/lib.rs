@@ -259,6 +259,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;
             katamari_collide_with_wall[0x7e2..0x7e9] => stereo_haptics::wall_bump_hook;
             katamari_bump_thing[0..5] => stereo_haptics::thing_bump_hook;
+
+            thing_start_rng_timer[0x59..0x63] => things::start_rng_timer;
+            thing_random_hop_main[0x1bf..0x1c7] => things::fish_timer_decrement;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

@@ -669,7 +669,9 @@ pub struct Thing {
     pub transform: Mat4,
     pub m_x150: Mat4,
     pub m_x190: Mat4,
-    pub _x1d0: Q<0xa00>,
+    pub _x1d0: Q<0x1e8>,
+    pub base_machine: StateMachineBase,
+    pub _x3f8: Q<0x7d8>,
 }
 
 assert_size!(Thing, 0xbd0);
@@ -680,6 +682,42 @@ assert_offset!(Thing, mono_shake_off_flag, 0x20);
 assert_offset!(Thing, pos_x40, 0x40);
 assert_offset!(Thing, vel_xe0, 0xe0);
 assert_offset!(Thing, m_x190, 0x190);
+assert_offset!(Thing, base_machine, 0x3b8);
+assert_offset!(Thing, _x3f8, 0x3f8);
+
+#[repr(C)]
+pub struct StateMachineBase {
+    pub machine_id: u8,
+    pub flag_x1: u8,
+    pub counter_x2: u16,
+    pub x4: f32,
+    pub machine: *mut (),
+    pub x10: f32,
+    pub _x14: Q<2>,
+    pub idx_x16: i16,
+    pub counter_x18: u8,
+    pub x19: u8,
+    pub hop_flags: u8,
+    pub _x1b: Q<1>,
+    pub freefall_spin_speed_x1c: f32,
+    pub first_derivative_x20: f32,
+    pub angular_velocity_x24: f32,
+    pub second_derivative_x28: f32,
+    pub rng_timer: u8,
+    pub random_hop_state: u8,
+    pub x2e: i16,
+    pub x30: i16,
+    pub use_alt_machine: bool,
+    pub x32: u8,
+    pub _x34: Q<1>,
+    pub area_id_x35: u8,
+    pub flag_x36: bool,
+    pub _x37: Q<2>,
+    pub x39: bool,
+    pub _x3a: Q<6>,
+}
+
+assert_size!(StateMachineBase, 0x40);
 
 #[repr(C)]
 pub struct PropConstants {

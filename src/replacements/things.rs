@@ -11,6 +11,10 @@ impl ExtraThingState {
     pub const fn new() -> Self {
         Self { rng_timer: 0 }
     }
+
+    pub unsafe fn of<'a>(thing: *mut Thing) -> &'a mut Self {
+        unsafe { &mut EXTRA_THING_STATE[(*thing).mono_ctrl_idx as usize] }
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -32,7 +36,6 @@ unsafe extern "C" {
     pub fn freefall_spin_b();
     pub fn freefall_spin_c();
     pub fn random_hop_motion();
-    // pub fn random_hop_timer();
     pub fn angle_move_towards();
     pub fn pursuit_angle_move_towards();
     pub fn animal_angle_move_towards();
@@ -62,5 +65,31 @@ pub unsafe extern "C" fn sink_rate() {
         // RCX and RAX would theoretically also be good to preserve,
         // but I think only RDX is strictly necessary based on the caller's register usage.
         asm!("", in("rdx") k);
+    }
+}
+
+pub unsafe extern "C" fn start_rng_timer(t: *mut Thing) {
+    unsafe {
+        let rng: u32;
+        asm!("", out("eax") rng);
+
+        let min_time = 667; // 20 ticks -> ⅔ seconds
+        let variance = 2100; // 0x3F ticks -> 2.1 seconds
+        let timer = (rng % variance) + min_time;
+
+        ExtraThingState::of(t).rng_timer = timer as u16;
+        (*t).base_machine.rng_timer = 100; // just to make sure the branches work right
+    }
+}
+
+pub unsafe extern "C" fn fish_timer_decrement() -> u8 {
+    unsafe {
+        let t: *mut Thing;
+        asm!("", out("rdi") t);
+
+        let state = ExtraThingState::of(t);
+        state.rng_timer = state.rng_timer.saturating_sub(values::dt_millis() as u16);
+        (*t).base_machine.rng_timer = if state.rng_timer > 0 { 100 } else { 0 };
+        0
     }
 }

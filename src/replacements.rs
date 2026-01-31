@@ -34,6 +34,9 @@ pub(crate) mod values {
     /// or at least will when the C# side of this mod is complete.
     pub static mut DT_SECONDS: f32 = 1.0 / 60.0;
 
+    #[repr(align(16))]
+    pub struct AlignedVec4(pub Vec4);
+
     /// The duration, in *ticks*, of the current update.
     ///
     /// If a value is measured in "units per tick", e.g. velocity,
@@ -41,7 +44,7 @@ pub(crate) mod values {
     ///
     /// This value is four
     #[unsafe(no_mangle)]
-    pub static mut DT_TICKS: Vec4 = Vec4::splat3(0.5);
+    pub static mut DT_TICKS: AlignedVec4 = AlignedVec4(Vec4::splat3(0.5));
 
     /// The duration, in (rounded) *milliseconds*, of the current update.
     ///
@@ -58,7 +61,7 @@ pub(crate) mod values {
         unsafe {
             DT_SECONDS = delta;
             let dt_ticks = delta * 1000.0 / 30.0;
-            DT_TICKS = Vec4::splat3(dt_ticks);
+            DT_TICKS = AlignedVec4(Vec4::splat3(dt_ticks));
 
             let millis = delta * 1000.0;
             DT_MILLIS = millis.floor() as i16;
@@ -114,7 +117,7 @@ pub(crate) mod values {
 
     #[inline]
     pub(super) fn dt_ticks() -> f32 {
-        unsafe { DT_TICKS.x }
+        unsafe { DT_TICKS.0.x }
     }
 
     #[inline]

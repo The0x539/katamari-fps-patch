@@ -310,3 +310,48 @@ flee_timer_update_state4:
 	mov ax, [DT_MILLIS]
 	neg ax
 	ret
+
+global flee_velocity_1
+flee_velocity_1:
+	mov rax, [PTR_THING_GRAVITY]
+	movss xmm6, [rax]
+	movaps xmm1, [DT_TICKS]
+
+	; update gravitational velocity
+	vfmadd123ss xmm6, xmm1, [rdi + 0x5c8]
+	movss [rdi + 0x5c8], xmm6
+
+	; update position using regular velocity
+	movaps xmm0, [rdi + 0xe0]
+	vfmadd123ps xmm0, xmm1, [rdi + 0x90]
+	movaps [rdi + 0x90], xmm0
+
+	; update position using gravitational velocity
+	movss xmm0, xmm6
+	vfmadd123ss xmm0, xmm1, [rdi + 0x94]
+	movss [rdi + 0x94], xmm0
+
+	; prepare "overall" y velocity for subsequent code???
+	;addss xmm6, [rdi + 0xe4]
+
+	ret
+
+global flee_velocity_2
+flee_velocity_2:
+	movaps xmm1, [DT_TICKS]
+	movaps xmm3, [rdi + 0xe0]
+	vfmadd123ps xmm3, xmm1, [rdi + 0xc0]
+	movaps [rdi + 0x90], xmm3
+	ret
+
+global flee_velocity_3
+flee_velocity_3:
+	movss xmm3, [rdi + 0x20]
+	mulss xmm3, [DT_TICKS]
+	ret
+
+global flee_velocity_spin
+flee_velocity_spin:
+	movss xmm3, [DT_TICKS]
+	; vfmadd231ss xmm6, xmm3, [rsi + 0x64]
+	ret

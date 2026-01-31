@@ -58,6 +58,10 @@ unsafe extern "C" {
     pub fn update_collision_cooldown();
     pub fn getup_hop_gravity();
     pub fn flee_timer_update_state4();
+    pub fn flee_velocity_1();
+    pub fn flee_velocity_2();
+    pub fn flee_velocity_3();
+    pub fn flee_velocity_spin();
 }
 
 pub unsafe extern "C" fn sink_rate() {

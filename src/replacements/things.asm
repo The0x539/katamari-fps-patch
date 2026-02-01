@@ -369,3 +369,9 @@ jumboman_spin:
 	movss xmm1, [DT_TICKS]
 	vfmadd123ss xmm0, xmm1, [rax + 0x20]
 	ret
+
+global windmill_spin
+windmill_spin:
+	movss xmm0, [DT_TICKS]
+	vfmadd123ss xmm1, xmm0, [r8]
+	ret

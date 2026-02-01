@@ -265,6 +265,9 @@ exports! {
     #[func @ 0x49d40]
     fn thing_spin_x49d40(t: *mut Thing);
 
+    #[func @ 0x39900]
+    fn thing_windmill_spin_x39900(_a: *mut (), _b: *mut (), theta: *mut f32);
+
     #[var @ 0]
     static base_addr: ();
 

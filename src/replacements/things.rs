@@ -64,6 +64,7 @@ unsafe extern "C" {
     pub fn flee_velocity_spin();
     pub fn spin_before_getup();
     pub fn jumboman_spin();
+    pub fn windmill_spin();
 }
 
 pub unsafe extern "C" fn sink_rate() {

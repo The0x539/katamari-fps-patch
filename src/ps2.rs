@@ -262,6 +262,9 @@ exports! {
     #[func @ 0x28e00]
     fn katamari_x28e00(k: *mut Katamari, t: *mut Thing);
 
+    #[func @ 0x49d40]
+    fn thing_spin_x49d40(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

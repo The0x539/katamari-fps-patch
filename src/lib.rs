@@ -293,6 +293,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_getup_flee_state_4a[0x137..0x19d] => things::flee_velocity_2;
             thing_getup_flee_state_4b[0x6f..0x74] => things::flee_velocity_3;
             thing_getup_flee_state_4b[0x49..0x4e] => things::flee_velocity_spin;
+
+            thing_spin_x49d40[0x23..0x28] => things::jumboman_spin;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

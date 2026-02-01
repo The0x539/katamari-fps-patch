@@ -363,3 +363,9 @@ spin_before_getup:
 	vfmadd231ss xmm1, xmm0, [.theta]
 	ret
 	.theta: dd 0.15
+
+global jumboman_spin
+jumboman_spin:
+	movss xmm1, [DT_TICKS]
+	vfmadd123ss xmm0, xmm1, [rax + 0x20]
+	ret

@@ -296,6 +296,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_spin_x49d40[0x23..0x28] => things::jumboman_spin;
             thing_windmill_spin_x39900[0x1c..0x21] => things::windmill_spin;
+
+            // I haven't figured out why the vanilla delta-timing within this function
+            // isn't the correct thing to do. I suspect the "turn rate" variable
+            // already naturally accounts for non-fixed tick rate, but haven't confirmed.
+            thing_walk_turn[0x13..0x23] => {}
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

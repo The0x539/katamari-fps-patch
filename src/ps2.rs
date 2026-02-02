@@ -268,6 +268,9 @@ exports! {
     #[func @ 0x39900]
     fn thing_windmill_spin_x39900(_a: *mut (), _b: *mut (), theta: *mut f32);
 
+    #[func @ 0x379a0]
+    fn thing_walk_turn(machine: *mut ());
+
     #[var @ 0]
     static base_addr: ();
 

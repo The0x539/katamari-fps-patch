@@ -288,6 +288,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_getup_flee_state_1[0..0x17] => things::spin_before_getup;
             thing_getup_flee_state_2[0x3a..0x64] => things::getup_hop_gravity;
+            thing_getup_flee_state_2[0xe1..0x100] => things::getup_flip;
 
             thing_getup_flee_state_4a[0x9e..0x10c] => things::flee_velocity_1;
             thing_getup_flee_state_4a[0x137..0x19d] => things::flee_velocity_2;

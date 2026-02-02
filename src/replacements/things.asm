@@ -364,6 +364,23 @@ spin_before_getup:
 	ret
 	.theta: dd 0.15
 
+global getup_flip
+getup_flip:
+	movss xmm2, [DT_TICKS]
+	comiss xmm1, xmm6
+	jbe .increase
+
+	vfnmadd231ss xmm1, xmm2, [.amount]
+	maxss xmm0, xmm1
+	ret
+
+	.increase:
+	vfmadd231ss xmm1, xmm2, [.amount]
+	minss xmm0, xmm1
+	ret
+
+	.amount: dd 0.4
+
 global jumboman_spin
 jumboman_spin:
 	movss xmm1, [DT_TICKS]

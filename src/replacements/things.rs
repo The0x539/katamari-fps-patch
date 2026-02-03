@@ -68,6 +68,8 @@ unsafe extern "C" {
     pub fn getup_flip();
     pub fn pendulum();
     pub fn wrecking_ball();
+    pub fn bird_update_timer_rbx();
+    pub fn bird_update_timer_rdx();
 }
 
 pub unsafe extern "C" fn sink_rate() {
@@ -151,6 +153,51 @@ pub unsafe extern "C" fn flee_timer_start() {
             "mov byte ptr [rbx + 0x33], 0",
             in(reg) flee,
             in("ax") timer,
+        }
+    }
+}
+
+#[inline]
+fn bird_timer(mono_ctrl_idx: u32) -> u16 {
+    let mut timer = ps2::rng() as u32;
+    timer += mono_ctrl_idx * 33; // should help achieve a roughly even distribution within the range
+    timer %= 500; // corresponds to & 0xF (15 ticks)
+    timer += 167;
+    timer as u16
+}
+
+pub unsafe extern "C" fn bird_start_rng_timer_rax() {
+    unsafe {
+        let bird: *mut ();
+        let mono_ctrl_idx: u32;
+        asm! {
+            "movzx {:e}, word ptr [rbx]",
+            out(reg) mono_ctrl_idx,
+            out("rax") bird,
+        };
+        asm! {
+            "inc byte ptr [rax]",
+            "mov word ptr [rax + 0x2], {:x}",
+            in(reg) bird_timer(mono_ctrl_idx),
+            in("rax") bird,
+        }
+    }
+}
+
+pub unsafe extern "C" fn bird_start_rng_timer_rdx() {
+    unsafe {
+        let bird: *mut ();
+        let mono_ctrl_idx: u32;
+        asm! {
+            "movzx {:e}, word ptr [rbx]",
+            out(reg) mono_ctrl_idx,
+            out("rdx") bird,
+        };
+        asm! {
+            "inc byte ptr [rdx]",
+            "mov word ptr [rdx + 0x2], {:x}",
+            in(reg) bird_timer(mono_ctrl_idx),
+            in("rdx") bird,
         }
     }
 }

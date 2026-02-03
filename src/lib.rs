@@ -305,6 +305,14 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_pendulum[0x23..0x28] => things::pendulum;
             thing_wrecking_ball_pendulum[0x47..0x4c] => things::wrecking_ball;
+
+            thing_bird_state_0_init[0x62..0x70] => things::bird_start_rng_timer_rax;
+            thing_bird_state_1_idle[0x2b..0x32] => things::bird_update_timer_rbx;
+            thing_bird_state_4_ascend[0x117+1..] => 5000_u32.to_le_bytes(); // 150 ticks -> 5 seconds
+            thing_bird_state_5_stay_in_sky[0x1e..0x25] => things::bird_update_timer_rdx;
+            thing_bird_state_5_stay_in_sky[0x2b+1..] => 5000_u32.to_le_bytes();
+            thing_bird_state_5_stay_in_sky[0x56..0x67] => things::bird_start_rng_timer_rdx;
+            thing_bird_state_6_begin_descent[0x25..0x2c] => things::bird_update_timer_rbx;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

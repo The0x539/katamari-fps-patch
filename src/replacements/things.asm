@@ -404,3 +404,21 @@ wrecking_ball:
 	movss xmm2, [DT_TICKS]
 	vfmadd123ss xmm0, xmm2, [rdi + 0x60]
 	ret
+
+global bird_update_timer_rbx
+bird_update_timer_rbx:
+	sub ax, [DT_MILLIS]
+	jns .not_negative
+	xor eax, eax
+	.not_negative:
+	mov [rbx + 0x2], ax
+	ret
+
+global bird_update_timer_rdx
+bird_update_timer_rdx:
+	sub ax, [DT_MILLIS]
+	jns .not_negative
+	xor eax, eax
+	.not_negative:
+	mov [rdx + 0x2], ax
+	ret

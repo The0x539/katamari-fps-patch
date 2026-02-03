@@ -277,6 +277,24 @@ exports! {
     #[func @ 0x48490]
     fn thing_wrecking_ball_pendulum(t: *mut Thing);
 
+    #[func @ 0x428d0]
+    fn thing_bird_state_0_init(t: *mut Thing);
+
+    #[func @ 0x42950]
+    fn thing_bird_state_1_idle(t: *mut Thing);
+
+    #[func @ 0x42da0]
+    fn thing_bird_state_4_ascend(t: *mut Thing);
+
+    #[func @ 0x42ee0]
+    fn thing_bird_state_5_stay_in_sky(t: *mut Thing);
+
+    #[func @ 0x42f50]
+    fn thing_bird_state_6_begin_descent(t: *mut Thing);
+
+    #[func @ 0x43100]
+    fn thing_bird_state_7_descend(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 
@@ -339,6 +357,9 @@ exports! {
 
     #[var @ 0xd34c2c]
     static angel_zoom_rate: f32;
+
+    #[var @ 0x7bc44]
+    static rng: i32;
 
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];

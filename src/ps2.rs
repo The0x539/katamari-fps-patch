@@ -304,6 +304,9 @@ exports! {
     #[func @ 0x43100]
     fn thing_bird_state_7_descend(t: *mut Thing);
 
+    #[func @ 0x46a20]
+    fn thing_scarecrow_sway(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

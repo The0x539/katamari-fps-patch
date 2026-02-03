@@ -79,6 +79,7 @@ unsafe extern "C" {
     pub fn bird_descend_vertical_b();
     pub fn animal_update_partial_walk_timer();
     pub fn animal_update_full_walk_timer();
+    pub fn scarecrow_sway();
 }
 
 pub unsafe extern "C" fn sink_rate() {

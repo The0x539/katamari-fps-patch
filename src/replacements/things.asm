@@ -463,3 +463,9 @@ animal_update_full_walk_timer:
 	dec_dt ax
 	mov [rbx + 0x2], ax
 	ret
+
+global scarecrow_sway
+scarecrow_sway:
+	movss xmm0, [DT_TICKS]
+	vfmadd123ss xmm1, xmm0, [rdi + 0x40]
+	ret

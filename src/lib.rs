@@ -336,6 +336,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_animal_state_1_walk[0x32..0x39] => things::animal_update_partial_walk_timer;
             thing_animal_state_1_walk[0xae..0xcf] => things::animal_reset_partial_walk_timer_30;
             thing_animal_state_1_walk[0x5a..0x7b] => things::animal_reset_partial_walk_timer_60;
+
+            thing_scarecrow_sway[0x1ed..0x1f2] => things::scarecrow_sway;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

@@ -1586,6 +1586,7 @@ dependencies = [
  "eyre",
  "nasm-rs",
  "vcvars",
+ "win32-util",
  "windows 0.62.2",
  "windows-strings 0.5.1",
  "winit",
@@ -3438,6 +3439,16 @@ dependencies = [
  "log",
  "thiserror 2.0.17",
  "web-sys",
+]
+
+[[package]]
+name = "win32-util"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6cbbb595b84905b85ad4ba7492e69199ac582e7ae8b3152571e878a3872e36ca"
+dependencies = [
+ "bitflags 2.10.0",
+ "windows 0.62.2",
 ]
 
 [[package]]

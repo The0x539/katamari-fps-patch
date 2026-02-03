@@ -321,9 +321,21 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_bird_state_4_ascend[0x8e..0x93] => things::bird_ascend_vertical_b;
 
             thing_bird_state_7_descend[0x34..0x95] => things::bird_descend_horizontal;
-            // thing_bird_state_7_descend[0x26..0x2b] => things::bird_descend_horizontal_simple;
             thing_bird_state_7_descend[0xf8..0x100] => things::bird_descend_vertical_a;
             thing_bird_state_7_descend[0xc1..0xc6] => things::bird_descend_vertical_b;
+
+            // When the "full walk timer" hits zero, the NPC will make a turn.
+            thing_animal_state_0_start[0x3e3..0x3fb] => things::animal_start_walk_timer;
+            thing_animal_state_0_start[0x455+1..] => 1000_u32.to_ne_bytes();
+            thing_animal_x3bfb0[0x91..0x98] => things::animal_update_full_walk_timer;
+            thing_animal_x3bfb0[0x39..0x64] => things::animal_restart_walk_timer;
+
+            // When the "partial walk timer" hits zero, the NPC will stop walking for a brief period.
+            // (This period is controlled by the same variable.)
+            thing_animal_state_1_walk[0x89..0x90] => things::animal_update_partial_walk_timer;
+            thing_animal_state_1_walk[0x32..0x39] => things::animal_update_partial_walk_timer;
+            thing_animal_state_1_walk[0xae..0xcf] => things::animal_reset_partial_walk_timer_30;
+            thing_animal_state_1_walk[0x5a..0x7b] => things::animal_reset_partial_walk_timer_60;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

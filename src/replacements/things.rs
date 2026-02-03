@@ -77,6 +77,8 @@ unsafe extern "C" {
     pub fn bird_descend_horizontal_simple();
     pub fn bird_descend_vertical_a();
     pub fn bird_descend_vertical_b();
+    pub fn animal_update_partial_walk_timer();
+    pub fn animal_update_full_walk_timer();
 }
 
 pub unsafe extern "C" fn sink_rate() {
@@ -199,12 +201,88 @@ pub unsafe extern "C" fn bird_start_rng_timer_rdx() {
             "movzx {:e}, word ptr [rbx]",
             out(reg) mono_ctrl_idx,
             out("rdx") bird,
-        };
+        }
         asm! {
             "inc byte ptr [rdx]",
             "mov word ptr [rdx + 0x2], {:x}",
             in(reg) bird_timer(mono_ctrl_idx),
             in("rdx") bird,
+        }
+    }
+}
+
+unsafe fn animal_full_walk_timer(thing: *mut Thing) -> u16 {
+    let mut timer = ps2::rng() as u32;
+    timer += unsafe { (*thing).mono_ctrl_idx } as u32;
+    timer *= 0x23a;
+    timer %= 8567;
+    timer += 4000;
+    timer as u16
+}
+
+pub unsafe extern "C" fn animal_start_walk_timer() {
+    unsafe {
+        let thing: *mut Thing;
+        let animal: *mut ();
+        asm! {
+            "mov {}, rbx",
+            out(reg) thing,
+            out("rdi") animal,
+        }
+        asm! {
+            "mov [{} + 0x2], {:x}",
+            in(reg) animal,
+            in(reg) animal_full_walk_timer(thing),
+            in("rdi") thing,
+        }
+    }
+}
+
+pub unsafe extern "C" fn animal_restart_walk_timer() {
+    unsafe {
+        let thing: *mut Thing;
+        let animal: *mut ();
+        asm! {
+            "mov byte ptr [rbx + 0x1], 0",
+            "mov {}, rbx",
+            out(reg) animal,
+            out("rcx") thing,
+        }
+        asm! {
+            "mov [{} + 0x2], {:x}",
+            in(reg) animal,
+            in(reg) animal_full_walk_timer(thing),
+        }
+    }
+}
+
+fn animal_partial_walk_timer(range: u32, base: u32) -> u16 {
+    let mut timer = ps2::rng() as u32;
+    timer %= range;
+    timer += base;
+    timer as u16
+}
+
+pub unsafe extern "C" fn animal_reset_partial_walk_timer_30() {
+    unsafe {
+        let animal: *mut ();
+        asm!("mov {}, rbx", out(reg) animal);
+        asm! {
+            "mov [{} + 0xa], {:x}",
+            in(reg) animal,
+            in(reg) animal_partial_walk_timer(1000, 1000),
+        }
+    }
+}
+
+pub unsafe extern "C" fn animal_reset_partial_walk_timer_60() {
+    unsafe {
+        let animal: *mut ();
+        asm!("mov {}, rbx", out(reg) animal);
+        asm! {
+            "mov [{} + 0xa], {:x}",
+            in(reg) animal,
+            in(reg) animal_partial_walk_timer(2000, 4000),
         }
     }
 }

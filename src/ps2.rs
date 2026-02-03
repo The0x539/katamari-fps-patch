@@ -181,8 +181,17 @@ exports! {
     #[func @ 0x3e040]
     fn pursuit_angle_move_towards(t: *mut Thing, pursuit_a: *mut (), angle: f32, flag: bool);
 
+    #[func @ 0x3ad20]
+    fn thing_animal_state_0_start(t: *mut Thing);
+
+    #[func @ 0x3b1e0]
+    fn thing_animal_state_1_walk(t: *mut Thing);
+
     #[func @ 0x3bcd0]
     fn thing_animal_state_3_turn(t: *mut Thing);
+
+    #[func @ 0x3bfb0]
+    fn thing_animal_x3bfb0(t: *mut Thing);
 
     #[func @ 0x391b0]
     fn thing_train_x391b0(t: *mut Thing);

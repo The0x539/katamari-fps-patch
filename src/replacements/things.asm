@@ -2,6 +2,13 @@ section .text
 
 extern PTR_THING_GRAVITY
 
+%macro dec_dt 1
+	sub %1, [DT_MILLIS]
+	jns .not_negative
+	xor %1, %1
+	.not_negative:
+%endmacro
+
 global melon_spin
 melon_spin:
 	movss xmm0, [.theta]
@@ -200,10 +207,7 @@ start_flee_timer:
 
 global update_flee_timer
 update_flee_timer:
-	sub ax, [DT_MILLIS]
-	jns .not_negative
-	xor eax, eax
-	.not_negative:
+	dec_dt ax
 	mov [rsp + 0x20 + 8], rbx ; trampoline
 	ret
 
@@ -227,10 +231,7 @@ elevator_timer_reset:
 
 global elevator_timer_update
 elevator_timer_update:
-	sub eax, [DT_MILLIS]
-	jns .not_negative
-	xor eax, eax
-	.not_negative:
+	dec_dt eax
 	mov [rbx + 0x2c], eax
 	ret
 
@@ -274,10 +275,7 @@ wobble_rate:
 
 global flee_timer_update
 flee_timer_update:
-	sub ax, [DT_MILLIS]
-	jns .not_negative
-	xor eax, eax
-	.not_negative:
+	dec_dt ax
 	mov [rdx + 0x30], ax
 	ret
 
@@ -407,19 +405,13 @@ wrecking_ball:
 
 global bird_update_timer_rbx
 bird_update_timer_rbx:
-	sub ax, [DT_MILLIS]
-	jns .not_negative
-	xor eax, eax
-	.not_negative:
+	dec_dt ax
 	mov [rbx + 0x2], ax
 	ret
 
 global bird_update_timer_rdx
 bird_update_timer_rdx:
-	sub ax, [DT_MILLIS]
-	jns .not_negative
-	xor eax, eax
-	.not_negative:
+	dec_dt ax
 	mov [rdx + 0x2], ax
 	ret
 
@@ -459,3 +451,15 @@ bird_descend_vertical_a:
 	vfnmadd231ss xmm0, xmm1, [DT_TICKS]
 	ret
 	.delta: dd 4.0
+
+global animal_update_partial_walk_timer
+animal_update_partial_walk_timer:
+	dec_dt ax
+	mov [rbx + 0xa], ax
+	ret
+
+global animal_update_full_walk_timer
+animal_update_full_walk_timer:
+	dec_dt ax
+	mov [rbx + 0x2], ax
+	ret

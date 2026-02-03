@@ -302,6 +302,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // isn't the correct thing to do. I suspect the "turn rate" variable
             // already naturally accounts for non-fixed tick rate, but haven't confirmed.
             thing_walk_turn[0x13..0x23] => {}
+
+            thing_pendulum[0x23..0x28] => things::pendulum;
+            thing_wrecking_ball_pendulum[0x47..0x4c] => things::wrecking_ball;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

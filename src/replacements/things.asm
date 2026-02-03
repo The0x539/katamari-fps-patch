@@ -392,3 +392,15 @@ windmill_spin:
 	movss xmm0, [DT_TICKS]
 	vfmadd123ss xmm1, xmm0, [r8]
 	ret
+
+global pendulum
+pendulum:
+	movss xmm1, [DT_TICKS]
+	vfmadd123ss xmm0, xmm1, [rbx + 0x40]
+	ret
+
+global wrecking_ball
+wrecking_ball:
+	movss xmm2, [DT_TICKS]
+	vfmadd123ss xmm0, xmm2, [rdi + 0x60]
+	ret

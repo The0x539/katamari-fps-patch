@@ -271,6 +271,12 @@ exports! {
     #[func @ 0x379a0]
     fn thing_walk_turn(machine: *mut ());
 
+    #[func @ 0x4a050]
+    fn thing_pendulum(t: *mut Thing);
+
+    #[func @ 0x48490]
+    fn thing_wrecking_ball_pendulum(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

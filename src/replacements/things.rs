@@ -70,6 +70,13 @@ unsafe extern "C" {
     pub fn wrecking_ball();
     pub fn bird_update_timer_rbx();
     pub fn bird_update_timer_rdx();
+    pub fn bird_ascend_vertical_a();
+    pub fn bird_ascend_vertical_b();
+    pub fn bird_ascend_horizontal();
+    pub fn bird_descend_horizontal();
+    pub fn bird_descend_horizontal_simple();
+    pub fn bird_descend_vertical_a();
+    pub fn bird_descend_vertical_b();
 }
 
 pub unsafe extern "C" fn sink_rate() {

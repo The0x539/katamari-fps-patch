@@ -422,3 +422,40 @@ bird_update_timer_rdx:
 	.not_negative:
 	mov [rdx + 0x2], ax
 	ret
+
+global bird_ascend_vertical_a
+global bird_descend_vertical_b
+bird_ascend_vertical_a:
+bird_descend_vertical_b:
+	movss xmm2, [DT_TICKS]
+	vfmadd231ss xmm6, xmm2, [rbx + 0x64]
+	ret
+
+global bird_ascend_horizontal
+bird_ascend_horizontal:
+	movss xmm2, [rbx + 0x6c]
+	mulss xmm2, [DT_TICKS]
+	ret
+
+global bird_ascend_vertical_b
+bird_ascend_vertical_b:
+	mulss xmm5, [rbx + 0x68]
+	mulss xmm5, [DT_TICKS]
+	ret
+
+global bird_descend_horizontal
+bird_descend_horizontal:
+	movups xmm0, [rbx + 0x10]
+	vbroadcastss xmm1, [rbx + 0x78]
+	mulps xmm1, [DT_TICKS]
+	vfmadd123ps xmm0, xmm1, [rcx + 0x90]
+	movups [rcx + 0x90], xmm0
+	ret
+
+; descend vertical "b" is the same code as ascend vertical "a"
+global bird_descend_vertical_a
+bird_descend_vertical_a:
+	movss xmm1, [.delta]
+	vfnmadd231ss xmm0, xmm1, [DT_TICKS]
+	ret
+	.delta: dd 4.0

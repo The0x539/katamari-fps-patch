@@ -115,3 +115,9 @@ prince_bump_timer_update:
 	dec_dt ax
 	xorps xmm0, xmm0
 	ret
+
+global prince_forced_turn
+prince_forced_turn:
+	movss xmm2, [rdi + 0x4b4]
+	mulss xmm2, [DT_TICKS]
+	ret

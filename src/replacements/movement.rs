@@ -14,6 +14,7 @@ unsafe extern "C" {
     pub fn bump_velocity();
     pub fn spin_amount();
     pub fn prince_bump_timer_update();
+    pub fn prince_forced_turn();
 
     pub fn steer_rbx();
     pub fn steer_rcx();

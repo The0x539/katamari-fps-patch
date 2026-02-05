@@ -310,6 +310,9 @@ exports! {
     #[func @ 0x54160]
     fn prince_read_sticks(p: *mut Prince);
 
+    #[func @ 0x54e90]
+    fn prince_forced_turn(p: *mut Prince);
+
     #[var @ 0]
     static base_addr: ();
 

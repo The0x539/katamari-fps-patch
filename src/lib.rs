@@ -341,6 +341,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             prince_read_sticks[0x101..0x107] => movement::prince_bump_timer_update;
             camera_animate[0x291..0x298] => camera::camera_bump_timer_update;
+            prince_forced_turn[0x119..0x121] => movement::prince_forced_turn;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

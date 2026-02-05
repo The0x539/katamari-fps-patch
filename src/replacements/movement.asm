@@ -109,3 +109,9 @@ steer_rcx:
 	mulss xmm1, [DT_TICKS]
 	addss xmm1, [rcx + 0x6c]
 	ret
+
+global prince_bump_timer_update
+prince_bump_timer_update:
+	dec_dt ax
+	xorps xmm0, xmm0
+	ret

@@ -13,6 +13,7 @@ unsafe extern "C" {
     pub fn climbing_ascent();
     pub fn bump_velocity();
     pub fn spin_amount();
+    pub fn prince_bump_timer_update();
 
     pub fn steer_rbx();
     pub fn steer_rcx();

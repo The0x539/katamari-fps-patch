@@ -9,6 +9,7 @@ unsafe extern "C" {
     pub fn size_threshold_animation_zoom();
     pub fn size_threshold_animation_other_zoom();
     pub fn angel_fade();
+    pub fn camera_bump_timer_update();
 }
 
 // TODO: For some reason, this might be too *slow* now, and the fade to white is still too fast.

@@ -64,3 +64,10 @@ angel_fade:
 	vfmadd231ss xmm2, xmm1, [DT_TICKS]
 	comiss xmm2, xmm7 ; trampoline
 	ret
+
+global camera_bump_timer_update
+camera_bump_timer_update:
+	mov dx, [rdi + 0x8cc]
+	dec_dt dx
+	mov [rdi + 0x8cc], dx
+	ret

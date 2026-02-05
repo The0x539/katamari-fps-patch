@@ -338,14 +338,23 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_animal_state_1_walk[0x5a..0x7b] => things::animal_reset_partial_walk_timer_60;
 
             thing_scarecrow_sway[0x1ed..0x1f2] => things::scarecrow_sway;
+
+            prince_read_sticks[0x101..0x107] => movement::prince_bump_timer_update;
+            camera_animate[0x291..0x298] => camera::camera_bump_timer_update;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();
 
-        {
-            let n = &mut *ps2::raw::climb_sustain_limit();
-            *n = (*n * 1000) / 30;
+        macro_rules! ticks_to_millis {
+            ($ptr:expr) => {
+                let v = $ptr;
+                *v = (*v * 1000) / 30;
+            };
         }
+
+        ticks_to_millis!(ps2::raw::climb_sustain_limit());
+        ticks_to_millis!(ps2::bump_timers(0));
+        ticks_to_millis!(ps2::bump_timers(1));
 
         hook::postfix(
             dll.initialize_princes,

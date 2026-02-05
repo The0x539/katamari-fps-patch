@@ -4,6 +4,13 @@ extern DT_MILLIS
 extern DT_TICKS
 extern MULTIPLAYER
 
+%macro dec_dt 1
+	sub %1, [DT_MILLIS]
+	jns .not_negative
+	xor %1, %1
+	.not_negative:
+%endmacro
+
 %include 'abilities.asm'
 %include 'cacophony.asm'
 %include 'dash.asm'

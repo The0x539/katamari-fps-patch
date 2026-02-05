@@ -307,6 +307,9 @@ exports! {
     #[func @ 0x46a20]
     fn thing_scarecrow_sway(t: *mut Thing);
 
+    #[func @ 0x54160]
+    fn prince_read_sticks(p: *mut Prince);
+
     #[var @ 0]
     static base_addr: ();
 
@@ -390,6 +393,9 @@ exports! {
 
     #[array @ 0x8a880]
     static prop_data_array: [PropConstants; 1718];
+
+    #[array @ 0x7a040]
+    static bump_timers: [u16; 2];
 
     #[callback @ 0x10ea00]
     fn play_visual_fx(

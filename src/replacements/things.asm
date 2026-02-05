@@ -2,13 +2,6 @@ section .text
 
 extern PTR_THING_GRAVITY
 
-%macro dec_dt 1
-	sub %1, [DT_MILLIS]
-	jns .not_negative
-	xor %1, %1
-	.not_negative:
-%endmacro
-
 global melon_spin
 melon_spin:
 	movss xmm0, [.theta]

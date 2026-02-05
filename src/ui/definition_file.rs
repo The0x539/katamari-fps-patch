@@ -18,6 +18,7 @@ pub struct DefinitionFile {
     pub prince: Vec<Field>,
     pub thing: Vec<Field>,
     pub camera: Vec<Field>,
+    pub camera_transform: Vec<Field>,
     pub global: Vec<Field>,
 }
 
@@ -167,6 +168,7 @@ parsers! {
                 "prince" => &mut doc.prince,
                 "thing" => &mut doc.thing,
                 "camera" => &mut doc.camera,
+                "camera_transform" => &mut doc.camera_transform,
                 "global" => &mut doc.global,
                 _ => return None,
             };
@@ -189,6 +191,7 @@ mod tests {
             Field {
                 offset: 0x40,
                 field_type: FieldType::Array(Box::new(FieldType::Vec4), 4),
+                sub_offset: None,
                 name: Some("foo".into()),
             },
         );
@@ -211,21 +214,25 @@ mod tests {
         let expected = vec![
             Field {
                 offset: 0x40,
+                sub_offset: None,
                 field_type: FieldType::Vec4,
                 name: Some("position".into()),
             },
             Field {
                 offset: 0x50,
+                sub_offset: None,
                 field_type: FieldType::Array(FieldType::Mat4.into(), 8),
                 name: Some("the 'guys'".into()),
             },
             Field {
                 offset: 0x254,
+                sub_offset: None,
                 field_type: FieldType::Float,
                 name: None,
             },
             Field {
                 offset: 0x25c,
+                sub_offset: None,
                 field_type: FieldType::Address,
                 name: None,
             },
@@ -251,11 +258,13 @@ mod tests {
             katamari: vec![
                 Field {
                     offset: 0x40,
+                    sub_offset: None,
                     field_type: FieldType::Vec4,
                     name: Some("position".into()),
                 },
                 Field {
                     offset: 0x50,
+                    sub_offset: None,
                     field_type: FieldType::Array(FieldType::Mat4.into(), 8),
                     name: Some("the 'guys'".into()),
                 },
@@ -263,11 +272,13 @@ mod tests {
             prince: vec![
                 Field {
                     offset: 0x254,
+                    sub_offset: None,
                     field_type: FieldType::Float,
                     name: None,
                 },
                 Field {
                     offset: 0x25c,
+                    sub_offset: None,
                     field_type: FieldType::Address,
                     name: None,
                 },

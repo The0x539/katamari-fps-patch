@@ -80,6 +80,15 @@ impl MyApp {
             katamari.with(definitions).ui(ui);
         });
 
+        if !definitions.camera_transform.is_empty() {
+            frame.show(ui, |ui| unsafe {
+                ui.label("Camera transform");
+                let i: usize = ps2::current_player_index().into();
+                let camera_transform = &mut *ps2::camera_transform_array(i);
+                camera_transform.with(definitions).ui(ui);
+            });
+        }
+
         let idx = unsafe { MONO_CTRL_IDX };
         if idx >= 4000 {
             return;

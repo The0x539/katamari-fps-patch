@@ -3,7 +3,7 @@ use egui::{Checkbox, DragValue, Ui, Widget, WidgetText};
 
 use crate::{
     ps2,
-    types::{Camera, Katamari, Mat4, MotionVectors, Prince, Thing, Vec4},
+    types::{Camera, CameraTransform, Katamari, Mat4, MotionVectors, Prince, Thing, Vec4},
     ui::definition_file::{DefinitionFile, Field, FieldType},
 };
 
@@ -226,6 +226,12 @@ unsafe impl Research for Thing {
             let name = std::ffi::CStr::from_ptr(data.name).to_str().unwrap();
             ui.label(format!("[{idx}]: {name} ({name_idx})"));
         }
+    }
+}
+
+unsafe impl Research for CameraTransform {
+    fn get_section(defs: &DefinitionFile) -> &[Field] {
+        &defs.camera_transform
     }
 }
 

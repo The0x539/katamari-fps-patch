@@ -1,7 +1,6 @@
 section .text
 
-global bang2
-bang2:
+fn bang2:
 	mov eax, [rbx + r8*8]
 	add eax, [DT_MILLIS]
 	mov [rbx + 8*r8], eax

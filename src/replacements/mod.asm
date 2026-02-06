@@ -11,6 +11,11 @@ extern MULTIPLAYER
 	.not_negative:
 %endmacro
 
+%macro fn 1
+        global %1
+        %1
+%endmacro
+
 %include 'abilities.asm'
 %include 'cacophony.asm'
 %include 'dash.asm'
@@ -22,8 +27,7 @@ section .text
 
 ; TODO: patch this directly into the original code to avoid the jump
 ; (possibly do similar for other position-independent code that's smaller than its replacement?)
-global copy_matrix
-copy_matrix:
+fn copy_matrix:
         sub rsp, 0x20
         movups [rsp], xmm0 ; Assumption: the original code doesn't use AVX
         movups [rsp + 0x10], xmm1

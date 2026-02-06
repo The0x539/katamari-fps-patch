@@ -2,16 +2,14 @@ section .text
 
 extern PTR_THING_GRAVITY
 
-global melon_spin
-melon_spin:
+fn melon_spin:
 	movss xmm0, [.theta]
 	mulss xmm0, [DT_TICKS]
 	addss xmm0, [rsi + 0x110]
 	ret
 	.theta: dd 0.15
 
-global animal_walk
-animal_walk:
+fn animal_walk:
 	; bit annoying that this went in the *middle* of the replaced code
 	movups [rbp - 0x79], xmm3
 
@@ -38,15 +36,13 @@ animal_walk:
 
 	ret
 
-global hop_timer_reset
-hop_timer_reset:
+fn hop_timer_reset:
 	; Praying that the byte after this counter is unused,
 	; at least by the NPCs we care about.
 	mov word [rax + 0x90], 833 ; 25 ticks -> 833 ms
 	ret
 
-global hop_timer_update
-hop_timer_update:
+fn hop_timer_update:
 	mov ax, [rcx + 0x90]
 	cmp ax, 0
 	jle .a
@@ -65,30 +61,26 @@ hop_timer_update:
 	.a:
 	ret
 
-global hop_angle_update
-hop_angle_update:
+fn hop_angle_update:
 	movss xmm2, [rdi + 0x78]
 	movss xmm1, [rdi + 0x74]
 	vfmadd231ss xmm1, xmm0, [DT_TICKS]
 	ret
 
-global hop_position_update
-hop_position_update:
+fn hop_position_update:
 	movups xmm3, [rcx + 0x90]
 	movups xmm1, [DT_TICKS]
 	vfmadd231ps xmm3, xmm1, [rcx + 0xe0]
 	movups [rcx + 0x90], xmm3
 	ret
 
-global hop_gravity
-hop_gravity:
+fn hop_gravity:
 	movss xmm3, [rdi + 0x88]           ; xmm3 = t->hop_grav_vel
 	vfmadd132ss xmm0, xmm3, [DT_TICKS] ; xmm0 = (xmm0 * dt) + xmm3
 	ret
 
 ; TODO: Maybe combine the preceding two functions into one, like this one?
-global other_hop_gravity
-other_hop_gravity:
+fn other_hop_gravity:
 	movss xmm1, [DT_TICKS]
 	movss xmm0, [rdx + 0x14]
 	vfmadd123ss xmm0, xmm1, [rdx + 0x10] ; xmm0 = (dt * accel) + velocity
@@ -98,8 +90,7 @@ other_hop_gravity:
 	movss [rbx + 0x94], xmm0 ; store new position
 	ret
 
-global freefall_pos
-freefall_pos:
+fn freefall_pos:
 	movss xmm5, [DT_TICKS]
 	; xmm2 is the w component, so if xmm5 is no bueno, just tamper with this one
 	vfmadd231ss xmm2, xmm5, [rcx + 0xec]
@@ -112,37 +103,32 @@ freefall_pos:
 
 	ret
 
-global freefall_gravity
-freefall_gravity:
+fn freefall_gravity:
 	mov rdi, [PTR_THING_GRAVITY]
 	movss xmm4, [rdi]
 	vfmadd231ss xmm0, xmm4, [DT_TICKS]
 	xor edi, edi
 	ret
 
-global freefall_spin_a
-freefall_spin_a:
+fn freefall_spin_a:
 	movss xmm5, [DT_TICKS]
 	vfmadd123ss xmm0, xmm5, [rcx + 0xa0 + 4*rax] ; xmm0 = (xmm0 * xmm5) + [current angle]
 	ret
 
-global freefall_spin_b
-freefall_spin_b:
+fn freefall_spin_b:
 	movss xmm5, [DT_TICKS]
 	vfmadd123ss xmm1, xmm5, [rcx + 0xa0 + 4*rax] ; xmm0 = (xmm0 * xmm5) + [current angle]
 	ret
 
 	
-global freefall_spin_c
-freefall_spin_c:
+fn freefall_spin_c:
 	movss xmm0, [rcx + 0xa4]
 	movss xmm2, [.pi]
 	vfmadd231ss xmm0, xmm1, [DT_TICKS]
 	ret
 	.pi: dd 3.14159265
 
-global random_hop_motion
-random_hop_motion:
+fn random_hop_motion:
 	; We have pretty good freedom with with registers to use here,
 	; as I don't think any subsequent code is dependent on XMM0/1/2.
 	; As such, a simple mnemonic: XMM(n) is the nth derivative.
@@ -157,8 +143,7 @@ random_hop_motion:
 
 ; Please tell me there aren't any already-delta-timed uses of this.
 ; I'm going to guess not based on the usage of pointers for all the args.
-global angle_move_towards
-angle_move_towards:
+fn angle_move_towards:
 	movss xmm1, [rdx]
 	mulss xmm1, [DT_TICKS]
 	xorps xmm0, xmm0
@@ -167,8 +152,7 @@ angle_move_towards:
 	addss xmm2, [rcx]
 	ret
 
-global pursuit_angle_move_towards
-pursuit_angle_move_towards:
+fn pursuit_angle_move_towards:
 	movss xmm1, [rdx + 0x7c]
 	mulss xmm1, [DT_TICKS]
 	movss xmm0, [rdx + 0x78]
@@ -176,42 +160,36 @@ pursuit_angle_move_towards:
 	ret
 	.neg_tau: dd -6.283185307
 
-global animal_angle_move_towards
-animal_angle_move_towards:
+fn animal_angle_move_towards:
 	movss xmm0, [rdi + 0x7c]
 	mulss xmm0, [DT_TICKS]
 	comiss xmm6, xmm0
 	movss xmm2, [rdi + 0x78]
 	ret
 
-global train_angle_move_towards
-train_angle_move_towards:
+fn train_angle_move_towards:
 	mov r14, rcx
 	movaps xmm2, xmm1
 	mulss xmm2, [DT_TICKS]
 	addss xmm2, [rdx + 0x10c]
 	ret
 
-global start_flee_timer
-start_flee_timer:
+fn start_flee_timer:
 	mov eax, 3000 ; 90 ticks -> 3 seconds
 	mov [rdi + 0x124], ax
 	ret
 
-global update_flee_timer
-update_flee_timer:
+fn update_flee_timer:
 	dec_dt ax
 	mov [rsp + 0x20 + 8], rbx ; trampoline
 	ret
 
-global sine_bob
-sine_bob:
+fn sine_bob:
 	movss xmm1, [DT_TICKS]
 	vfmadd123ss xmm0, xmm1, [rbx + 0x10]
 	ret
 
-global elevator_timer_reset
-elevator_timer_reset:
+fn elevator_timer_reset:
 	; the trampoline instruction is written differently in each case in the original code,
 	; but this does work in both cases
 	inc byte [rbx + 0x2] ; state += 1
@@ -222,27 +200,23 @@ elevator_timer_reset:
 	ret
 	.thirty: dd 30
 
-global elevator_timer_update
-elevator_timer_update:
+fn elevator_timer_update:
 	dec_dt eax
 	mov [rbx + 0x2c], eax
 	ret
 
-global elevator_height_update
-elevator_height_update:
+fn elevator_height_update:
 	movss xmm2, [DT_TICKS]
 	vfmadd123ss xmm0, xmm2, [rbx + 0x20]
 	ret
 
-global teddy_bear_bowl_spin
-teddy_bear_bowl_spin:
+fn teddy_bear_bowl_spin:
 	movss xmm1, [.theta]
 	vfmadd231ss xmm0, xmm1, [DT_TICKS]
 	ret
 	.theta: dd 0.05
 
-global basic_gravity
-basic_gravity:
+fn basic_gravity:
 	mov [rsp + 0x80 + 8], rsi ; trampoline
 
 	; acceleration (xmm0 currently contains gravity)
@@ -260,26 +234,22 @@ basic_gravity:
 
 	ret
 
-global wobble_rate
-wobble_rate:
+fn wobble_rate:
 	movss xmm2, [rsi + 0x4]
 	mulss xmm2, [DT_TICKS]
 	ret
 
-global flee_timer_update
-flee_timer_update:
+fn flee_timer_update:
 	dec_dt ax
 	mov [rdx + 0x30], ax
 	ret
 
-global update_collision_cooldown
-update_collision_cooldown:
+fn update_collision_cooldown:
 	sub ax, [DT_MILLIS]
 	mov [rbx], ax
 	ret
 
-global getup_hop_gravity
-getup_hop_gravity:
+fn getup_hop_gravity:
 	movss xmm0, [.accel]
 	movss xmm1, [DT_TICKS]
 
@@ -296,14 +266,12 @@ getup_hop_gravity:
 	.accel: dd -0.72
 	.rate: dd 0.8
 
-global flee_timer_update_state4
-flee_timer_update_state4:
+fn flee_timer_update_state4:
 	mov ax, [DT_MILLIS]
 	neg ax
 	ret
 
-global flee_velocity_1
-flee_velocity_1:
+fn flee_velocity_1:
 	mov rax, [PTR_THING_GRAVITY]
 	movss xmm6, [rax]
 	movaps xmm1, [DT_TICKS]
@@ -327,36 +295,31 @@ flee_velocity_1:
 
 	ret
 
-global flee_velocity_2
-flee_velocity_2:
+fn flee_velocity_2:
 	movaps xmm1, [DT_TICKS]
 	movaps xmm3, [rdi + 0xe0]
 	vfmadd123ps xmm3, xmm1, [rdi + 0xc0]
 	movaps [rdi + 0x90], xmm3
 	ret
 
-global flee_velocity_3
-flee_velocity_3:
+fn flee_velocity_3:
 	movss xmm3, [rdi + 0x20]
 	mulss xmm3, [DT_TICKS]
 	ret
 
-global flee_velocity_spin
-flee_velocity_spin:
+fn flee_velocity_spin:
 	movss xmm3, [DT_TICKS]
 	vfmadd231ss xmm6, xmm3, [rsi + 0x64]
 	ret
 
-global spin_before_getup
-spin_before_getup:
+fn spin_before_getup:
 	movss xmm1, [rcx + 0xa4]
 	movss xmm0, [DT_TICKS]
 	vfmadd231ss xmm1, xmm0, [.theta]
 	ret
 	.theta: dd 0.15
 
-global getup_flip
-getup_flip:
+fn getup_flip:
 	movss xmm2, [DT_TICKS]
 	comiss xmm1, xmm6
 	jbe .increase
@@ -372,64 +335,53 @@ getup_flip:
 
 	.amount: dd 0.4
 
-global jumboman_spin
-jumboman_spin:
+fn jumboman_spin:
 	movss xmm1, [DT_TICKS]
 	vfmadd123ss xmm0, xmm1, [rax + 0x20]
 	ret
 
-global windmill_spin
-windmill_spin:
+fn windmill_spin:
 	movss xmm0, [DT_TICKS]
 	vfmadd123ss xmm1, xmm0, [r8]
 	ret
 
-global pendulum
-pendulum:
+fn pendulum:
 	movss xmm1, [DT_TICKS]
 	vfmadd123ss xmm0, xmm1, [rbx + 0x40]
 	ret
 
-global wrecking_ball
-wrecking_ball:
+fn wrecking_ball:
 	movss xmm2, [DT_TICKS]
 	vfmadd123ss xmm0, xmm2, [rdi + 0x60]
 	ret
 
-global bird_update_timer_rbx
-bird_update_timer_rbx:
+fn bird_update_timer_rbx:
 	dec_dt ax
 	mov [rbx + 0x2], ax
 	ret
 
-global bird_update_timer_rdx
-bird_update_timer_rdx:
+fn bird_update_timer_rdx:
 	dec_dt ax
 	mov [rdx + 0x2], ax
 	ret
 
-global bird_ascend_vertical_a
-global bird_descend_vertical_b
-bird_ascend_vertical_a:
-bird_descend_vertical_b:
+fn bird_ascend_vertical_a:
+fn bird_descend_vertical_b:
 	movss xmm2, [DT_TICKS]
 	vfmadd231ss xmm6, xmm2, [rbx + 0x64]
 	ret
 
-global bird_ascend_horizontal
-bird_ascend_horizontal:
+fn bird_ascend_horizontal:
 	movss xmm2, [rbx + 0x6c]
 	mulss xmm2, [DT_TICKS]
 	ret
 
-global bird_ascend_vertical_b
-bird_ascend_vertical_b:
+fn bird_ascend_vertical_b:
 	mulss xmm5, [rbx + 0x68]
 	mulss xmm5, [DT_TICKS]
 	ret
 
-global bird_descend_horizontal
-bird_descend_horizontal:
+fn bird_descend_horizontal:
 	movups xmm0, [rbx + 0x10]
 	vbroadcastss xmm1, [rbx + 0x78]
 	mulps xmm1, [DT_TICKS]
@@ -438,40 +390,34 @@ bird_descend_horizontal:
 	ret
 
 ; descend vertical "b" is the same code as ascend vertical "a"
-global bird_descend_vertical_a
-bird_descend_vertical_a:
+fn bird_descend_vertical_a:
 	movss xmm1, [.delta]
 	vfnmadd231ss xmm0, xmm1, [DT_TICKS]
 	ret
 	.delta: dd 4.0
 
-global animal_update_partial_walk_timer
-animal_update_partial_walk_timer:
+fn animal_update_partial_walk_timer:
 	dec_dt ax
 	mov [rbx + 0xa], ax
 	ret
 
-global animal_update_full_walk_timer
-animal_update_full_walk_timer:
+fn animal_update_full_walk_timer:
 	dec_dt ax
 	mov [rbx + 0x2], ax
 	ret
 
-global scarecrow_sway
-scarecrow_sway:
+fn scarecrow_sway:
 	movss xmm0, [DT_TICKS]
 	vfmadd123ss xmm1, xmm0, [rdi + 0x40]
 	ret
 
-global other_hop_timer_check
-other_hop_timer_check:
+fn other_hop_timer_check:
 	mov ax, [rdx + 0xa]
 	test ax, ax
 	ret
 
 ; thank the heavens that there's a byte of padding for my usage
-global other_hop_timer_update
-other_hop_timer_update:
+fn other_hop_timer_update:
 	dec_dt ax
 	mov [rdx + 0xa], ax
 	ret

@@ -1,26 +1,22 @@
 section .text
 
-global airborne_gravity
-airborne_gravity:
+fn airborne_gravity:
 	; xmm5 is currently initialized to the katamari's f32@0x1a0 field,
 	; which seems to be the gravitational acceleration value.
 	movss xmm1, [DT_TICKS]
 	vfmadd213ss xmm5, xmm1, [rbx + 0x2e4]
 	ret
 
-global bumpy_ride
-bumpy_ride:
+fn bumpy_ride:
 	mulss xmm6, [DT_TICKS]
 	movss [rdi + 0x39b8], xmm6
 	ret
 
-global climbing_position
-climbing_position:
+fn climbing_position:
         movups xmm1, [rbx + 0x290] ; xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
 	jmp increment_position
 
-global rolling_position
-rolling_position:
+fn rolling_position:
 	movups xmm1, [rbx + 0x2b0] ; xmm1 = k->motion.h (effective velocity, including gravity)
 	; fall through to increment_position
 
@@ -34,14 +30,12 @@ increment_position:
 	movups [rbx + 0x460], xmm0    ; k->position = xmm0
 	ret
 
-global turn_radius
-turn_radius:
+fn turn_radius:
 	movss xmm2, [rsi + 0x78]
 	mulss xmm2, [DT_TICKS]
 	ret
 
-global friction
-friction:
+fn friction:
 	; xmm12 is the first register to be overwritten after the patched code
 	movss xmm12, [DT_TICKS]
 	vfmadd231ss xmm6, xmm12, [rbx + 0x300]
@@ -49,8 +43,7 @@ friction:
 	vfmadd231ss xmm8, xmm12, [rbx + 0x308]
 	ret
 
-global push_force
-push_force:
+fn push_force:
 	movss xmm1, [DT_TICKS]
 	vfmadd213ss xmm6,  xmm1, [r12 + 0x0]
 	vfmadd213ss xmm10, xmm1, [r12 + 0x4]
@@ -58,8 +51,7 @@ push_force:
 	vfmadd213ss xmm15, xmm1, [r12 + 0xc]
 	ret
 
-global climb_ascent_timer
-climb_ascent_timer:
+fn climb_ascent_timer:
 	mov [rsp + 0xc0 + 8], rsi
 	mov si, [DT_MILLIS]
 	add [rdx + 0x784], si
@@ -67,15 +59,13 @@ climb_ascent_timer:
 	cmp word [rdx + 0x784], 1000 ; 1 second
 	ret
 
-global climb_sustain_timer
-climb_sustain_timer:
+fn climb_sustain_timer:
 	movzx eax, word [rdx + 0x786]
 	add ax, [DT_MILLIS]
 	mov [rdx + 0x786], ax
 	ret
 
-global climbing_ascent
-climbing_ascent:
+fn climbing_ascent:
 	; the original code is insanely complex to just subtract climb_amount from position.y
 	; we start with climb_amount stored in xmm5
 	mov rsi, [rsp + 0xC0 + 8]     ; annoying thing that was in the middle of the replaced code
@@ -86,38 +76,32 @@ climbing_ascent:
 	movss [rbx + 0x464], xmm3
 	ret
 
-global bump_velocity
-bump_velocity:
+fn bump_velocity:
 	divss xmm0, [DT_TICKS]   ; important part
 	lea r8, [rsp + 0x20 + 8] ; trampoline
 	ret
 
-global spin_amount
-spin_amount:
+fn spin_amount:
 	movss [rsp + 0x2c + 8], xmm9 ; trampoline: finish storing the roll direction on the stack (what a waste)
 	mulss xmm2, [DT_TICKS]       ; important part: delta-time the "theta" arg
 	ret
 
-global steer_rbx
-steer_rbx:
+fn steer_rbx:
 	mulss xmm1, [DT_TICKS]
 	addss xmm1, [rbx + 0x6c]
 	ret
 
-global steer_rcx
-steer_rcx:
+fn steer_rcx:
 	mulss xmm1, [DT_TICKS]
 	addss xmm1, [rcx + 0x6c]
 	ret
 
-global prince_bump_timer_update
-prince_bump_timer_update:
+fn prince_bump_timer_update:
 	dec_dt ax
 	xorps xmm0, xmm0
 	ret
 
-global prince_forced_turn
-prince_forced_turn:
+fn prince_forced_turn:
 	movss xmm2, [rdi + 0x4b4]
 	mulss xmm2, [DT_TICKS]
 	ret

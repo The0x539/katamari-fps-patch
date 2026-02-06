@@ -43,6 +43,7 @@ spindash_gain_power:
 
 global spindash_spinning
 spindash_spinning:
+	mulps xmm0, [VEC_NEG]
 	movups [rsp + 0x58 + 8], xmm0 ; trampoline
 	mulss xmm2, [DT_TICKS]
 	ret
@@ -53,6 +54,12 @@ VEC4_W:
 	dd 0.0
 	dd 0.0
 	dd 0.0
+	dd 1.0
+
+VEC_NEG:
+	dd -1.0
+	dd -1.0
+	dd -1.0
 	dd 1.0
 
 TICK_MS:

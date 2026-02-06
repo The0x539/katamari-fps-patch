@@ -243,6 +243,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_machine_22_state_2[0x30..0x35] => things::sine_bob;
             thing_machine_22_state_3[0x58..0x7f] => things::other_hop_gravity;
 
+            thing_machine_22_state_3[0x386..0x38c] => things::other_hop_timer_check;
+            thing_machine_22_state_3[0x38e..0x393] => things::other_hop_timer_update;
+            thing_machine_22_state_3[0x449..0x451] => things::other_hop_timer_start;
+
             thing_machine_22_state_6[0x1b1..0x1bb] => things::elevator_timer_reset;
             thing_machine_22_state_6[0x164..0x16a] => things::elevator_timer_reset;
             thing_machine_22_state_6[0xbf..0xc4] => things::elevator_timer_update;

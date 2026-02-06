@@ -80,6 +80,8 @@ unsafe extern "C" {
     pub fn animal_update_partial_walk_timer();
     pub fn animal_update_full_walk_timer();
     pub fn scarecrow_sway();
+    pub fn other_hop_timer_check();
+    pub fn other_hop_timer_update();
 }
 
 pub unsafe extern "C" fn sink_rate() {
@@ -287,3 +289,78 @@ pub unsafe extern "C" fn animal_reset_partial_walk_timer_60() {
         }
     }
 }
+
+pub unsafe extern "C" fn other_hop_timer_start() {
+    unsafe {
+        let mut timer: u32;
+        let mut hop: *mut ();
+        asm!("", out("rdx") hop, out("eax") timer);
+        // Originally truncated to a byte, and 255 ticks is 8.5 seconds
+        timer %= 8500;
+        // Originally incremented by 0x14 = 20 ticks = ⅔ seconds
+        // Not sure the original code actually worked quite as intended due to overflow.
+        // It would've been a uniform distribution of the 256 possible values either way, right?
+        // Oh well, guess I'm fixing a bug.
+        timer += 667;
+        asm! {
+            "inc byte ptr [rdx + 0x9]", // trampoline-ish
+            "mov word ptr [rdx + 0xa], {:x}",
+            in(reg) timer,
+            in("rdx") hop,
+        }
+    }
+}
+
+// Versions from a much more cursed timeline where there wasn't an unused padding byte.
+/*
+#[unsafe(naked)]
+pub unsafe extern "C" fn other_hop_timer_start() {
+    naked_asm! {
+        "xchg [rsp + 0x100 + 8], rbx",
+        "call {}",
+        "mov rbx, [rsp + 0x100 + 8]",
+        "ret",
+        sym other_hop_timer_start_impl,
+    }
+}
+
+unsafe extern "C" fn other_hop_timer_start_impl() {
+    unsafe {
+        let thing: *mut Thing;
+        asm! {
+            "inc byte ptr [rdx + 0x9]",     // trampoline
+            "mov byte ptr [rdx + 0xa], 10", // give it a value so that the branches work
+            "mov {}, rbx",
+            out(reg) thing,
+        };
+        let mut timer = ps2::rng() as u32;
+        // Originally truncated to a byte, and 255 ticks is 8.5 seconds
+        timer %= 8500;
+        // Originally incremented by 0x14 = 20 ticks = ⅔ seconds
+        // Not sure the original code actually worked quite as intended due to overflow.
+        // It would've been a uniform distribution of the 256 possible values either way, right?
+        // Oh well, guess I'm fixing a bug.
+        timer += 667;
+        ExtraThingState::of(thing).hop_timer = timer as u16;
+    }
+}
+
+pub unsafe extern "C" fn other_hop_timer_update() {
+    unsafe {
+        let hop: *mut ();
+        let thing: *mut Thing;
+        asm! {
+            "mov {}, rbx",
+            out(reg) thing,
+            out("rdx") hop,
+        }
+        let s = ExtraThingState::of(thing);
+        s.hop_timer = s.hop_timer.saturating_sub(values::dt_millis() as u16);
+        asm! {
+            "mov byte ptr [rdx + 0xa], {}",
+            in(reg_byte) if s.hop_timer > 0 { 1_u8 } else { 0_u8 },
+            in("rdx") hop,
+        }
+    }
+}
+*/

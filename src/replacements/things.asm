@@ -462,3 +462,16 @@ scarecrow_sway:
 	movss xmm0, [DT_TICKS]
 	vfmadd123ss xmm1, xmm0, [rdi + 0x40]
 	ret
+
+global other_hop_timer_check
+other_hop_timer_check:
+	mov ax, [rdx + 0xa]
+	test ax, ax
+	ret
+
+; thank the heavens that there's a byte of padding for my usage
+global other_hop_timer_update
+other_hop_timer_update:
+	dec_dt ax
+	mov [rdx + 0xa], ax
+	ret

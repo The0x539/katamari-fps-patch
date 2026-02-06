@@ -82,6 +82,7 @@ unsafe extern "C" {
     pub fn scarecrow_sway();
     pub fn other_hop_timer_check();
     pub fn other_hop_timer_update();
+    pub fn animal_flee_turn();
 }
 
 pub unsafe extern "C" fn sink_rate() {

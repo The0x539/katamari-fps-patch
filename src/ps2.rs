@@ -313,6 +313,9 @@ exports! {
     #[func @ 0x54e90]
     fn prince_forced_turn(p: *mut Prince);
 
+    #[func @ 0x31f90]
+    fn thing_animal_x31f90(t: *mut Thing, animal: *mut ());
+
     #[var @ 0]
     static base_addr: ();
 

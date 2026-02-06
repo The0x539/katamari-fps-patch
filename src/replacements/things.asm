@@ -421,3 +421,8 @@ fn other_hop_timer_update:
 	dec_dt ax
 	mov [rdx + 0xa], ax
 	ret
+
+fn animal_flee_turn:
+	movss xmm2, [DT_TICKS]
+	vfmadd123ss xmm1, xmm2, [rdx + 0x74]
+	ret

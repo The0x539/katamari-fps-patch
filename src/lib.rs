@@ -348,9 +348,21 @@ fn install_hooks_impl() -> eyre::Result<()> {
             prince_forced_turn[0x119..0x121] => movement::prince_forced_turn;
 
             thing_animal_x31f90[0x34..0x39] => things::animal_flee_turn;
+
+            camera_credits_update[0x1de..0x1e6] => camera::credits_zoom;
+            camera_credits_update[0xe9..0xf1] => camera::credits_zoom;
+
+            init[0x251..0x258] => camera::credits_timer_start_a;
+            camera_credits_update[0x1ca..0x1d1] => camera::credits_timer_start_b;
+            camera_credits_update[0xcc..0xd3] => camera::credits_timer_zero;
+            camera_credits_update[0x199..0x1a0] => camera::credits_timer_zero;
+
+            camera_credits_update[0xa6..0xba] => camera::credits_timer_update;
+            camera_credits_update[0x189..0x191] => camera::credits_timer_update;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();
+        replacements::values::PTR_CREDITS_TIMER = ps2::raw::credits_timer();
 
         macro_rules! ticks_to_millis {
             ($ptr:expr) => {

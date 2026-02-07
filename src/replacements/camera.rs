@@ -10,6 +10,9 @@ unsafe extern "C" {
     pub fn size_threshold_animation_other_zoom();
     pub fn angel_fade();
     pub fn camera_bump_timer_update();
+    pub fn credits_zoom();
+    pub fn credits_timer_update();
+    pub fn credits_timer_zero();
 }
 
 // TODO: For some reason, this might be too *slow* now, and the fade to white is still too fast.
@@ -22,5 +25,17 @@ pub unsafe extern "C" fn angel_zoom() -> f32 {
         *distance = f32::mul_add(*rate, dt, *distance);
         asm!("pop rcx");
         *distance // returned via xmm0, which is used again soon afterwards in the caller
+    }
+}
+
+pub unsafe extern "C" fn credits_timer_start_a() {
+    unsafe {
+        *ps2::raw::credits_timer() = 30_000_i32;
+    }
+}
+
+pub unsafe extern "C" fn credits_timer_start_b() {
+    unsafe {
+        *ps2::raw::credits_timer() = 214_800_i32;
     }
 }

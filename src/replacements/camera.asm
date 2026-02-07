@@ -1,5 +1,7 @@
 section .text
 
+extern PTR_CREDITS_TIMER
+
 fn orbit_a:
 	movss xmm0, [.theta]
 	movss xmm1, [rdi + 0x964]
@@ -61,4 +63,21 @@ fn camera_bump_timer_update:
 	mov dx, [rdi + 0x8cc]
 	dec_dt dx
 	mov [rdi + 0x8cc], dx
+	ret
+
+fn credits_zoom:
+	addss xmm1, [DT_TICKS]
+	ret
+
+fn credits_timer_update:
+	mov rbx, [PTR_CREDITS_TIMER]
+	movsx ecx, word [DT_MILLIS]
+	sub [rbx], ecx
+	ret
+
+; Needed because the vanilla code only zeroes a word, not a dword.
+fn credits_timer_zero:
+	mov rbx, [PTR_CREDITS_TIMER]
+	mov dword [rbx], 0
+	xor rbx, rbx
 	ret

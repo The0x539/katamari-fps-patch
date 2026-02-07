@@ -316,6 +316,12 @@ exports! {
     #[func @ 0x31f90]
     fn thing_animal_x31f90(t: *mut Thing, animal: *mut ());
 
+    #[func @ 0x7610]
+    fn camera_credits_update();
+
+    #[func @ 0x2b10]
+    fn init();
+
     #[var @ 0]
     static base_addr: ();
 
@@ -381,6 +387,10 @@ exports! {
 
     #[var @ 0x7bc44]
     static rng: i32;
+
+    // accessed as i16 by the game but there's padding that lets me use i32 instead
+    #[var @ 0xd34c38]
+    static credits_timer: i32;
 
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];

@@ -105,3 +105,8 @@ fn prince_forced_turn:
 	movss xmm2, [rdi + 0x4b4]
 	mulss xmm2, [DT_TICKS]
 	ret
+
+fn credits_sphere_walk:
+	movaps xmm0, [rbx + 0x2b0]
+	mulps xmm0, [DT_TICKS]
+	ret

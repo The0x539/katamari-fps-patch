@@ -159,7 +159,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             splash[0x3c1..0x5ad] => cacophony::splash;
 
             // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
-            gunshot[0x1cb..0x2c7] => cacophony::bang;
+            gunshot[0x1cb..0x1eb] => cacophony::bang;
             // This handles the local cooldown
             gunshot[0xd5..0x10a] => cacophony::bang2;
             // Remove a weird remaining increment of the counter, since my code handles it

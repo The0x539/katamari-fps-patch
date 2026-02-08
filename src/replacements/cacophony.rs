@@ -88,38 +88,28 @@ pub unsafe extern "C" fn splash() {
     }
 }
 
-pub extern "C" fn bang() {
-    let gun_pos = unsafe {
-        let (x, y, z);
-        asm!("", out("xmm2") x, out("xmm0") y, out("xmm1") z);
-        Vec4::new(x, y, z, 1.0)
-    };
+pub(super) static mut GUNSHOT_TIMESTAMP: Option<Instant> = None;
 
-    unsafe {
-        static mut MOST_RECENT_SFX: Option<Instant> = None;
-        // Vanilla logic: 5 < tick_count - most_recent
-        // i.e. sound can play if it's been 6 or more ticks
-        if MOST_RECENT_SFX.is_some_and(|t| t.elapsed() < Duration::from_millis(200)) {
-            return;
-        } else {
-            MOST_RECENT_SFX = Some(Instant::now());
+pub unsafe extern "C" fn bang() -> u32 {
+    let too_soon =
+        unsafe { GUNSHOT_TIMESTAMP }.is_some_and(|t| t.elapsed() < Duration::from_millis(200));
+
+    if !too_soon {
+        unsafe {
+            GUNSHOT_TIMESTAMP = Some(Instant::now());
         }
     }
 
-    let i = ps2::current_player_index();
+    // The original calling code computes a value for EAX by subtracting
+    // its "now" timestamp from its "most recent gunshot" timestamp.
+    // After this function returns, the calling code compares EAX to 0x6.
+    // If EAX >= 6, then the block to play the SFX executes.
+    // If EAX < 6, then the JC instruction branches, and the block is skipped.
+    // The decompiled C code writes this comparison as `if (5 < foo) {`.
+    // To minimize confusion, let's have this function return a value either smaller than 5 or larger than 6.
+    if too_soon { 4 } else { 7 }
 
-    let k = unsafe { &*ps2::katamari_array(i) };
-    let camera = unsafe { &*ps2::camera_transform_array(i) };
-    let distance = (gun_pos - camera.x140.rows[3]).len();
-
-    let triple_diameter = k.diameter_cm * 3.0;
-    let raw_volume = (distance - triple_diameter) / (k.diameter_cm * 15.0 - triple_diameter); // ???
-    let volume = 1.0 - raw_volume.clamp(0.0, 1.0);
-
-    // TODO: I'm not at all sure that the volume is being calculated correctly,
-    // in either the original or my recreation.
-
-    if volume > 0.0 {
-        ps2::cb::play_sound_fx(0x31, volume, 0);
-    }
+    // TODO: The original code does some math that uses camera distance
+    // and katamari size to determine the volume of the sound,
+    // but if a larger katamari is supposed to hear quieter sounds, I don't think it works properly.
 }

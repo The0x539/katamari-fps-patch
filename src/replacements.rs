@@ -148,6 +148,7 @@ pub unsafe extern "C" fn prince_post_init() {
 
         unsafe {
             values::MULTIPLAYER = ps2::multiplayer() as u8;
+            cacophony::GUNSHOT_TIMESTAMP = None;
         }
     }
 }

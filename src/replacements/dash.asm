@@ -22,3 +22,7 @@ fn prince_exhausted:
 	mov cx, [DT_MILLIS]
 	sub [rdx + 0x480], cx
 	ret
+
+fn multiplayer_dash_input_window:
+	mov r9d, 200 ; 6 ticks -> 200 milliseconds
+	ret

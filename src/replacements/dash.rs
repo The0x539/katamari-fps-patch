@@ -6,6 +6,7 @@ unsafe extern "C" {
     pub fn stamina_drain();
     pub fn update_dash_input_timer();
     pub fn prince_exhausted();
+    pub fn multiplayer_dash_input_window();
 }
 
 pub unsafe extern "C" fn dash_state_machine() {

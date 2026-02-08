@@ -151,6 +151,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             prince_handle_dash[0x16f..0x176] => dash::stamina_drain;
             prince_handle_dash[0x3f9..0x404] => dash::update_dash_input_timer;
             speed_thing_2[0x143..0x21f] => dash::dash_state_machine;
+            prince_handle_dash[0x14c..0x153] => dash::multiplayer_dash_input_window;
 
             speed_thing_2[0x42a..0x42f] => movement::turn_radius;
 

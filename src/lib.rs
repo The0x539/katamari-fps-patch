@@ -197,7 +197,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_update_xc500[0xf5..0x148] => camera::size_threshold_animation_zoom;
 
             // Cheat code to pick up things of any size
-            // katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}
+            //katamari_queue_things_for_pickup[0x2d7..0x2d9] => {}
+            // Cheat code to always flip things and never collect directly
+            //katamari_x28640[0x19b..0x1d6] => {}
 
             // TODO: I had a very hard time figuring out where to put this hook,
             // but that was before the 12->5 byte hook shrink.

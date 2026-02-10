@@ -325,6 +325,9 @@ exports! {
     #[func @ 0x30490]
     fn thing_calc_velocity(t: *mut Thing, v: *const Vec4);
 
+    #[func @ 0x28640]
+    fn katamari_x28640(k: *mut Katamari);
+
     #[var @ 0]
     static base_addr: ();
 

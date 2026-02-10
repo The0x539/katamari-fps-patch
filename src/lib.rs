@@ -362,6 +362,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_credits_update[0x189..0x191] => camera::credits_timer_update;
 
             katamari_physics_big_kahuna[0x37c..0x383] => movement::credits_sphere_walk;
+
+            thing_calc_velocity[0xdb..0x137] => things::thing_calc_velocity;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

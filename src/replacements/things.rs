@@ -83,6 +83,7 @@ unsafe extern "C" {
     pub fn other_hop_timer_check();
     pub fn other_hop_timer_update();
     pub fn animal_flee_turn();
+    pub fn thing_calc_velocity();
 }
 
 pub unsafe extern "C" fn sink_rate() {

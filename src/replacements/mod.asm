@@ -16,6 +16,15 @@ extern MULTIPLAYER
         %1
 %endmacro
 
+%macro dv 4
+        align 16
+        %00:
+                dd %1
+                dd %2
+                dd %3
+                dd %4
+%endmacro
+
 %include 'abilities.asm'
 %include 'cacophony.asm'
 %include 'dash.asm'

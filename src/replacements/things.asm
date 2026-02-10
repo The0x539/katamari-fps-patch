@@ -426,3 +426,36 @@ fn animal_flee_turn:
 	movss xmm2, [DT_TICKS]
 	vfmadd123ss xmm1, xmm2, [rdx + 0x74]
 	ret
+
+fn thing_calc_velocity:
+	; step 1: xmm0 = pos - prev_pos
+	movups xmm0, [rcx + 0x90]
+	subps xmm0, [rcx + 0xc0]
+
+	; step 2: xmm0 = xmm0.xyz0 / dt
+	; i.e., "un-delta-time" the delta-position to get the "true" velocity
+	; ideally this would use the delta-time of the *previous* tick
+	; (as would similar older patches for this same pattern)
+	; but this is close enough in all reasonable circumstances
+	mulps xmm0, [VEC_XYZ]
+	; I put a zero in the W component of the vector alias of DT_TICKS.
+	; the zero is useful for multiply-add operations, but not here
+	vbroadcastss xmm1, [DT_TICKS]
+	divps xmm0, xmm1
+
+	; step 3: scatter d{xyz} into the places it gets used
+	vmovss xmm10, xmm0
+	vshufps xmm11, xmm0, xmm0, 0b11_11_11_01
+	vshufps xmm12, xmm0, xmm0, 0b11_11_11_10
+
+	; step 4: xmm0 = dot(xmm0, xmm0)
+	mulps xmm0, xmm0
+	xorps xmm1, xmm1
+	haddps xmm0, xmm1
+	haddps xmm0, xmm1
+
+	ret
+
+section .rodata
+
+VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

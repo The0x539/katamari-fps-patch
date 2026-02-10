@@ -16,7 +16,7 @@ fn flip_timer:
 	mov edi, [DT_MILLIS]
 	sub [rcx + 0x44c], edi
 	xorps xmm11, xmm11
-	movaps xmm0, [VEC4_W]
+	movaps xmm0, [VEC_W]
 	ret
 
 fn katamari_view_ascend:
@@ -44,17 +44,6 @@ fn spindash_spinning:
 
 section .rodata
 
-VEC4_W:
-	dd 0.0
-	dd 0.0
-	dd 0.0
-	dd 1.0
-
-VEC_NEG:
-	dd -1.0
-	dd -1.0
-	dd -1.0
-	dd 1.0
-
-TICK_MS:
-	dd 33.33333333333333333
+VEC_W: dv 0.0, 0.0, 0.0, 1.0
+VEC_NEG: dv -1.0, -1.0, -1.0, 1.0
+TICK_MS: dd 33.33333333333333333

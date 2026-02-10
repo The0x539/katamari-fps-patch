@@ -82,6 +82,18 @@ pub unsafe extern "C" fn thing_bump_hook() {
     }
 }
 
+#[unsafe(naked)]
+pub unsafe extern "C" fn thing_flip_hook() {
+    naked_asm! {
+        "sub rsp, 0x8",              // align stack
+        "movaps [r11 - 0x18], xmm6", // trampoline
+        "call {}",
+        "add rsp, 0x8",
+        "ret",
+        sym thing_bump_hook_impl,
+    }
+}
+
 unsafe extern "C" fn thing_bump_hook_impl(katamari: &Katamari, thing: &Thing) {
     let displacement = katamari.position.xz() - thing.position.xz();
     on_bump(katamari, displacement);

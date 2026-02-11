@@ -331,6 +331,9 @@ exports! {
     #[func @ 0x2f8e0]
     fn thing_collide_with_other_thing(t: *mut Thing, idx: u16);
 
+    #[func @ 0x14c80]
+    fn katamari_physics_x14c80(rcx: u64, k: *mut Katamari);
+
     #[var @ 0]
     static base_addr: ();
 
@@ -400,6 +403,15 @@ exports! {
     // accessed as i16 by the game but there's padding that lets me use i32 instead
     #[var @ 0xd34c38]
     static credits_timer: i32;
+
+    #[var @ 0x7b25c]
+    static air_time_min: i32; // normally 5 frames
+
+    #[var @ 0x7b260]
+    static fall_time_min: i32; // normally 9 frames
+
+    #[var @ 0x7b264]
+    static fall_time_max: i32; // normally 46 frames
 
     #[array @ 0xd33210]
     static prince_array: [Prince; 2];

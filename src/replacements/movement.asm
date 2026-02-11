@@ -110,3 +110,22 @@ fn credits_sphere_walk:
 	movaps xmm0, [rbx + 0x2b0]
 	mulps xmm0, [DT_TICKS]
 	ret
+
+fn air_time_increment:
+	add ax, [DT_MILLIS]
+	jno .nof
+	mov ax, 0x7fff
+	.nof:
+	mov [rbx + 0x114], ax
+	ret
+
+fn fall_time_increment:
+	push ax
+	mov ax, [rbx + 0x116]
+	add ax, [DT_MILLIS]
+	jno .nof
+	mov ax, 0x7fff
+	.nof:
+	mov [rbx + 0x116], ax
+	pop ax
+	ret

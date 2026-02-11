@@ -16,6 +16,8 @@ unsafe extern "C" {
     pub fn prince_bump_timer_update();
     pub fn prince_forced_turn();
     pub fn credits_sphere_walk();
+    pub fn air_time_increment();
+    pub fn fall_time_increment();
 
     pub fn steer_rbx();
     pub fn steer_rcx();

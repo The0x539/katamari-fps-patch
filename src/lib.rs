@@ -371,6 +371,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // TODO: does this go on other call sites? there are four in total
             thing_freefall[0x469..0x46e] => things::thing_bounce;
             thing_collide_with_other_thing[0x215..0x21a] => things::thing_bounce;
+
+            katamari_collide_with_wall[0xda+5..] => 333_i32.to_ne_bytes();
+            katamari_physics_x14c80[0x593..0x59d] => movement::air_time_increment;
+            katamari_physics_x14c80[0x60f..0x619] => movement::air_time_increment;
+            katamari_physics_x14c80[0x5b2..0x5b9] => movement::fall_time_increment;
+            katamari_physics_x14c80[0x62e..0x635] => movement::fall_time_increment;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();
@@ -384,6 +390,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
         }
 
         ticks_to_millis!(ps2::raw::climb_sustain_limit());
+        ticks_to_millis!(ps2::raw::air_time_min());
+        ticks_to_millis!(ps2::raw::fall_time_min());
+        ticks_to_millis!(ps2::raw::fall_time_max());
         ticks_to_millis!(ps2::bump_timers(0));
         ticks_to_millis!(ps2::bump_timers(1));
 

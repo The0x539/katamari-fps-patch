@@ -328,6 +328,9 @@ exports! {
     #[func @ 0x28640]
     fn katamari_x28640(k: *mut Katamari);
 
+    #[func @ 0x2f8e0]
+    fn thing_collide_with_other_thing(t: *mut Thing, idx: u16);
+
     #[var @ 0]
     static base_addr: ();
 

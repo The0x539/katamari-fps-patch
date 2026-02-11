@@ -214,7 +214,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // There's probably still more to be done in this function, given its sheer scale,
             // but this is pretty good for now.
             thing_freefall[0x12..0x1c] => things::freefall_gravity;
-            thing_freefall[0x46..0x5e] => things::freefall_pos;
+            thing_freefall[0x2b..0x5e] => things::freefall_pos;
             thing_freefall[0xb7..0xc0] => things::freefall_spin_a;
             thing_freefall[0x267..0x270] => things::freefall_spin_b;
             thing_freefall[0x2f1..0x305] => things::freefall_spin_c;
@@ -222,9 +222,13 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // and put the x component addition after both ends of the branch
             // my code just does it alongside the others
             //
-            // this is another case where I should probably get this using VFMADDPS
-            thing_freefall[0x64..0x74] => {}
-            thing_freefall[0x201..0x211] => {}
+            // it also... only writes the position after both ends of the branch
+            // no thanks, I'll do it unconditionally rather than biconditionally
+            thing_freefall[0x64..0x9f] => {}   // the first branch
+            thing_freefall[0x201..0x211] => {} // the second branch, before some unrelated stuff
+            thing_freefall[0x21b..0x246] => {} // the second branch, after the unrelated stuff
+
+            thing_collide_with_other_thing[0x215..0x21a] => things::bounce_energy_hack;
 
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
             thing_reset_hop_timer[0x2c..0x33] => things::hop_timer_reset;

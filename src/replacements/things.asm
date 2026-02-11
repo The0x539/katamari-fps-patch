@@ -91,16 +91,10 @@ fn other_hop_gravity:
 	ret
 
 fn freefall_pos:
-	movss xmm5, [DT_TICKS]
-	; xmm2 is the w component, so if xmm5 is no bueno, just tamper with this one
-	vfmadd231ss xmm2, xmm5, [rcx + 0xec]
-	vfmadd231ss xmm0, xmm5, [rcx + 0xe4]
-	vfmadd231ss xmm1, xmm5, [rcx + 0xe8]
-
-	; the stupid x component
-	movss xmm3, [rcx + 0x90]
-	vfmadd231ss xmm3, xmm5, [rcx + 0xe0]
-
+	movaps xmm1, [DT_TICKS]
+	movaps xmm0, [rcx + 0x90]
+	vfmadd231ps xmm0, xmm1, [rcx + 0xe0]
+	movaps [rcx + 0x90], xmm0
 	ret
 
 fn freefall_gravity:

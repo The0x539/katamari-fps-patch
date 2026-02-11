@@ -228,8 +228,6 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_freefall[0x201..0x211] => {} // the second branch, before some unrelated stuff
             thing_freefall[0x21b..0x246] => {} // the second branch, after the unrelated stuff
 
-            thing_collide_with_other_thing[0x215..0x21a] => things::bounce_energy_hack;
-
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
             thing_reset_hop_timer[0x2c..0x33] => things::hop_timer_reset;
 
@@ -370,7 +368,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             katamari_physics_big_kahuna[0x37c..0x383] => movement::credits_sphere_walk;
 
-            thing_calc_velocity[0xdb..0x137] => things::thing_calc_velocity;
+            // TODO: does this go on other call sites? there are four in total
+            thing_freefall[0x469..0x46e] => things::thing_bounce;
+            thing_collide_with_other_thing[0x215..0x21a] => things::thing_bounce;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

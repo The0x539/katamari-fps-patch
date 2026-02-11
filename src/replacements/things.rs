@@ -83,7 +83,6 @@ unsafe extern "C" {
     pub fn other_hop_timer_check();
     pub fn other_hop_timer_update();
     pub fn animal_flee_turn();
-    pub fn thing_calc_velocity();
 }
 
 pub unsafe extern "C" fn sink_rate() {
@@ -314,31 +313,16 @@ pub unsafe extern "C" fn other_hop_timer_start() {
 }
 
 #[unsafe(naked)]
-pub unsafe extern "C" fn bounce_energy_hack() {
+pub unsafe extern "C" fn thing_bounce() {
     naked_asm! {
-        "sub rsp, 8",
-        "call {}",
-        "call {}",
-        "add rsp, 8",
+        "push rbx",
+        "call {calc_vel}",
+        "pop rbx",
+        "movaps xmm0, [rbx + 0xe0]",
+        "divps xmm0, [rip + {dt}]",
+        "movaps [rbx + 0xe0], xmm0",
         "ret",
-        sym ps2::thing_calc_velocity,
-        sym bounce_energy_hack_impl,
+        calc_vel = sym ps2::thing_calc_velocity,
+        dt = sym values::DT_TICKS,
     }
-}
-
-// This is terrible and I don't understand why the delta-timing is wrong for this situation.
-// I really ought to figure out the nature of this problem better.
-// Is the delta-position already a non-dt'd value at this spot in the code?
-// Or is it being *used* in a non-dt'd fashion after this computation?
-//
-// Honestly I can't even tell if this is working properly.
-// It seems like they might be bouncing with too much energy, but that might just be how it works.
-unsafe extern "C" fn bounce_energy_hack_impl() {
-    let t = unsafe {
-        let t: *mut Thing;
-        asm!("mov {}, rbx", out(reg) t);
-        &mut *t
-    };
-    let dt = unsafe { values::DT_TICKS.0 };
-    t.vel_xe0 = t.vel_xe0 * dt;
 }

@@ -83,6 +83,9 @@ unsafe extern "C" {
     pub fn other_hop_timer_check();
     pub fn other_hop_timer_update();
     pub fn animal_flee_turn();
+    pub fn kickball_position();
+    pub fn kickball_rotation();
+    pub fn kickball_deceleration();
 }
 
 pub unsafe extern "C" fn sink_rate() {

@@ -1,6 +1,7 @@
 section .text
 
 extern PTR_THING_GRAVITY
+extern KICKBALL_DECEL
 
 fn melon_spin:
 	movss xmm0, [.theta]
@@ -419,6 +420,45 @@ fn other_hop_timer_update:
 fn animal_flee_turn:
 	movss xmm2, [DT_TICKS]
 	vfmadd123ss xmm1, xmm2, [rdx + 0x74]
+	ret
+
+fn kickball_position:
+	mov [rsp + 0x128 + 8], rbx
+	movaps [rsp + 0x100 + 8], xmm6
+
+	movups xmm0, [rax + 0xa0]
+	movaps xmm1, [DT_TICKS]
+
+	; gravity
+	shufps xmm0, xmm0, 0b11_10_00_01   ; xyzw -> yxzw
+	movss xmm6, xmm0                   ; xmm6 = y component of xmm0 (just got shuffled to low word)
+	vfmadd231ss xmm6, xmm1, [.gravity] ; xmm6 += gravity * dt
+	movss xmm0, xmm6                   ; move the updated y component back into xmm0's low word
+	shufps xmm0, xmm0, 0b11_10_00_01   ; yxzw -> xyzw
+	; now xmm6 contains vel.y + gravity, which gets used in a bit of code after the patch,
+	; in order to actually "apply the gravitational acceleration"
+
+	vfmadd123ps xmm0, xmm1, [rcx + 0x90]
+	movups [rcx + 0x90], xmm0
+	movups [rbp - 0x60], xmm0
+
+	ret
+
+	.gravity: dd -0.9
+
+fn kickball_rotation:
+	movss xmm0, [DT_TICKS]
+	vfmadd123ss xmm2, xmm0, [rbx + 0xc0]
+	ret
+
+fn kickball_deceleration:
+	movss xmm0, [rbx + 0xa0]
+	mulss xmm0, [KICKBALL_DECEL]
+	movss [rbx + 0xa0], xmm0
+
+	movss xmm0, [rbx + 0xa8]
+	mulss xmm0, [KICKBALL_DECEL]
+	movss [rbx + 0xa8], xmm0
 	ret
 
 section .rodata

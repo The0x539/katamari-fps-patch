@@ -377,6 +377,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_x14c80[0x60f..0x619] => movement::air_time_increment;
             katamari_physics_x14c80[0x5b2..0x5b9] => movement::fall_time_increment;
             katamari_physics_x14c80[0x62e..0x635] => movement::fall_time_increment;
+
+            thing_kickball_state_1[0x3b..0xd1] => things::kickball_position;
+            thing_kickball_state_1[0x15e..0x166] => things::kickball_rotation;
+            thing_kickball_physics[0x10b..0x14b] => things::kickball_deceleration;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

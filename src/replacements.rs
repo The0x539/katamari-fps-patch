@@ -57,6 +57,9 @@ pub(crate) mod values {
     /// The accumulated rounding error of DT_MILLIS.
     static mut DT_MICROS: i16 = 0;
 
+    #[unsafe(no_mangle)]
+    static mut KICKBALL_DECEL: f32 = 0.98;
+
     pub fn set_dt(delta: f32) {
         unsafe {
             DT_SECONDS = delta;
@@ -86,6 +89,8 @@ pub(crate) mod values {
             let vanilla_t = smoothing.x * smoothing.y * smoothing.z;
             let desired_t = 1.0 - (1.0 - vanilla_t).powf(dt_ticks);
             smoothing.w = (desired_t / vanilla_t).clamp(0.01, 1.0);
+
+            KICKBALL_DECEL = 0.98_f32.powf(dt_ticks);
         }
     }
 

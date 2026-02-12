@@ -334,6 +334,12 @@ exports! {
     #[func @ 0x14c80]
     fn katamari_physics_x14c80(rcx: u64, k: *mut Katamari);
 
+    #[func @ 0x4a9f0]
+    fn thing_kickball_state_1(t: *mut Thing);
+
+    #[func @ 0x4b1d0]
+    fn thing_kickball_physics(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

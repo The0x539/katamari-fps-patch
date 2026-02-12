@@ -18,6 +18,7 @@ unsafe extern "C" {
     pub fn credits_sphere_walk();
     pub fn air_time_increment();
     pub fn fall_time_increment();
+    pub fn fall_time_check();
 
     pub fn steer_rbx();
     pub fn steer_rcx();

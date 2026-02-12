@@ -372,7 +372,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_freefall[0x469..0x46e] => things::thing_bounce;
             thing_collide_with_other_thing[0x215..0x21a] => things::thing_bounce;
 
-            katamari_collide_with_wall[0xda+5..] => 333_i32.to_ne_bytes();
+            katamari_collide_with_wall[0xda..0xe2] => movement::fall_time_check;
             katamari_physics_x14c80[0x593..0x59d] => movement::air_time_increment;
             katamari_physics_x14c80[0x60f..0x619] => movement::air_time_increment;
             katamari_physics_x14c80[0x5b2..0x5b9] => movement::fall_time_increment;

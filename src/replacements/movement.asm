@@ -129,3 +129,7 @@ fn fall_time_increment:
 	mov [rbx + 0x116], ax
 	pop ax
 	ret
+
+fn fall_time_check:
+	cmp word [rdx + 0x116], 333
+	ret

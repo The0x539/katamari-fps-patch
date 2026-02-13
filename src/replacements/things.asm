@@ -169,12 +169,17 @@ fn train_angle_move_towards:
 	addss xmm2, [rdx + 0x10c]
 	ret
 
-fn start_flee_timer:
+fn update_flee_timer_1:
+	dec_dt ax
+	mov [rdi + 0x120], ax
+	ret
+
+fn start_flee_timer_2:
 	mov eax, 3000 ; 90 ticks -> 3 seconds
 	mov [rdi + 0x124], ax
 	ret
 
-fn update_flee_timer:
+fn update_flee_timer_2:
 	dec_dt ax
 	mov [rsp + 0x20 + 8], rbx ; trampoline
 	ret

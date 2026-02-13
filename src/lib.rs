@@ -237,8 +237,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // This isn't working. There's something missing. More blood must be shed.
             thing_train_x391b0[0x48..0x56] => things::train_angle_move_towards;
 
-            thing_flee_state_2[0x64..0x70] => things::start_flee_timer;
-            thing_flee_state_4[0x3f..0x47] => things::update_flee_timer;
+            thing_flee_state_1[0x80+1..] => 333_u32.to_ne_bytes(); // start flee timer 1
+            thing_flee_state_2[0x55..0x5f] => things::update_flee_timer_1;
+            thing_flee_state_2[0x64..0x70] => things::start_flee_timer_2;
+            thing_flee_state_4[0x3f..0x47] => things::update_flee_timer_2;
 
             f32_angle_move_towards[0..0x11] => things::angle_move_towards;
             pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;

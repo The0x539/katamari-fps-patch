@@ -199,6 +199,9 @@ exports! {
     #[func @ 0xc500]
     fn camera_update_xc500(p_idx: i64, cam: *mut Camera, k: *mut Katamari, prince: *const Prince, ordinary: bool);
 
+    #[func @ 0x39e40]
+    fn thing_flee_state_1(t: *mut Thing);
+
     #[func @ 0x39ee0]
     fn thing_flee_state_2(t: *mut Thing);
 

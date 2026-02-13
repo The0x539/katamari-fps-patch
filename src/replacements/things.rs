@@ -44,8 +44,9 @@ unsafe extern "C" {
     pub fn pursuit_angle_move_towards();
     pub fn animal_angle_move_towards();
     pub fn train_angle_move_towards();
-    pub fn start_flee_timer();
-    pub fn update_flee_timer();
+    pub fn update_flee_timer_1();
+    pub fn start_flee_timer_2();
+    pub fn update_flee_timer_2();
     pub fn other_hop_gravity();
     pub fn sine_bob();
     pub fn elevator_timer_reset();

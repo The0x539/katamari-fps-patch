@@ -102,7 +102,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
                 $func:ident[$offset:literal $(+ $extra:literal)? ..] => $replacement:expr;
                 $($tt:tt)*
             ) => {
-                hook::raw_patch(dll.$func, $offset $(+ $extra)?, &$replacement)?;
+                hook::raw_patch(dll.$func, $offset $(+ $extra)?, bytemuck::bytes_of(&$replacement))?;
                 patches!($($tt)*);
             };
         }
@@ -187,7 +187,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             camera_update_katamari_view[0x489..0x48f] => abilities::katamari_view_ascend;
             camera_update_katamari_view[0xed..0xf5] => abilities::katamari_view_descend;
-            camera_set_view_mode[0x286..] => 666_i32.to_ne_bytes(); // mov eax, 20 -> mov eax, 666 (frames -> ms)
+            camera_set_view_mode[0x286..] => 666_i32; // mov eax, 20 -> mov eax, 666 (frames -> ms)
 
             camera_update_xc500[0x8e..0x96] => camera::size_threshold_animation_timer;
             camera_update_xc500[0x1b5..0x1bd] => camera::size_threshold_animation_spin;
@@ -237,7 +237,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // This isn't working. There's something missing. More blood must be shed.
             thing_train_x391b0[0x48..0x56] => things::train_angle_move_towards;
 
-            thing_flee_state_1[0x80+1..] => 333_u32.to_ne_bytes(); // start flee timer 1
+            thing_flee_state_1[0x80+1..] => 333_u32; // start flee timer 1
             thing_flee_state_2[0x55..0x5f] => things::update_flee_timer_1;
             thing_flee_state_2[0x64..0x70] => things::start_flee_timer_2;
             thing_flee_state_4[0x3f..0x47] => things::update_flee_timer_2;
@@ -282,23 +282,23 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_getup_flee_state_0[0x2d..0x35] => things::flee_timer_start;
             thing_getup_flee_state_1[0x3f..0x46] => things::flee_timer_update;
-            thing_getup_flee_state_2[0x385..] => 667_u32.to_ne_bytes(); // 20 ticks -> ⅔ seconds
+            thing_getup_flee_state_2[0x385..] => 667_u32; // 20 ticks -> ⅔ seconds
 
             thing_getup_flee_state_3a[0x9..0x10] => things::flee_timer_update;
             thing_getup_flee_state_3b[0x9..0x10] => things::flee_timer_update;
-            thing_getup_flee_state_3a[0x14+1..] => 1000_u32.to_ne_bytes(); // 1 second
-            thing_getup_flee_state_3b[0x14+1..] => 1000_u32.to_ne_bytes();
+            thing_getup_flee_state_3a[0x14+1..] => 1000_u32; // 1 second
+            thing_getup_flee_state_3b[0x14+1..] => 1000_u32;
 
             thing_getup_flee_state_4a[0x4f2..0x4f7] => things::flee_timer_update_state4;
             thing_getup_flee_state_4b[0x1ab..0x1b0] => things::flee_timer_update_state4;
 
             katamari_queue_things_for_pickup[0x20f..0x215] => things::update_collision_cooldown;
 
-            katamari_flip_thing[0x174+1..] => 1000_u32.to_ne_bytes(); // NPC collision cooldown: 1 second
-            x27170[0x233+1..] => 333_u32.to_ne_bytes();               // NPC collision cooldown: ⅓ second
-            katamari_bump_thing[0x181+1..] => 333_u32.to_ne_bytes();
-            katamari_hit_test[0x15d0+1..] => 333_u32.to_ne_bytes();
-            katamari_x28e00[0xd5+1..] => 167_u32.to_ne_bytes();       // NPC collision cooldown: ⅙ second
+            katamari_flip_thing[0x174+1..] => 1000_u32; // NPC collision cooldown: 1 second
+            x27170[0x233+1..] => 333_u32;               // NPC collision cooldown: ⅓ second
+            katamari_bump_thing[0x181+1..] => 333_u32;
+            katamari_hit_test[0x15d0+1..] => 333_u32;
+            katamari_x28e00[0xd5+1..] => 167_u32;       // NPC collision cooldown: ⅙ second
 
             thing_getup_flee_state_1[0..0x17] => things::spin_before_getup;
             thing_getup_flee_state_2[0x3a..0x64] => things::getup_hop_gravity;
@@ -331,9 +331,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_bird_state_0_init[0x62..0x70] => things::bird_start_rng_timer_rax;
             thing_bird_state_1_idle[0x2b..0x32] => things::bird_update_timer_rbx;
-            thing_bird_state_4_ascend[0x117+1..] => 5000_u32.to_le_bytes(); // 150 ticks -> 5 seconds
+            thing_bird_state_4_ascend[0x117+1..] => 5000_u32; // 150 ticks -> 5 seconds
             thing_bird_state_5_stay_in_sky[0x1e..0x25] => things::bird_update_timer_rdx;
-            thing_bird_state_5_stay_in_sky[0x2b+1..] => 5000_u32.to_le_bytes();
+            thing_bird_state_5_stay_in_sky[0x2b+1..] => 5000_u32;
             thing_bird_state_5_stay_in_sky[0x56..0x67] => things::bird_start_rng_timer_rdx;
             thing_bird_state_6_begin_descent[0x25..0x2c] => things::bird_update_timer_rbx;
 
@@ -347,7 +347,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             // When the "full walk timer" hits zero, the NPC will make a turn.
             thing_animal_state_0_start[0x3e3..0x3fb] => things::animal_start_walk_timer;
-            thing_animal_state_0_start[0x455+1..] => 1000_u32.to_ne_bytes();
+            thing_animal_state_0_start[0x455+1..] => 1000_u32;
             thing_animal_x3bfb0[0x91..0x98] => things::animal_update_full_walk_timer;
             thing_animal_x3bfb0[0x39..0x64] => things::animal_restart_walk_timer;
 

@@ -35,6 +35,7 @@ windows.features = [
   "Win32_System_Memory",
 ]
 win32-util = { version = "0.3", optional = true, features = ["processes"] }
+bytemuck = "1.25.0"
 
 [features]
 default = ["ui", "launch-game"]

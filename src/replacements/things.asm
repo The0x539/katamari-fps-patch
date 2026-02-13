@@ -360,6 +360,7 @@ fn bird_update_timer_rbx:
 	mov [rbx + 0x2], ax
 	ret
 
+fn update_flee_timer_1b:
 fn bird_update_timer_rdx:
 	dec_dt ax
 	mov [rdx + 0x2], ax

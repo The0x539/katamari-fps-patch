@@ -208,6 +208,12 @@ exports! {
     #[func @ 0x3a270]
     fn thing_flee_state_4(t: *mut Thing);
 
+    #[func @ 0x3c8e0]
+    fn thing_pursuit_alt_state_1(t: *mut Thing);
+
+    #[func @ 0x3c950]
+    fn thing_pursuit_alt_state_2(t: *mut Thing);
+
     #[func @ 0x28ef0]
     fn katamari_attach_thing_x28ef0(k: *mut Katamari, t: *mut Thing);
 

@@ -242,6 +242,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_flee_state_2[0x64..0x70] => things::start_flee_timer_2;
             thing_flee_state_4[0x3f..0x47] => things::update_flee_timer_2;
 
+            thing_pursuit_alt_state_1[0x51+1..] => 333_u32; // start flee timer 1b
+            thing_pursuit_alt_state_2[0x10..0x17] => things::update_flee_timer_1b;
+
             f32_angle_move_towards[0..0x11] => things::angle_move_towards;
             pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;
 

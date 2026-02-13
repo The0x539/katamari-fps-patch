@@ -310,10 +310,19 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_spin_x49d40[0x23..0x28] => things::jumboman_spin;
             thing_windmill_spin_x39900[0x1c..0x21] => things::windmill_spin;
 
-            // I haven't figured out why the vanilla delta-timing within this function
-            // isn't the correct thing to do. I suspect the "turn rate" variable
-            // already naturally accounts for non-fixed tick rate, but haven't confirmed.
-            thing_walk_turn[0x13..0x23] => {}
+            // The behavior code for NPCs that walk laps around a fixed path
+            // is already delta-timed in the vanilla game, but in a strange way
+            // that leads to a bug where they turn too slowly
+            // (which may look like they're "snapping" to each angle if making several small turns in a row)
+            //
+            // This happens because it uses the "current" delta-time to decide the movement speed
+            // and turn rate, but then also delta-times the rotation update that *uses* the turn rate.
+            // Currently, the movement speed remains using this original approach,
+            // while these patches remove the time factor from the "turn rate" value.
+            // Ideally the movement would use a consistent design with the rest of my changes,
+            // but as long as it's not obviously janky, it's fine, at least for now.
+            thing_walk_cycle_x39440[0x25b..0x260] => things::remove_redundant_delta;
+            thing_walk_cycle_x42080[0x244..0x249] => things::remove_redundant_delta;
 
             thing_pendulum[0x23..0x28] => things::pendulum;
             thing_wrecking_ball_pendulum[0x47..0x4c] => things::wrecking_ball;

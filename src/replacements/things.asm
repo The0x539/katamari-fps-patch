@@ -461,6 +461,11 @@ fn kickball_deceleration:
 	movss [rbx + 0xa8], xmm0
 	ret
 
+fn remove_redundant_delta:
+	divss xmm6, [DT_TICKS]
+	movss [rbx + 0x10], xmm6
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

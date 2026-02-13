@@ -86,6 +86,7 @@ unsafe extern "C" {
     pub fn kickball_position();
     pub fn kickball_rotation();
     pub fn kickball_deceleration();
+    pub fn remove_redundant_delta();
 }
 
 pub unsafe extern "C" fn sink_rate() {

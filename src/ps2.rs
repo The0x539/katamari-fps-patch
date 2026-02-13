@@ -340,6 +340,12 @@ exports! {
     #[func @ 0x4b1d0]
     fn thing_kickball_physics(t: *mut Thing);
 
+    #[func @ 0x39440]
+    fn thing_walk_cycle_x39440(t: *mut Thing);
+
+    #[func @ 0x42080]
+    fn thing_walk_cycle_x42080(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

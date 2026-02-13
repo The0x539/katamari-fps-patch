@@ -40,7 +40,7 @@ pub unsafe fn init(dll: HMODULE) {
             assert_eq!(*TRAMPOLINE_PHASE1.byte_add(i), 0);
         }
 
-        super::raw_patch(TRAMPOLINE_PHASE1, 0, &trampoline_code).unwrap();
+        super::raw_patch(TRAMPOLINE_PHASE1, 0, trampoline_code).unwrap();
     }
 }
 

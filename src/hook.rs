@@ -74,9 +74,11 @@ unsafe fn generate_call(call_addr: *const u8, target_addr: *const u8) -> [u8; 5]
 pub unsafe fn raw_patch(
     target: impl Target,
     offset: usize,
-    replacement: &[u8],
+    replacement: impl RawPatch,
 ) -> eyre::Result<()> {
     let target = target.into_target();
+    let replacement = replacement.to_bytes();
+    let replacement = replacement.as_ref();
     unsafe {
         let dst = std::ptr::slice_from_raw_parts_mut(target.add(offset), replacement.len());
         mprotect(dst, w::PAGE_READWRITE, || {
@@ -247,3 +249,25 @@ fn fill_with_nops(code: &mut [u8]) {
         chunk.copy_from_slice(nop);
     }
 }
+
+pub trait RawPatch {
+    fn to_bytes(self) -> impl AsRef<[u8]>;
+}
+
+impl<const N: usize> RawPatch for [u8; N] {
+    fn to_bytes(self) -> impl AsRef<[u8]> {
+        self
+    }
+}
+
+macro_rules! impl_raw_patch {
+    ($($T:ty),*) => {$(
+        impl RawPatch for $T {
+            fn to_bytes(self) -> impl AsRef<[u8]> {
+                self.to_ne_bytes()
+            }
+        }
+    )*}
+}
+
+impl_raw_patch!(u8, i8, u16, i16, u32, i32, u64, i64);

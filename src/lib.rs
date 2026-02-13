@@ -102,7 +102,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
                 $func:ident[$offset:literal $(+ $extra:literal)? ..] => $replacement:expr;
                 $($tt:tt)*
             ) => {
-                hook::raw_patch(dll.$func, $offset $(+ $extra)?, bytemuck::bytes_of(&$replacement))?;
+                hook::raw_patch(dll.$func, $offset $(+ $extra)?, $replacement)?;
                 patches!($($tt)*);
             };
         }

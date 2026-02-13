@@ -1582,7 +1582,6 @@ dependencies = [
 name = "katamari-ffi"
 version = "0.1.0"
 dependencies = [
- "bytemuck",
  "eframe",
  "eyre",
  "nasm-rs",

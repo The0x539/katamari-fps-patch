@@ -493,20 +493,13 @@ fn path_walker_position_borked:
 
 fn path_walker_position:
 	movups xmm0, [rbx + 0xd0]
-	mulps xmm0, [DT_TICKS]    ; xmm2 = delta-timed velocity
-	vsqrlen xmm1, xmm0        ; xmm1 = (squared) distance to be travelled this tick, before checking for overshoot
-
-	movups xmm2, [rbx + 0xc0]
-	subps xmm2, [rdi + 0x90]  ; xmm2 = target position
-	vsqrlen xmm3, xmm2        ; xmm3 = (squared) distance from current position to target
-
-	comiss xmm3, xmm1
-	jnl .not_overshoot ; if xmm3 < xmm1 {
-	movaps xmm0, xmm2  ;     delta_pos = remaining_distance
-	.not_overshoot:    ; }
-
-	addps xmm0, [rdi + 0x90]
+	movaps xmm1, [DT_TICKS]
+	vfmadd123ps xmm0, xmm1, [rdi + 0x90]
 	movups [rdi + 0x90], xmm0
+	ret
+
+fn fix_melon_jank:
+	mulss xmm6, [DT_TICKS]
 	ret
 
 section .rodata

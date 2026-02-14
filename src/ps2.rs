@@ -245,7 +245,7 @@ exports! {
     fn thing_start_rng_timer(t: *mut Thing);
 
     #[func @ 0x37610]
-    fn thing_x37610(t: *mut Thing);
+    fn thing_check_reached_target_path_node(t: *mut Thing);
 
     #[func @ 0x36a10]
     fn thing_x36a10(t: *mut Thing);

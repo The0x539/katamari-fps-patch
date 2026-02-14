@@ -89,6 +89,7 @@ unsafe extern "C" {
     pub fn kickball_rotation();
     pub fn kickball_deceleration();
     pub fn path_walker_position();
+    pub fn fix_melon_jank();
 }
 
 pub unsafe extern "C" fn sink_rate() {

@@ -182,14 +182,13 @@ fn install_hooks_impl() -> eyre::Result<()> {
             //
             // This happens because it uses the "current" delta-time to decide the movement speed
             // and turn rate, but then also delta-times the rotation update that *uses* the turn rate.
-            // Currently, the movement speed remains using this original approach,
-            // while these patches remove the time factor from the "turn rate" value.
-            // Ideally the movement would use a consistent design with the rest of my changes,
-            // but as long as it's not obviously janky, it's fine, at least for now.
-
-            // WIP: Need to analyze where the call to this function goes within the order of operations.
-            // My "snapping" code seems like it may work but it's hard to tell.
-            // thing_x37610[0x20..0x30] => {}
+            //
+            // Let's just replace all of that with a framerate-independent velocity
+            // that gets multiplied by Δt during the "add to position" step, like the rest of my code.
+            // This should hopefully address "trains" of path-following NPCs slowly drifting out of sync
+            // (which happened due to each member reaching a node at a different time,
+            //  and Δt thus varying slightly for each member for that segment of the path,
+            //  which determined the velocity for that segment)
 
             thing_walk_cycle_x39440[0x4d..0x56] => {}
             thing_walk_cycle_x39440[0x62..0x6b] => {}
@@ -203,6 +202,14 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_walk_cycle_x42080[0x55..0x5e] => {}
             // would ideally start at 0x249 but there's a pesky MOV RCX, RBX
             thing_walk_cycle_x42080[0x254..0x2ba] => things::path_walker_position;
+
+            // On top of the stuff described above, a very tricky floating-point rounding error kind of issue
+            // in the code to check whether an NPC has "reached" its current target node
+            // was causing some NPCs to occasionally make instantaneous 180° turns,
+            // most obviously with the giant watermelons on the beach in Eternal 3.
+            // The fix for this is seemingly to just replace a vanilla delta-time with using our own Δt.
+            // I guess doing that means the rounding errors or whatever work out how they need to?
+            thing_check_reached_target_path_node[0x20..0x30] => things::fix_melon_jank;
 
             thing_animal_motion[0x9e..0xe5] => things::animal_walk;
 

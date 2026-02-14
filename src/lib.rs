@@ -173,7 +173,36 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             calculate_gravity[0x12d..0x135] => movement::airborne_gravity;
 
-            npc_40bb0[0x7a..0x8a] => things::melon_spin;
+            npc_40bb0[0x7a..0x8a] => things::melon_roll;
+
+            // The behavior code for NPCs that walk laps around a fixed path
+            // is already delta-timed in the vanilla game, but in a strange way
+            // that leads to a bug where they turn too slowly
+            // (which may look like they're "snapping" to each angle if making several small turns in a row)
+            //
+            // This happens because it uses the "current" delta-time to decide the movement speed
+            // and turn rate, but then also delta-times the rotation update that *uses* the turn rate.
+            // Currently, the movement speed remains using this original approach,
+            // while these patches remove the time factor from the "turn rate" value.
+            // Ideally the movement would use a consistent design with the rest of my changes,
+            // but as long as it's not obviously janky, it's fine, at least for now.
+
+            // WIP: Need to analyze where the call to this function goes within the order of operations.
+            // My "snapping" code seems like it may work but it's hard to tell.
+            // thing_x37610[0x20..0x30] => {}
+
+            thing_walk_cycle_x39440[0x4d..0x56] => {}
+            thing_walk_cycle_x39440[0x62..0x6b] => {}
+            thing_walk_cycle_x39440[0x368..0x3d6] => things::path_walker_position;
+
+            thing_walk_cycle_x41ce0[0x44..0x4c] => {}
+            thing_walk_cycle_x41ce0[0x50..0x58] => {}
+            thing_walk_cycle_x41ce0[0x216..0x284] => things::path_walker_position;
+
+            thing_walk_cycle_x42080[0x43..0x4c] => {}
+            thing_walk_cycle_x42080[0x55..0x5e] => {}
+            // would ideally start at 0x249 but there's a pesky MOV RCX, RBX
+            thing_walk_cycle_x42080[0x254..0x2ba] => things::path_walker_position;
 
             thing_animal_motion[0x9e..0xe5] => things::animal_walk;
 
@@ -314,20 +343,6 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_spin_x49d40[0x23..0x28] => things::jumboman_spin;
             thing_windmill_spin_x39900[0x1c..0x21] => things::windmill_spin;
-
-            // The behavior code for NPCs that walk laps around a fixed path
-            // is already delta-timed in the vanilla game, but in a strange way
-            // that leads to a bug where they turn too slowly
-            // (which may look like they're "snapping" to each angle if making several small turns in a row)
-            //
-            // This happens because it uses the "current" delta-time to decide the movement speed
-            // and turn rate, but then also delta-times the rotation update that *uses* the turn rate.
-            // Currently, the movement speed remains using this original approach,
-            // while these patches remove the time factor from the "turn rate" value.
-            // Ideally the movement would use a consistent design with the rest of my changes,
-            // but as long as it's not obviously janky, it's fine, at least for now.
-            thing_walk_cycle_x39440[0x25b..0x260] => things::remove_redundant_delta;
-            thing_walk_cycle_x42080[0x244..0x249] => things::remove_redundant_delta;
 
             thing_pendulum[0x23..0x28] => things::pendulum;
             thing_wrecking_ball_pendulum[0x47..0x4c] => things::wrecking_ball;

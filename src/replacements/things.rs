@@ -26,7 +26,7 @@ static mut EXTRA_THING_STATE: [ExtraThingState; 4000] = [ExtraThingState::new();
 
 #[link(name = "native_replacements", kind = "static")]
 unsafe extern "C" {
-    pub fn melon_spin();
+    pub fn melon_roll();
     pub fn animal_walk();
     pub fn animal_turn();
     pub fn hop_timer_reset();
@@ -88,7 +88,7 @@ unsafe extern "C" {
     pub fn kickball_position();
     pub fn kickball_rotation();
     pub fn kickball_deceleration();
-    pub fn remove_redundant_delta();
+    pub fn path_walker_position();
 }
 
 pub unsafe extern "C" fn sink_rate() {

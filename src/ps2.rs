@@ -244,6 +244,9 @@ exports! {
     #[func @ 0x36730]
     fn thing_start_rng_timer(t: *mut Thing);
 
+    #[func @ 0x37610]
+    fn thing_x37610(t: *mut Thing);
+
     #[func @ 0x36a10]
     fn thing_x36a10(t: *mut Thing);
 
@@ -351,6 +354,9 @@ exports! {
 
     #[func @ 0x39440]
     fn thing_walk_cycle_x39440(t: *mut Thing);
+
+    #[func @ 0x41ce0]
+    fn thing_walk_cycle_x41ce0(t: *mut Thing);
 
     #[func @ 0x42080]
     fn thing_walk_cycle_x42080(t: *mut Thing);

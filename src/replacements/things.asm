@@ -3,7 +3,7 @@ section .text
 extern PTR_THING_GRAVITY
 extern KICKBALL_DECEL
 
-fn melon_spin:
+fn melon_roll:
 	movss xmm0, [.theta]
 	mulss xmm0, [DT_TICKS]
 	addss xmm0, [rsi + 0x110]
@@ -467,11 +467,49 @@ fn kickball_deceleration:
 	movss [rbx + 0xa8], xmm0
 	ret
 
-fn remove_redundant_delta:
-	divss xmm6, [DT_TICKS]
-	movss [rbx + 0x10], xmm6
+; I am extremely grateful that three different functions need this patch and use the same GPRs
+fn path_walker_position_borked:
+	movups xmm0, [rbx + 0xd0]
+
+	mulps xmm0, [DT_TICKS]
+
+	movups xmm1, [rbx + 0xc0]
+	subps xmm1, [rdi + 0x90] ; xmm1 now contains the displacement towards the target position
+
+	pcmpeqd xmm2, xmm2 ; xmm2 = [-1_i32; 4]
+	pslld xmm2, 31     ; xmm2 = [1 << 31; 4]
+
+	vandnps xmm3, xmm2, xmm0 ; xmm3 = abs(velocity)
+	vandnps xmm4, xmm2, xmm1 ; xmm4 = abs(distance_from_target)
+
+	cmpltps xmm4, xmm3        ; xmm4 = xmm4 < xmm3
+	vblendvps xmm0, xmm0, xmm1, xmm4 ; xmm0 = IF xmm4 THEN xmm1 ELSE xmm0
+	; End result: xmm0 contains either the velocity or the distance from the target,
+	; whichever of the two values has a smaller *magnitude*, for each axis.
+
+	addps xmm0, [rdi + 0x90] ; xmm0 now contains the new position
+	movups [rdi + 0x90], xmm0
+	ret
+
+fn path_walker_position:
+	movups xmm0, [rbx + 0xd0]
+	mulps xmm0, [DT_TICKS]    ; xmm2 = delta-timed velocity
+	vsqrlen xmm1, xmm0        ; xmm1 = (squared) distance to be travelled this tick, before checking for overshoot
+
+	movups xmm2, [rbx + 0xc0]
+	subps xmm2, [rdi + 0x90]  ; xmm2 = target position
+	vsqrlen xmm3, xmm2        ; xmm3 = (squared) distance from current position to target
+
+	comiss xmm3, xmm1
+	jnl .not_overshoot ; if xmm3 < xmm1 {
+	movaps xmm0, xmm2  ;     delta_pos = remaining_distance
+	.not_overshoot:    ; }
+
+	addps xmm0, [rdi + 0x90]
+	movups [rdi + 0x90], xmm0
 	ret
 
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0
+VEC_NEG_ZERO: dv -0.0, -0.0, -0.0, -0.0

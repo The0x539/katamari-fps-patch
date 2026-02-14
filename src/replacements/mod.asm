@@ -25,6 +25,14 @@ extern MULTIPLAYER
                 dd %4
 %endmacro
 
+%macro sqrlen 1
+        dpps %1, %1, 0b0111_0001
+%endmacro
+
+%macro vsqrlen 2
+        vdpps %1, %2, %2, 0b0111_0001
+%endmacro
+
 %include 'abilities.asm'
 %include 'cacophony.asm'
 %include 'dash.asm'

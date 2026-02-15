@@ -190,6 +190,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             //  and Δt thus varying slightly for each member for that segment of the path,
             //  which determined the velocity for that segment)
 
+            // TODO: Replacing these with empty code is incorrect? I think????
+            // Something about 1000/30 (33⅓ , mine) versus DT_SECONDS * 30 (vanilla)
+            // idk, need to think about it after sleep and food
             thing_walk_cycle_x39440[0x4d..0x56] => {}
             thing_walk_cycle_x39440[0x62..0x6b] => {}
             thing_walk_cycle_x39440[0x368..0x3d6] => things::path_walker_position;
@@ -417,6 +420,13 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_kickball_state_1[0x3b..0xd1] => things::kickball_position;
             thing_kickball_state_1[0x15e..0x166] => things::kickball_rotation;
             thing_kickball_physics[0x10b..0x14b] => things::kickball_deceleration;
+
+            thing_golfer_animation_state_0[0x1a..0x21] => things::golfer_start_timer_b;
+            thing_golfer_animation_state_1[0x7+1..] => 3000; // 90 ticks -> 3 seconds
+            thing_golfer_animation_state_2[0x7..0xd] => things::golfer_check_timer_b;
+            thing_golfer_animation_state_2[0xf..0x14] => things::golfer_update_timer_b;
+            thing_golfer_animation_state_3[0x10..0x17] => things::golfer_update_timer_a;
+            thing_golfer_animation_state_3[0x1f..0x2c] => things::golfer_restart_both_timers;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

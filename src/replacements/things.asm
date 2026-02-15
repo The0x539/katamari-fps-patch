@@ -502,6 +502,31 @@ fn fix_melon_jank:
 	mulss xmm6, [DT_TICKS]
 	ret
 
+fn golfer_update_timer_a:
+	dec_dt ax
+	mov [rdx + 0x40], ax
+	ret
+
+fn golfer_start_timer_b:
+	mov word [rdx + 0x42], 2250 ; 70 ticks -> 2.1 seconds (but this new magic number seems to actually animate properly for SOME reason)
+	inc byte [rcx + 0x10] ; trampoline
+	ret
+
+fn golfer_check_timer_b:
+	mov ax, [rdx + 0x42]
+	test ax, ax
+	ret
+
+fn golfer_update_timer_b:
+	dec_dt ax
+	mov [rdx + 0x42], ax
+	ret
+
+fn golfer_restart_both_timers:
+	mov word [rdx + 0x40], 3000 ; 90 ticks -> 3 seconds
+	mov word [rdx + 0x42], 2250
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

@@ -90,6 +90,12 @@ unsafe extern "C" {
     pub fn kickball_deceleration();
     pub fn path_walker_position();
     pub fn fix_melon_jank();
+
+    pub fn golfer_update_timer_a();
+    pub fn golfer_start_timer_b();
+    pub fn golfer_check_timer_b();
+    pub fn golfer_update_timer_b();
+    pub fn golfer_restart_both_timers();
 }
 
 pub unsafe extern "C" fn sink_rate() {

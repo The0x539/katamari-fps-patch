@@ -361,6 +361,18 @@ exports! {
     #[func @ 0x42080]
     fn thing_walk_cycle_x42080(t: *mut Thing);
 
+    #[func @ 0x46250]
+    fn thing_golfer_animation_state_0(t: *mut Thing);
+
+    #[func @ 0x46280]
+    fn thing_golfer_animation_state_1(t: *mut Thing);
+
+    #[func @ 0x462a0]
+    fn thing_golfer_animation_state_2(t: *mut Thing);
+
+    #[func @ 0x462c0]
+    fn thing_golfer_animation_state_3(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

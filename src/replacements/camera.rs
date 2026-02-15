@@ -13,6 +13,7 @@ unsafe extern "C" {
     pub fn credits_zoom();
     pub fn credits_timer_update();
     pub fn credits_timer_zero();
+    pub fn first_person_controls();
 }
 
 // TODO: For some reason, this might be too *slow* now, and the fade to white is still too fast.

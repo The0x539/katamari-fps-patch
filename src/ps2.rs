@@ -373,6 +373,9 @@ exports! {
     #[func @ 0x462c0]
     fn thing_golfer_animation_state_3(t: *mut Thing);
 
+    #[func @ 0x54c90]
+    fn prince_first_person_controls(p: *mut Prince);
+
     #[var @ 0]
     static base_addr: ();
 

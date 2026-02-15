@@ -81,3 +81,10 @@ fn credits_timer_zero:
 	mov dword [rbx], 0
 	xor rbx, rbx
 	ret
+
+fn first_person_controls:
+	cvtdq2ps xmm3, xmm3 ; trampoline
+	comiss xmm4, xmm1   ; trampoline
+	mulss xmm1, [DT_TICKS]
+	mulss xmm3, [DT_TICKS]
+	ret

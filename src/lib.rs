@@ -427,6 +427,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_golfer_animation_state_2[0xf..0x14] => things::golfer_update_timer_b;
             thing_golfer_animation_state_3[0x10..0x17] => things::golfer_update_timer_a;
             thing_golfer_animation_state_3[0x1f..0x2c] => things::golfer_restart_both_timers;
+
+            prince_first_person_controls[0xff..0x105] => camera::first_person_controls;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

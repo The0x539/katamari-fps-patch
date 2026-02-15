@@ -429,6 +429,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_golfer_animation_state_3[0x1f..0x2c] => things::golfer_restart_both_timers;
 
             prince_first_person_controls[0xff..0x105] => camera::first_person_controls;
+
+            // Prototype for versus mode on Earth
+            //init[0x2d+2..] => 3_u32;
+            //mono_init_start[0x4a+1..] => 3_u32;
         }
 
         replacements::values::PTR_THING_GRAVITY = ps2::raw::thing_gravity();

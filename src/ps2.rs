@@ -334,6 +334,9 @@ exports! {
     #[func @ 0x2b10]
     fn init();
 
+    #[func @ 0x4fd0]
+    fn mono_init_start(mono_data: *mut (), mission: i32, area: i32, stage: u8, kadai_flag: bool, clear_flag: bool, end_flag: bool);
+
     #[func @ 0x30490]
     fn thing_calc_velocity(t: *mut Thing, v: *const Vec4);
 

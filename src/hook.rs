@@ -154,41 +154,24 @@ unsafe impl Target for *mut u8 {
     }
 }
 
-unsafe impl<R> Target for extern "win64" fn() -> R {
-    fn into_target(self) -> *mut u8 {
-        self as _
+macro_rules! impl_target {
+    ($($T:ident),*) => {
+        unsafe impl<R $(, $T)*> Target for extern "win64" fn($($T),*) -> R {
+            fn into_target(self) -> *mut u8 {
+                self as _
+            }
+        }
     }
 }
 
-unsafe impl<T, R> Target for extern "win64" fn(T) -> R {
-    fn into_target(self) -> *mut u8 {
-        self as _
-    }
-}
-
-unsafe impl<T, U, R> Target for extern "win64" fn(T, U) -> R {
-    fn into_target(self) -> *mut u8 {
-        self as _
-    }
-}
-
-unsafe impl<T, U, V, R> Target for extern "win64" fn(T, U, V) -> R {
-    fn into_target(self) -> *mut u8 {
-        self as _
-    }
-}
-
-unsafe impl<T, U, V, W, R> Target for extern "win64" fn(T, U, V, W) -> R {
-    fn into_target(self) -> *mut u8 {
-        self as _
-    }
-}
-
-unsafe impl<T, U, V, W, X, R> Target for extern "win64" fn(T, U, V, W, X) -> R {
-    fn into_target(self) -> *mut u8 {
-        self as _
-    }
-}
+impl_target!();
+impl_target!(T);
+impl_target!(T, U);
+impl_target!(T, U, V);
+impl_target!(T, U, V, W);
+impl_target!(T, U, V, W, X);
+impl_target!(T, U, V, W, X, Y);
+impl_target!(T, U, V, W, X, Y, Z);
 
 unsafe extern "C" {
     static hook_start: u8;

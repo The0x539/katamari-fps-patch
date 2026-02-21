@@ -382,6 +382,9 @@ exports! {
     #[func @ 0x4a560]
     fn thing_vortex_spin(t: *mut Thing);
 
+    #[func @ 0x4a200]
+    fn thing_pinwheel_spin(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

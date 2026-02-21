@@ -433,6 +433,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_vortex_spin[0x14..0x19] => things::vortex_spin_a;
             thing_vortex_spin[0x3d..0x42] => things::vortex_spin_b;
 
+            thing_pinwheel_spin[0x12..0x17] => things::pinwheel_spin;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

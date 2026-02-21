@@ -99,6 +99,8 @@ unsafe extern "C" {
 
     pub fn vortex_spin_a();
     pub fn vortex_spin_b();
+
+    pub fn pinwheel_spin();
 }
 
 pub unsafe extern "C" fn sink_rate() {

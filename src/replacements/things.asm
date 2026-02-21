@@ -537,6 +537,11 @@ fn vortex_spin_b:
 	vfmadd123ss xmm0, xmm2, [rdx + 0x54]
 	ret
 
+fn pinwheel_spin:
+	movss xmm1, [DT_TICKS]
+	vfmadd123ss xmm0, xmm1, [rax + 0x70]
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

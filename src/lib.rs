@@ -430,6 +430,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             prince_first_person_controls[0xff..0x105] => camera::first_person_controls;
 
+            thing_vortex_spin[0x14..0x19] => things::vortex_spin_a;
+            thing_vortex_spin[0x3d..0x42] => things::vortex_spin_b;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

@@ -96,6 +96,9 @@ unsafe extern "C" {
     pub fn golfer_check_timer_b();
     pub fn golfer_update_timer_b();
     pub fn golfer_restart_both_timers();
+
+    pub fn vortex_spin_a();
+    pub fn vortex_spin_b();
 }
 
 pub unsafe extern "C" fn sink_rate() {

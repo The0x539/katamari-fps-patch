@@ -379,6 +379,9 @@ exports! {
     #[func @ 0x54c90]
     fn prince_first_person_controls(p: *mut Prince);
 
+    #[func @ 0x4a560]
+    fn thing_vortex_spin(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

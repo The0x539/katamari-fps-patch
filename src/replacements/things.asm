@@ -527,6 +527,16 @@ fn golfer_restart_both_timers:
 	mov word [rdx + 0x42], 2250
 	ret
 
+fn vortex_spin_a:
+	movss xmm2, [DT_TICKS]
+	vfnmadd231ss xmm1, xmm2, [rdx + 0x44]
+	ret
+
+fn vortex_spin_b:
+	; xmm2 is already populated from vortex_spin_a (the original function doesn't touch it)
+	vfmadd123ss xmm0, xmm2, [rdx + 0x54]
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

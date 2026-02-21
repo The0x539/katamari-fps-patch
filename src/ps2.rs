@@ -385,6 +385,9 @@ exports! {
     #[func @ 0x4a200]
     fn thing_pinwheel_spin(t: *mut Thing);
 
+    #[func @ 0x237c0]
+    fn katamari_compute_dash(_rcx: usize, t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

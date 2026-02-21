@@ -26,3 +26,9 @@ fn prince_exhausted:
 fn multiplayer_dash_input_window:
 	mov r9d, 200 ; 6 ticks -> 200 milliseconds
 	ret
+
+fn update_spindown_timer:
+	dec_dt ax
+	mov [r14 + 0x3b70], ax
+	test ax, ax
+	ret

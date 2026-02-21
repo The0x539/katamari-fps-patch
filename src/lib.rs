@@ -422,7 +422,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_kickball_physics[0x10b..0x14b] => things::kickball_deceleration;
 
             thing_golfer_animation_state_0[0x1a..0x21] => things::golfer_start_timer_b;
-            thing_golfer_animation_state_1[0x7+1..] => 3000; // 90 ticks -> 3 seconds
+            thing_golfer_animation_state_1[0x7+1..] => 3000_u32; // 90 ticks -> 3 seconds
             thing_golfer_animation_state_2[0x7..0xd] => things::golfer_check_timer_b;
             thing_golfer_animation_state_2[0xf..0x14] => things::golfer_update_timer_b;
             thing_golfer_animation_state_3[0x10..0x17] => things::golfer_update_timer_a;
@@ -434,6 +434,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_vortex_spin[0x3d..0x42] => things::vortex_spin_b;
 
             thing_pinwheel_spin[0x12..0x17] => things::pinwheel_spin;
+
+            katamari_compute_dash[0xac+1..] => 500_u32; // 15 ticks -> 0.5 seconds
+            speed_thing_2[0x244..0x250] => dash::update_spindown_timer;
 
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;

@@ -7,6 +7,7 @@ unsafe extern "C" {
     pub fn update_dash_input_timer();
     pub fn prince_exhausted();
     pub fn multiplayer_dash_input_window();
+    pub fn update_spindown_timer();
 }
 
 pub unsafe extern "C" fn dash_state_machine() {

@@ -210,6 +210,11 @@ fn elevator_height_update:
 	vfmadd123ss xmm0, xmm2, [rbx + 0x20]
 	ret
 
+fn balloon_desync_timer_update:
+	dec_dt eax
+	mov [rbx + 0xc], eax
+	ret
+
 fn teddy_bear_bowl_spin:
 	movss xmm1, [.theta]
 	vfmadd231ss xmm0, xmm1, [DT_TICKS]

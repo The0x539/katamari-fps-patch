@@ -270,7 +270,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
             thing_reset_hop_timer[0x2c..0x33] => things::hop_timer_reset;
 
-            // Hooks below this line still need to be analyzed for improvements with the smaller hook.
+            // TODO: Hooks below this line still need to be analyzed for improvements with the smaller hook.
 
             thing_animal_state_3_turn[0x61..0x6e] => things::animal_angle_move_towards;
             // This isn't working. There's something missing. More blood must be shed.
@@ -289,6 +289,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             // Hooks below this line are newer than the "hooks above this line" comment.
 
+            thing_machine_22_state_1[0x96..0xaf] => things::balloon_desync_timer_start;
+
+            thing_machine_22_state_2[0x1b..0x20] => things::balloon_desync_timer_update;
             thing_machine_22_state_2[0x30..0x35] => things::sine_bob;
             thing_machine_22_state_3[0x58..0x7f] => things::other_hop_gravity;
 

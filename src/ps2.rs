@@ -220,6 +220,9 @@ exports! {
     #[func @ 0x15950]
     fn katamari_collide_with_wall(_rcx: usize, k: *mut Katamari);
 
+    #[func @ 0x3f260]
+    fn thing_machine_22_state_1(t: *mut Thing);
+
     #[func @ 0x3f510]
     fn thing_machine_22_state_2(t: *mut Thing);
 

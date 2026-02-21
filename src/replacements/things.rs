@@ -101,6 +101,8 @@ unsafe extern "C" {
     pub fn vortex_spin_b();
 
     pub fn pinwheel_spin();
+
+    pub fn balloon_desync_timer_update();
 }
 
 pub unsafe extern "C" fn sink_rate() {
@@ -327,6 +329,12 @@ pub unsafe extern "C" fn other_hop_timer_start() {
             in(reg) timer,
             in("rdx") hop,
         }
+    }
+}
+
+pub unsafe extern "C" fn balloon_desync_timer_start() {
+    unsafe {
+        asm!("", in("edx") ps2::rng() % 2000);
     }
 }
 

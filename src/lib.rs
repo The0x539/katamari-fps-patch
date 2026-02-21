@@ -441,6 +441,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_compute_dash[0xac+1..] => 500_u32; // 15 ticks -> 0.5 seconds
             speed_thing_2[0x244..0x250] => dash::update_spindown_timer;
 
+            camera_set_view_mode[0x51b+1..] => 2000_u32;
+            camera_set_view_mode[0x565+1..] => 666_u32;
+            camera_animate[0x437..0x43e] => camera::update_shoot_timer;
+            update_prince_position[0x455..0x468] => camera::update_shoot_angle;
+            katamari_physics_big_kahuna[0x698..0x69f] => dash::multiplayer_dash_deplete_distance;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

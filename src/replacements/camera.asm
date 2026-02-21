@@ -88,3 +88,17 @@ fn first_person_controls:
 	mulss xmm1, [DT_TICKS]
 	mulss xmm3, [DT_TICKS]
 	ret
+
+fn update_shoot_timer:
+	mov dx, [rdi + 0x918]
+	dec_dt dx
+	mov [rdi + 0x918], dx
+	ret
+
+fn update_shoot_angle:
+	mov ecx, 666
+	sub ecx, eax
+	cvtsi2ss xmm0, ecx
+	divss xmm0, [.twothirds]
+	ret
+	.twothirds: dd 666.0

@@ -25,3 +25,8 @@ fn brake_dust_timer_update:
 	dec_dt cx
 	mov [r14 + 0x3b80], cx
 	ret
+
+fn bump_scream_cooldown_update:
+	dec_dt eax
+	mov [rbx + 0x5], al
+	ret

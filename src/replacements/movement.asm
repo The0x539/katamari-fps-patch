@@ -133,3 +133,12 @@ fn fall_time_increment:
 fn fall_time_check:
 	cmp word [rdx + 0x116], 333
 	ret
+
+fn bumped_by_thing:
+	movups xmm6, [rbx + 0xc0]
+	subps xmm6, [rbx + 0x90]
+	sqrlen xmm6
+	sqrtss xmm6, xmm6
+	; all the above is just simplifying the computation of the new speed, for fun
+	divss xmm6, [DT_TICKS] ; the actual important bit
+	ret

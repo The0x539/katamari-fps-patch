@@ -450,6 +450,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_brakes[0x542..0x54a] => cacophony::brake_dust_timer_update;
             katamari_brakes[0x555+1..] => 333_u32;
 
+            katamari_bump_stationary_thing[0x228..0x270] => movement::bumped_by_thing;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

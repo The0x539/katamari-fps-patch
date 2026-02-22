@@ -394,6 +394,9 @@ exports! {
     #[func @ 0x21870]
     fn katamari_brakes(k_: *mut Katamari, k: *mut Katamari, p: *mut Prince);
 
+    #[func @ 0x2bd60]
+    fn katamari_bump_stationary_thing(k: *mut Katamari, t: *const Thing);
+
     #[var @ 0]
     static base_addr: ();
 

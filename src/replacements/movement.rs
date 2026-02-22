@@ -22,6 +22,8 @@ unsafe extern "C" {
 
     pub fn steer_rbx();
     pub fn steer_rcx();
+
+    pub fn bumped_by_thing();
 }
 
 #[inline]

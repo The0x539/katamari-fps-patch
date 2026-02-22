@@ -5,6 +5,7 @@ use super::*;
 #[link(name = "native_replacements", kind = "static")]
 unsafe extern "C" {
     pub fn bang2();
+    pub fn brake_dust_timer_update();
 }
 
 pub unsafe extern "C" fn sfx_npc_approaching() {

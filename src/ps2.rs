@@ -391,6 +391,9 @@ exports! {
     #[func @ 0x237c0]
     fn katamari_compute_dash(_rcx: usize, t: *mut Thing);
 
+    #[func @ 0x21870]
+    fn katamari_brakes(k_: *mut Katamari, k: *mut Katamari, p: *mut Prince);
+
     #[var @ 0]
     static base_addr: ();
 

@@ -447,6 +447,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
             update_prince_position[0x455..0x468] => camera::update_shoot_angle;
             katamari_physics_big_kahuna[0x698..0x69f] => dash::multiplayer_dash_deplete_distance;
 
+            katamari_brakes[0x542..0x54a] => cacophony::brake_dust_timer_update;
+            katamari_brakes[0x555+1..] => 333_u32;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

@@ -19,3 +19,9 @@ fn bang2:
 	sub eax, 333
 	mov [rbx + 8*r8], eax
 	ret
+
+fn brake_dust_timer_update:
+	mov cx, [r14 + 0x3b80]
+	dec_dt cx
+	mov [r14 + 0x3b80], cx
+	ret

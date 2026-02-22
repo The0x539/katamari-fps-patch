@@ -7,11 +7,12 @@ section .text
 
 global trampoline_phase2
 trampoline_phase2:
+        pushfq
         push r8
         push r9
         push r10
 
-        mov r8, [rsp + 0x18]
+        mov r8, [rsp + 0x20]
         sub r8, [OTHER_DLL_BASE]
 
         mov r9, r8
@@ -40,12 +41,14 @@ trampoline_phase2:
         pop r10
         pop r9
         pop r8
+        popfq
         jmp [current_target]
 
         .oops:
         pop r10
         pop r9
         pop r8
+        popfq
         ret
 
 section .data

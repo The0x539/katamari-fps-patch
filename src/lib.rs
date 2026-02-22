@@ -250,8 +250,6 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_hop_apply_velocity[0xd9..0x14a] => things::hop_position_update;
             thing_hop_apply_velocity[0x8c..0x94] => things::hop_gravity;
 
-            // There's probably still more to be done in this function, given its sheer scale,
-            // but this is pretty good for now.
             thing_freefall[0x12..0x1c] => things::freefall_gravity;
             thing_freefall[0x2b..0x5e] => things::freefall_pos;
             thing_freefall[0xb7..0xc0] => things::freefall_spin_a;

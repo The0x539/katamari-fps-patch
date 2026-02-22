@@ -547,6 +547,11 @@ fn pinwheel_spin:
 	vfmadd123ss xmm0, xmm1, [rax + 0x70]
 	ret
 
+fn swingset:
+	movaps xmm2, xmm0 ; trampoline
+	vfmadd132ss xmm2, xmm3, [DT_TICKS]
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

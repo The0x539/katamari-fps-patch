@@ -103,6 +103,8 @@ unsafe extern "C" {
     pub fn pinwheel_spin();
 
     pub fn balloon_desync_timer_update();
+
+    pub fn swingset();
 }
 
 pub unsafe extern "C" fn sink_rate() {

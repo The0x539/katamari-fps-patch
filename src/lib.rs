@@ -455,6 +455,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_queue_things_for_pickup[0x226..0x22b] => cacophony::bump_scream_cooldown_update;
             katamari_queue_things_for_pickup[0x386+3..] => 0xff_u8; // 15 ticks -> 255 milliseconds ¯\_(ツ)_/¯ (better than nothing)
 
+            thing_swingset_state_2[0x38..0x3f] => things::swingset;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

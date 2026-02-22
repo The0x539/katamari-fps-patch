@@ -397,6 +397,9 @@ exports! {
     #[func @ 0x2bd60]
     fn katamari_bump_stationary_thing(k: *mut Katamari, t: *const Thing);
 
+    #[func @ 0x474d0]
+    fn thing_swingset_state_2(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

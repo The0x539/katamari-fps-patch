@@ -69,10 +69,10 @@ fn hop_angle_update:
 	ret
 
 fn hop_position_update:
-	movups xmm3, [rcx + 0x90]
-	movups xmm1, [DT_TICKS]
+	movaps xmm3, [rcx + 0x90]
+	movaps xmm1, [DT_TICKS]
 	vfmadd231ps xmm3, xmm1, [rcx + 0xe0]
-	movups [rcx + 0x90], xmm3
+	movaps [rcx + 0x90], xmm3
 	ret
 
 fn hop_gravity:
@@ -225,7 +225,7 @@ fn basic_gravity:
 	mov [rsp + 0x80 + 8], rsi ; trampoline
 
 	; acceleration (xmm0 currently contains gravity)
-	movups xmm1, [DT_TICKS] ; (we'll be using the whole vector soon)
+	movaps xmm1, [DT_TICKS] ; (we'll be using the whole vector soon)
 	vfmadd123ss xmm0, xmm1, [rcx + 0xe4]
 	movss [rcx + 0xe4], xmm0
 
@@ -392,7 +392,7 @@ fn bird_descend_horizontal:
 	vbroadcastss xmm1, [rbx + 0x78]
 	mulps xmm1, [DT_TICKS]
 	vfmadd123ps xmm0, xmm1, [rcx + 0x90]
-	movups [rcx + 0x90], xmm0
+	movaps [rcx + 0x90], xmm0
 	ret
 
 ; descend vertical "b" is the same code as ascend vertical "a"
@@ -450,8 +450,8 @@ fn kickball_position:
 	; in order to actually "apply the gravitational acceleration"
 
 	vfmadd123ps xmm0, xmm1, [rcx + 0x90]
-	movups [rcx + 0x90], xmm0
-	movups [rbp - 0x60], xmm0
+	movaps [rcx + 0x90], xmm0
+	movaps [rbp - 0x60], xmm0
 
 	ret
 
@@ -474,11 +474,11 @@ fn kickball_deceleration:
 
 ; I am extremely grateful that three different functions need this patch and use the same GPRs
 fn path_walker_position_borked:
-	movups xmm0, [rbx + 0xd0]
+	movaps xmm0, [rbx + 0xd0]
 
 	mulps xmm0, [DT_TICKS]
 
-	movups xmm1, [rbx + 0xc0]
+	movaps xmm1, [rbx + 0xc0]
 	subps xmm1, [rdi + 0x90] ; xmm1 now contains the displacement towards the target position
 
 	pcmpeqd xmm2, xmm2 ; xmm2 = [-1_i32; 4]
@@ -493,14 +493,14 @@ fn path_walker_position_borked:
 	; whichever of the two values has a smaller *magnitude*, for each axis.
 
 	addps xmm0, [rdi + 0x90] ; xmm0 now contains the new position
-	movups [rdi + 0x90], xmm0
+	movaps [rdi + 0x90], xmm0
 	ret
 
 fn path_walker_position:
 	movups xmm0, [rbx + 0xd0]
 	movaps xmm1, [DT_TICKS]
 	vfmadd123ps xmm0, xmm1, [rdi + 0x90]
-	movups [rdi + 0x90], xmm0
+	movaps [rdi + 0x90], xmm0
 	ret
 
 fn fix_melon_jank:

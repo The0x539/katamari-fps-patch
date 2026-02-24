@@ -13,11 +13,11 @@ fn bumpy_ride:
 	ret
 
 fn climbing_position:
-        movups xmm1, [rbx + 0x290] ; xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
+        movaps xmm1, [rbx + 0x290] ; xmm1 = k->motion.f (effective velocity, EXCLUDING gravity)
 	jmp increment_position
 
 fn rolling_position:
-	movups xmm1, [rbx + 0x2b0] ; xmm1 = k->motion.h (effective velocity, including gravity)
+	movaps xmm1, [rbx + 0x2b0] ; xmm1 = k->motion.h (effective velocity, including gravity)
 	; fall through to increment_position
 
 increment_position:
@@ -25,9 +25,9 @@ increment_position:
 	; but reading it back from memory is a lot easier than shuffling those into one XMM register.
 	; Bonus: we can read the version that already includes gravity
 	; xmm0-4 are clobbered by the original code.
-	movups xmm0, [rbx + 0x460]    ; xmm0 = k->position
+	movaps xmm0, [rbx + 0x460]    ; xmm0 = k->position
 	vfmadd231ps xmm0, xmm1, [DT_TICKS] ; xmm0 += xmm1 * dt
-	movups [rbx + 0x460], xmm0    ; k->position = xmm0
+	movaps [rbx + 0x460], xmm0    ; k->position = xmm0
 	ret
 
 fn turn_radius:
@@ -135,7 +135,7 @@ fn fall_time_check:
 	ret
 
 fn bumped_by_thing:
-	movups xmm6, [rbx + 0xc0]
+	movaps xmm6, [rbx + 0xc0]
 	subps xmm6, [rbx + 0x90]
 	sqrlen xmm6
 	sqrtss xmm6, xmm6

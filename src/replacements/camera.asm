@@ -34,17 +34,17 @@ fn size_threshold_animation_spin:
 	ret
 
 fn size_threshold_animation_zoom:
-	movups xmm0, [rdx + 0x0]
-	movups xmm1, [rdx + 0x40]
+	movaps xmm0, [rdx + 0x0]
+	movaps xmm1, [rdx + 0x40]
 	vfmadd231ps xmm0, xmm1, [DT_TICKS]
-	movups [rdx + 0x0], xmm0
+	movaps [rdx + 0x0], xmm0
 	ret
 
 fn size_threshold_animation_other_zoom:
-	movups xmm0, [rdx + 0x10]
-	movups xmm1, [rdx + 0x50]
+	movaps xmm0, [rdx + 0x10]
+	movaps xmm1, [rdx + 0x50]
 	vfmadd231ps xmm0, xmm1, [DT_TICKS]
-	movups [rdx + 0x10], xmm0
+	movaps [rdx + 0x10], xmm0
 	ret
 
 ; this isn't quite mathematically correct, but I am *way* too tired

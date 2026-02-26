@@ -19,6 +19,7 @@ unsafe extern "C" {
     pub fn air_time_increment();
     pub fn fall_time_increment();
     pub fn fall_time_check();
+    pub fn update_climb_cooldown();
 
     pub fn steer_rbx();
     pub fn steer_rcx();

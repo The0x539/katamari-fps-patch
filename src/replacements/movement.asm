@@ -142,3 +142,8 @@ fn bumped_by_thing:
 	; all the above is just simplifying the computation of the new speed, for fun
 	divss xmm6, [DT_TICKS] ; the actual important bit
 	ret
+
+fn update_climb_cooldown:
+	dec_dt ax
+	mov [rcx + 0x118], ax
+	ret

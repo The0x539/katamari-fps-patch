@@ -455,6 +455,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_swingset_state_2[0x38..0x3f] => things::swingset;
 
+            katamari_physics_x14c80[0x140+2..] => 333_u32;
+            init_x1f030[0x679+2..] => 333_u32;
+            terminate_climb[0x16+1..] => 333_u32;
+            do_katamari_physics[0xeb..0xf5] => movement::update_climb_cooldown;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

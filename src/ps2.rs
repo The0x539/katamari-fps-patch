@@ -400,6 +400,9 @@ exports! {
     #[func @ 0x474d0]
     fn thing_swingset_state_2(t: *mut Thing);
 
+    #[func @ 0x1f030]
+    fn init_x1f030(override_size: f32);
+
     #[var @ 0]
     static base_addr: ();
 

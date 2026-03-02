@@ -352,6 +352,9 @@ exports! {
     #[func @ 0x14c80]
     fn katamari_physics_x14c80(rcx: u64, k: *mut Katamari);
 
+    #[func @ 0x12ca0]
+    fn katamari_terminate_climb(k: *mut Katamari);
+
     #[func @ 0x4a9f0]
     fn thing_kickball_state_1(t: *mut Thing);
 
@@ -402,6 +405,9 @@ exports! {
 
     #[func @ 0x1f030]
     fn init_x1f030(override_size: f32);
+
+    #[func @ 0x16930]
+    fn katamari_start_climb_x16930(k: *mut Katamari);
 
     #[var @ 0]
     static base_addr: ();

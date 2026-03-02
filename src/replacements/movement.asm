@@ -147,3 +147,17 @@ fn update_climb_cooldown:
 	dec_dt ax
 	mov [rcx + 0x118], ax
 	ret
+
+fn climb_coyote_timer_update_b:
+	; for some reason the compiler stuck this stuff right in the middle???
+	movzx r10d, r8b
+	movzx r9d, r8b
+fn climb_coyote_timer_update_a:
+	dec_dt ax
+	mov [rbx + 0x898], ax
+	ret
+
+fn climb_coyote_timer_update_c:
+	dec_dt ax
+	mov [rcx + 0x898], ax
+	ret

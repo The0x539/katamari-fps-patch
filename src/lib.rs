@@ -460,6 +460,11 @@ fn install_hooks_impl() -> eyre::Result<()> {
             terminate_climb[0x16+1..] => 333_u32;
             do_katamari_physics[0xeb..0xf5] => movement::update_climb_cooldown;
 
+            katamari_start_climb_x16930[0x9+1..] => 33_u32;
+            katamari_physics_x14c80[0x6d2..0x6dc] => movement::climb_coyote_timer_update_a;
+            katamari_physics_x14c80[0x5bb..0x5d4] => movement::climb_coyote_timer_update_b;
+            katamari_terminate_climb[0x3e..0x48] => movement::climb_coyote_timer_update_b;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

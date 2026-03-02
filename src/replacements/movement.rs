@@ -20,6 +20,9 @@ unsafe extern "C" {
     pub fn fall_time_increment();
     pub fn fall_time_check();
     pub fn update_climb_cooldown();
+    pub fn climb_coyote_timer_update_a();
+    pub fn climb_coyote_timer_update_b();
+    pub fn climb_coyote_timer_update_c();
 
     pub fn steer_rbx();
     pub fn steer_rcx();

@@ -409,6 +409,9 @@ exports! {
     #[func @ 0x16930]
     fn katamari_start_climb_x16930(k: *mut Katamari);
 
+    #[func @ 0x43730]
+    fn thing_bird_orbit_x43730(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

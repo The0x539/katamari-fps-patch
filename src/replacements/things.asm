@@ -552,6 +552,11 @@ fn swingset:
 	vfmadd132ss xmm2, xmm3, [DT_TICKS]
 	ret
 
+fn bird_orbit:
+	lea rdx, [rsp + 0x40 + 8] ; trampoline
+	mulss xmm2, [DT_TICKS]
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

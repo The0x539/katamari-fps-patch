@@ -105,6 +105,8 @@ unsafe extern "C" {
     pub fn balloon_desync_timer_update();
 
     pub fn swingset();
+
+    pub fn bird_orbit();
 }
 
 pub unsafe extern "C" fn sink_rate() {

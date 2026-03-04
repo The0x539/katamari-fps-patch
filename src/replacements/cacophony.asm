@@ -30,3 +30,10 @@ fn bump_scream_cooldown_update:
 	dec_dt eax
 	mov [rbx + 0x5], al
 	ret
+
+fn big_dust_timer:
+	; THANK YOU compiler, for loading the DLL base address into RDX.
+	mov ax, [rdx + r15*2 + 0x10eac8]
+	dec_dt ax
+	mov [rdx + r15*2 + 0x10eac8], ax
+	ret

@@ -7,6 +7,7 @@ unsafe extern "C" {
     pub fn bang2();
     pub fn brake_dust_timer_update();
     pub fn bump_scream_cooldown_update();
+    pub fn big_dust_timer();
 }
 
 pub unsafe extern "C" fn sfx_npc_approaching() {

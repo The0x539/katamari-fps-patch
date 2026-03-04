@@ -467,6 +467,9 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_bird_orbit_x43730[0x152..0x157] => things::bird_orbit;
 
+            do_katamari_physics[0x70a..0x713] => cacophony::big_dust_timer;
+            do_katamari_physics[0x729+1..] => 100_u32; // 3 ticks -> 100 ms
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

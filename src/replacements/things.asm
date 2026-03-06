@@ -513,7 +513,10 @@ fn golfer_update_timer_a:
 	ret
 
 fn golfer_start_timer_b:
-	mov word [rdx + 0x42], 2250 ; 70 ticks -> 2.1 seconds (but this new magic number seems to actually animate properly for SOME reason)
+	; 70 ticks -> 2⅓ seconds
+	; there's a bit of a jump in the animation
+	; but I don't think it's this timer's fault
+	mov word [rdx + 0x42], 2333
 	inc byte [rcx + 0x10] ; trampoline
 	ret
 

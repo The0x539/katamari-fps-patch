@@ -5,9 +5,10 @@ use winnow::ascii::{
     dec_uint, escaped, hex_uint, line_ending, multispace0, space0, space1, till_line_ending,
 };
 use winnow::combinator::{
-    alt, delimited, dispatch, fail, opt, preceded, repeat, seq, terminated, trace,
+    alt, backtrack_err, cut_err, delimited, dispatch, eof, fail, opt, peek, preceded, repeat,
+    repeat_till, seq, terminated, trace,
 };
-use winnow::error::ParserError;
+use winnow::error::{AddContext, ParserError, StrContext, StrContextValue};
 use winnow::token::{any, none_of, one_of, take_till};
 
 use crate::types::{Mat4, MotionVectors, Vec4};
@@ -27,7 +28,11 @@ impl DefinitionFile {
         let mut text = String::new();
         f.rewind().map_err(|e| e.to_string())?;
         f.read_to_string(&mut text).map_err(|e| e.to_string())?;
-        let this = document.parse(&text).map_err(|e| format!("{e:?}"))?;
+        let this = document.parse(&text).map_err(|e| {
+            println!("{e}");
+            println!("{e:?}");
+            e.to_string()
+        })?;
         Ok(this)
     }
 }
@@ -64,9 +69,28 @@ impl FieldType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FieldPos {
+    pub base: isize,
+    pub offset: Option<isize>,
+}
+
+#[allow(dead_code)]
+impl FieldPos {
+    pub const fn new(base: isize) -> Self {
+        Self { base, offset: None }
+    }
+
+    pub const fn with_offset(self, offset: isize) -> Self {
+        Self {
+            base: self.base,
+            offset: Some(offset),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Field {
-    pub offset: isize,
-    pub sub_offset: Option<isize>,
+    pub position: FieldPos,
     pub field_type: FieldType,
     pub name: Option<String>,
 }
@@ -83,11 +107,15 @@ macro_rules! parsers {
 
 fn string_literal<'i, E>(quote: char) -> impl winnow::ModalParser<&'i str, String, E>
 where
-    E: ParserError<&'i str>,
+    E: ParserError<&'i str> + AddContext<&'i str, StrContext>,
 {
     let control = '\\';
     let esc = [control, quote];
-    delimited(quote, escaped(none_of(esc), control, one_of(esc)), quote)
+    cut_err(delimited(
+        quote,
+        escaped(none_of((esc, '\n')), control, one_of(esc)),
+        quote.context(StrContext::Expected(StrContextValue::CharLiteral(quote))),
+    ))
 }
 
 fn integer_type<'i, E>(signed: bool) -> impl winnow::ModalParser<&'i str, FieldType, E>
@@ -123,18 +151,24 @@ parsers! {
             _: ']',
         )),
         _ => fail,
-    };
+    }.context(StrContext::Label("field type"));
 
-    name: String = alt((
-        string_literal('\''),
-        string_literal('"'),
-        take_till(1.., [';', ' ', '\r', '\n']).map(String::from),
-    ));
+    name: String = dispatch!{peek(any);
+        '\'' => string_literal('\''),
+        '\"' => string_literal('"'),
+        // This variation still has messed up error reporting. Whatever.
+        _ => take_till(1.., [';', ' ', '\r', '\n']).map(String::from),
+    }.context(StrContext::Label("field name"));
+
+    field_pos: FieldPos = seq!{FieldPos{
+        _: 'x',
+        base: hex_uint.map(|n: u64| n as isize),
+        offset: opt(preceded('+', hex_uint).map(|n: u64| n as isize)),
+    }};
 
     field: Field = seq!{Field{
-        offset: preceded('x', hex_uint).map(|n: u64| n as isize),
-        sub_offset: opt(preceded('+', hex_uint).map(|n: u64| n as isize)),
-        field_type: preceded(space1, field_type),
+        position: terminated(field_pos, space1).context(StrContext::Label("field address")),
+        field_type: field_type,
         name: opt(preceded(space1, name)),
     }};
 
@@ -142,22 +176,34 @@ parsers! {
 
     line: Field = trace("line", delimited(
         space0,
-        field,
-        (space0, opt(comment)),
-    ));
+        cut_err(field),
+        (
+            space0,
+            opt(comment),
+            alt((line_ending, eof))
+        ),
+    )).context(StrContext::Label("line"));
 
-    blank_line: () = (space0, opt(comment)).void();
-    junk: () = trace("junk", repeat(0.., (line_ending, blank_line).void()));
+    blank_line: () = alt((
+        (space0, comment, alt((line_ending, eof))).void(),
+        (space0, line_ending).void(),
+        space1.void(),
+    ));
+    junk: () = trace("junk", repeat(0.., blank_line.void()));
 
     header<'a>: &'a str = delimited(
         (multispace0, '['),
         take_till(1.., ']'),
         ']',
-    );
+    ).context(StrContext::Label("header"));
 
-    body: Vec<Field> = terminated(repeat(0.., preceded(junk, line)), trace("trailing junk", junk));
+    body: Vec<Field> = repeat_till(
+        0..,
+        terminated(line, junk),
+        peek(alt(("[", eof))),
+    ).map(|(acc, _)| acc);
 
-    section<'a>: (&'a str, Vec<Field>) = (header, body);
+    section<'a>: (&'a str, Vec<Field>) = (terminated(header, (line_ending, junk)), body);
 
     document: DefinitionFile = repeat(0.., section).verify_fold(
         DefinitionFile::default,
@@ -189,9 +235,8 @@ mod tests {
         assert_eq!(
             parsed,
             Field {
-                offset: 0x40,
+                position: FieldPos::new(0x40),
                 field_type: FieldType::Array(Box::new(FieldType::Vec4), 4),
-                sub_offset: None,
                 name: Some("foo".into()),
             },
         );
@@ -210,29 +255,28 @@ mod tests {
 
             
         "#;
-        let parsed = section.parse(input).unwrap();
+        let parsed = section
+            .parse(input)
+            .inspect_err(|e| println!("{e}"))
+            .unwrap();
         let expected = vec![
             Field {
-                offset: 0x40,
-                sub_offset: None,
+                position: FieldPos::new(0x40),
                 field_type: FieldType::Vec4,
                 name: Some("position".into()),
             },
             Field {
-                offset: 0x50,
-                sub_offset: None,
+                position: FieldPos::new(0x50),
                 field_type: FieldType::Array(FieldType::Mat4.into(), 8),
                 name: Some("the 'guys'".into()),
             },
             Field {
-                offset: 0x254,
-                sub_offset: None,
+                position: FieldPos::new(0x254),
                 field_type: FieldType::Float,
                 name: None,
             },
             Field {
-                offset: 0x25c,
-                sub_offset: None,
+                position: FieldPos::new(0x25c),
                 field_type: FieldType::Address,
                 name: None,
             },
@@ -253,32 +297,31 @@ mod tests {
             x254 f32
             x25c addr ; what does he point to
         "#;
-        let parsed = document.parse(input).unwrap();
+        let parsed = document
+            .parse(input)
+            .inspect_err(|e| println!("{e}"))
+            .unwrap();
         let expected = DefinitionFile {
             katamari: vec![
                 Field {
-                    offset: 0x40,
-                    sub_offset: None,
+                    position: FieldPos::new(0x40),
                     field_type: FieldType::Vec4,
                     name: Some("position".into()),
                 },
                 Field {
-                    offset: 0x50,
-                    sub_offset: None,
+                    position: FieldPos::new(0x50),
                     field_type: FieldType::Array(FieldType::Mat4.into(), 8),
                     name: Some("the 'guys'".into()),
                 },
             ],
             prince: vec![
                 Field {
-                    offset: 0x254,
-                    sub_offset: None,
+                    position: FieldPos::new(0x254),
                     field_type: FieldType::Float,
                     name: None,
                 },
                 Field {
-                    offset: 0x25c,
-                    sub_offset: None,
+                    position: FieldPos::new(0x25c),
                     field_type: FieldType::Address,
                     name: None,
                 },
@@ -286,5 +329,55 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(parsed, expected);
+    }
+
+    #[test]
+    fn field_offset_err() {
+        let mut input = r#"
+            [prince]
+            ; foo
+
+            [global]
+            x153150 ptr
+            x7a050 f32
+            x7a054 f32
+            x7a058 f32
+            xd35380 ptr
+            x10EB18 u32 'CLIMB SUSTAIN LIMIT'
+            ×10eac8 i16 'dust cooldown'
+
+            [camera_transform]
+            ; foo
+        "#;
+        let err = document.parse(&mut input).unwrap_err();
+        assert_eq!(err.offset(), err.input().find('×').unwrap());
+        assert!(
+            err.inner()
+                .context()
+                .any(|c| *c == StrContext::Label("field address"))
+        );
+    }
+
+    #[test]
+    fn field_name_err() {
+        let mut input = r#"
+            [prince]
+            ; foo
+            x10 u8 foo
+
+            [thing]
+            x3b8+8 ptr "full machine
+            x90 vec4 position
+            xa0 vec4 rotation
+
+            [camera_transform]
+            ; foo
+        "#;
+        let err = document.parse(&mut input).unwrap_err();
+        let msg = err.to_string();
+        println!("{msg}");
+        println!("{err:?}");
+        assert!(msg.contains("invalid field name"));
+        assert!(msg.contains("expected `\"`"));
     }
 }

@@ -9,7 +9,7 @@ use crate::{
 
 impl Field {
     pub fn label(&self) -> String {
-        match (&self.name, self.offset, self.sub_offset) {
+        match (&self.name, self.position.base, self.position.offset) {
             (Some(name), ..) => name.clone(),
             (None, a, None) => format!("0x{a:x}"),
             (None, a, Some(b)) => format!("0x{a:x}+{b:x}"),
@@ -18,14 +18,14 @@ impl Field {
 
     pub unsafe fn ui<T: 'static>(&self, data: *mut T, ui: &mut Ui) -> egui::Response {
         if std::any::TypeId::of::<T>() != std::any::TypeId::of::<()>() {
-            assert!(self.offset < std::mem::size_of::<T>() as isize);
+            assert!(self.position.base < std::mem::size_of::<T>() as isize);
         }
 
         ui.horizontal(|ui| {
             ui.label(self.label());
 
             unsafe {
-                let offset = self.offset + self.sub_offset.unwrap_or(0);
+                let offset = self.position.base + self.position.offset.unwrap_or(0);
                 let field = data.cast::<()>().byte_offset(offset);
                 self.field_type.ui(data, field, ui);
             }

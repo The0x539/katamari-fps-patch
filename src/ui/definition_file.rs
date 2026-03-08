@@ -5,8 +5,8 @@ use winnow::ascii::{
     dec_uint, escaped, hex_uint, line_ending, multispace0, space0, space1, till_line_ending,
 };
 use winnow::combinator::{
-    alt, backtrack_err, cut_err, delimited, dispatch, eof, fail, opt, peek, preceded, repeat,
-    repeat_till, seq, terminated, trace,
+    alt, cut_err, delimited, dispatch, eof, fail, opt, peek, preceded, repeat, repeat_till, seq,
+    terminated, trace,
 };
 use winnow::error::{AddContext, ParserError, StrContext, StrContextValue};
 use winnow::token::{any, none_of, one_of, take_till};
@@ -153,11 +153,19 @@ parsers! {
         _ => fail,
     }.context(StrContext::Label("field type"));
 
+    line_termination: () = (space0, opt(comment), alt((line_ending, eof)))
+        .void()
+        .context(StrContext::Expected(StrContextValue::Description("comment or end of line")));
+
+    quoteless_name<'a>: &'a str = terminated(
+        take_till(1.., [';', ' ', '\r', '\n']),
+        cut_err(peek(line_termination)),
+    );
+
     name: String = dispatch!{peek(any);
         '\'' => string_literal('\''),
         '\"' => string_literal('"'),
-        // This variation still has messed up error reporting. Whatever.
-        _ => take_till(1.., [';', ' ', '\r', '\n']).map(String::from),
+        _ => quoteless_name.map(String::from),
     }.context(StrContext::Label("field name"));
 
     field_pos: FieldPos = seq!{FieldPos{
@@ -177,11 +185,7 @@ parsers! {
     line: Field = trace("line", delimited(
         space0,
         cut_err(field),
-        (
-            space0,
-            opt(comment),
-            alt((line_ending, eof))
-        ),
+        line_termination,
     )).context(StrContext::Label("line"));
 
     blank_line: () = alt((
@@ -379,5 +383,28 @@ mod tests {
         println!("{err:?}");
         assert!(msg.contains("invalid field name"));
         assert!(msg.contains("expected `\"`"));
+    }
+
+    #[test]
+    fn quoteless_field_name_err() {
+        let mut input = r#"
+            [prince]
+            ; foo
+            x10 u8 foo
+
+            [thing]
+            x3b8+8 ptr full machine
+            x90 vec4 position
+            xa0 vec4 rotation
+
+            [camera_transform]
+            ; foo
+        "#;
+        let err = document.parse(&mut input).unwrap_err();
+        let msg = err.to_string();
+        println!("{msg}");
+        println!("{err:?}");
+        assert!(msg.contains("invalid field name"));
+        assert!(msg.contains("expected comment or end of line"));
     }
 }

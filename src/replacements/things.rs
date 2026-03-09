@@ -107,6 +107,9 @@ unsafe extern "C" {
     pub fn swingset();
 
     pub fn bird_orbit();
+
+    pub fn bamboo_fountain_timer_update();
+    pub fn bamboo_fountain_motion();
 }
 
 pub unsafe extern "C" fn sink_rate() {

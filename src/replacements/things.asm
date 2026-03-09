@@ -560,6 +560,16 @@ fn bird_orbit:
 	mulss xmm2, [DT_TICKS]
 	ret
 
+fn bamboo_fountain_timer_update:
+	dec_dt eax
+	mov [rdx + 0x50], eax
+	ret
+
+fn bamboo_fountain_motion:
+	movss xmm0, [DT_TICKS]
+	vfmadd123ss xmm1, xmm0, [rdi + 0x54]
+	ret
+
 section .rodata
 
 VEC_XYZ: dv 1.0, 1.0, 1.0, 0.0

@@ -412,6 +412,21 @@ exports! {
     #[func @ 0x43730]
     fn thing_bird_orbit_x43730(t: *mut Thing);
 
+    #[func @ 0x46dc0]
+    fn thing_bamboo_fountain_state_0(t: *mut Thing);
+
+    #[func @ 0x46e50]
+    fn thing_bamboo_fountain_state_1(t: *mut Thing);
+
+    #[func @ 0x46e90]
+    fn thing_bamboo_fountain_state_2(t: *mut Thing);
+
+    #[func @ 0x46f20]
+    fn thing_bamboo_fountain_state_3(t: *mut Thing);
+
+    #[func @ 0x46f60]
+    fn thing_bamboo_fountain_state_4(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

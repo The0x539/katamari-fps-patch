@@ -470,6 +470,14 @@ fn install_hooks_impl() -> eyre::Result<()> {
             do_katamari_physics[0x70a..0x713] => cacophony::big_dust_timer;
             do_katamari_physics[0x729+1..] => 100_u32; // 3 ticks -> 100 ms
 
+            thing_bamboo_fountain_state_0[0x7a+3..] => 3000_u32; // 0x5a = 90 ticks -> 3 seconds
+            thing_bamboo_fountain_state_1[0x14..0x19] => things::bamboo_fountain_timer_update;
+            thing_bamboo_fountain_state_2[0x1e..0x23] => things::bamboo_fountain_motion;
+            thing_bamboo_fountain_state_2[0x6f+3..] => 100_u32; // 3 ticks
+            thing_bamboo_fountain_state_3[0xe..0x13] => things::bamboo_fountain_timer_update;
+            thing_bamboo_fountain_state_4[0x1e..0x23] => things::bamboo_fountain_motion;
+            thing_bamboo_fountain_state_4[0x73+3..] => 3000_u32;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

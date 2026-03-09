@@ -28,11 +28,7 @@ impl DefinitionFile {
         let mut text = String::new();
         f.rewind().map_err(|e| e.to_string())?;
         f.read_to_string(&mut text).map_err(|e| e.to_string())?;
-        let this = document.parse(&text).map_err(|e| {
-            println!("{e}");
-            println!("{e:?}");
-            e.to_string()
-        })?;
+        let this = document.parse(&text).map_err(|e| e.to_string())?;
         Ok(this)
     }
 }

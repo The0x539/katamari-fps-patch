@@ -794,13 +794,32 @@ impl Vec4 {
     }
 
     #[inline]
-    pub fn sqrlen(&self) -> f32 {
-        self.dot3(self)
+    pub fn sqrlen(self) -> f32 {
+        unsafe {
+            let ret: f32;
+            std::arch::asm! {
+                "vdpps {out}, {a}, {a}, {mask}",
+                a = in(xmm_reg) self.to_simd(),
+                out = out(xmm_reg) ret,
+                mask = const 0b0111_0001
+            }
+            ret
+        }
     }
 
     #[inline]
-    pub fn dot3(&self, other: &Self) -> f32 {
-        self.x * other.x + self.y * other.y + self.z * other.z
+    pub fn dot3(self, other: &Self) -> f32 {
+        unsafe {
+            let ret: f32;
+            std::arch::asm! {
+                "vdpps {out}, {a}, [{b}], {mask}",
+                a = in(xmm_reg) self.to_simd(),
+                b = in(reg) other,
+                out = out(xmm_reg) ret,
+                mask = const 0b0111_0001
+            }
+            ret
+        }
     }
 
     #[inline]

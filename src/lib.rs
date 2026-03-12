@@ -1,8 +1,6 @@
 #![feature(slice_from_ptr_range)]
 #![feature(portable_simd)]
 #![feature(slice_ptr_get)]
-// the big macro invocation for the patches uses a token-tree muncher
-#![recursion_limit = "256"]
 
 #[macro_use]
 pub mod macros;
@@ -63,47 +61,34 @@ fn install_hooks_impl() -> eyre::Result<()> {
         let dll = ps2::DLL;
 
         macro_rules! patches {
-            () => {};
+            ($(
+                $func:ident $([$($range:tt)+])?
+                =>
+                $($replacement:tt)::+ $(;)?
+            )*) => {$(
+                patch!($func $([$($range)+])? => $($replacement)::+);
+            )*};
+        }
 
-            (
-                $func:ident => {}
-                $($tt:tt)*
-            ) => {
+        macro_rules! patch {
+            ($func:ident => {}) => {
                 hook::skip(dll.$func)?;
-                patches!($($tt)*);
             };
 
-            (
-                $func:ident => $($replacement:ident)::*;
-                $($tt:tt)*
-            ) => {
-                hook::install(dll.$func, replacements::$($replacement)::* as _)?;
-                patches!($($tt)*);
+            ($func:ident => $($replacement:ident)::+) => {
+                hook::install(dll.$func, replacements::$($replacement)::+ as _)?;
             };
 
-            (
-                $func:ident[$range:expr] => {}
-                $($tt:tt)*
-            ) => {
+            ($func:ident[$range:expr] => {}) => {
                 hook::skip_range(dll.$func, $range)?;
-                patches!($($tt)*);
             };
 
-            (
-                $func:ident[$range:expr] => $($replacement:ident)::*;
-                $($tt:tt)*
-            ) => {
+            ($func:ident[$range:expr] => $($replacement:ident)::*) => {
                 hook::patch(dll.$func, $range, replacements::$($replacement)::* as _)?;
-                patches!($($tt)*);
             };
 
-            // EXTREMELY sketchy, but handy for e.g. changing a Jcc into another Jcc
-            (
-                $func:ident[$offset:literal $(+ $extra:literal)? ..] => $replacement:expr;
-                $($tt:tt)*
-            ) => {
+            ($func:ident[$offset:literal $(+ $extra:literal)? ..] => $replacement:expr) => {
                 hook::raw_patch(dll.$func, $offset $(+ $extra)?, $replacement)?;
-                patches!($($tt)*);
             };
         }
 

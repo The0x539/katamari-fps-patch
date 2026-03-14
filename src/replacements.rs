@@ -63,7 +63,7 @@ pub(crate) mod values {
     pub fn set_dt(delta: f32) {
         unsafe {
             DT_SECONDS = delta;
-            let dt_ticks = delta * 1000.0 / 30.0;
+            let dt_ticks = delta * 30.0;
             DT_TICKS = AlignedVec4(Vec4::splat3(dt_ticks));
 
             let millis = delta * 1000.0;

@@ -29,6 +29,16 @@ pub unsafe fn init(dll: HMODULE) {
     let phase2_ptr = trampoline_phase2 as *const () as usize;
     trampoline_code[0x10..0x18].copy_from_slice(&phase2_ptr.to_ne_bytes());
 
+    // trampoline_code now contains x86_64 machine code of the form:
+    //
+    // trampoline_phase1:
+    //     jmp qword [rel phase2_ptr]
+    //
+    // ; (NOPs to pad/align to 0x10 bytes)
+    //
+    // phase2_ptr:
+    //     dq trampoline_phase2
+
     unsafe {
         OTHER_DLL_BASE = dll.0.cast();
         // Insert our stuff at the end of PS2KatamariSimulation.text, shortly after its final functions

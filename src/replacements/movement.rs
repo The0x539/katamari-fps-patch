@@ -84,7 +84,7 @@ pub unsafe extern "C" fn uphill() {
     let time_factor = time_factor.min(1.0);
 
     let amount = time_factor * (k.diameter_cm / 50.0) * mass_factor * dt;
-    k.motion.downhill += downhill_v * amount;
+    k.motion.downhill = k.motion.downhill.mul_add(downhill_v, Vec4::splat(amount));
 }
 
 pub unsafe extern "C" fn downhill() {
@@ -101,5 +101,5 @@ pub unsafe extern "C" fn downhill() {
     let time_factor = time_factor.min(1.0);
 
     let amount = time_factor * (k.diameter_cm / 50.0) * values::dt_ticks();
-    k.motion.downhill += downhill_v * amount;
+    k.motion.downhill = k.motion.downhill.mul_add(downhill_v, Vec4::splat(amount));
 }

@@ -1,4 +1,5 @@
 use std::{
+    arch::asm,
     ops::{Add, AddAssign, Div, Mul, Sub},
     simd::f32x4,
 };
@@ -774,12 +775,27 @@ impl Vec4 {
     }
 
     #[inline]
+    pub const fn splat(v: f32) -> Self {
+        Self::new(v, v, v, v)
+    }
+
+    #[inline]
     pub const fn splat3(v: f32) -> Self {
         Self {
             x: v,
             y: v,
             z: v,
             w: 0.0,
+        }
+    }
+
+    #[inline]
+    pub const fn splat3_1(v: f32) -> Self {
+        Self {
+            x: v,
+            y: v,
+            z: v,
+            w: 1.0,
         }
     }
 
@@ -794,13 +810,23 @@ impl Vec4 {
     }
 
     #[inline]
+    pub const fn from_array([x, y, z, w]: [f32; 4]) -> Self {
+        Self { x, y, z, w }
+    }
+
+    #[inline]
+    pub const fn from_simd(value: f32x4) -> Self {
+        Self::from_array(value.to_array())
+    }
+
+    #[inline]
     pub fn sqrlen(self) -> f32 {
         unsafe {
             let ret: f32;
-            std::arch::asm! {
+            asm! {
                 "vdpps {out}, {a}, {a}, {mask}",
                 a = in(xmm_reg) self.to_simd(),
-                out = out(xmm_reg) ret,
+                out = lateout(xmm_reg) ret,
                 mask = const 0b0111_0001
             }
             ret
@@ -811,14 +837,28 @@ impl Vec4 {
     pub fn dot3(self, other: &Self) -> f32 {
         unsafe {
             let ret: f32;
-            std::arch::asm! {
+            asm! {
                 "vdpps {out}, {a}, [{b}], {mask}",
                 a = in(xmm_reg) self.to_simd(),
                 b = in(reg) other,
-                out = out(xmm_reg) ret,
+                out = lateout(xmm_reg) ret,
                 mask = const 0b0111_0001
             }
             ret
+        }
+    }
+
+    #[inline]
+    pub fn mul_add(self, increment: Self, factor: Self) -> Self {
+        unsafe {
+            let ret: f32x4;
+            asm! {
+                "vfmadd231ps {acc}, {increment}, {factor}",
+                acc = inout(xmm_reg) self.to_simd() => ret,
+                increment = in(xmm_reg) increment.to_simd(),
+                factor = in(xmm_reg) factor.to_simd(),
+            }
+            Self::from_simd(ret)
         }
     }
 
@@ -848,60 +888,56 @@ impl Vec4 {
 
 impl Add for Vec4 {
     type Output = Self;
+    #[inline]
     fn add(self, rhs: Self) -> Self::Output {
-        Self::new(
-            self.x + rhs.x,
-            self.y + rhs.y,
-            self.z + rhs.z,
-            self.w + rhs.w,
-        )
+        Self::from_simd(self.to_simd() + rhs.to_simd())
     }
 }
 
 impl AddAssign for Vec4 {
+    #[inline]
     fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-        self.z += rhs.z;
-        self.w += rhs.w;
+        *self = *self + rhs;
     }
 }
 
 impl Sub for Vec4 {
     type Output = Self;
+    #[inline]
     fn sub(self, rhs: Self) -> Self::Output {
-        Self::new(
-            self.x - rhs.x,
-            self.y - rhs.y,
-            self.z - rhs.z,
-            self.w - rhs.w,
-        )
+        Self::from_simd(self.to_simd() - rhs.to_simd())
     }
 }
 
 impl Mul for Vec4 {
     type Output = Self;
+    #[inline]
     fn mul(self, rhs: Self) -> Self::Output {
-        Self::new(
-            self.x * rhs.x,
-            self.y * rhs.y,
-            self.z * rhs.z,
-            self.w * rhs.w,
-        )
+        Self::from_simd(self.to_simd() * rhs.to_simd())
+    }
+}
+
+impl Div for Vec4 {
+    type Output = Self;
+    #[inline]
+    fn div(self, rhs: Self) -> Self::Output {
+        Self::from_simd(self.to_simd() / rhs.to_simd())
     }
 }
 
 impl Mul<f32> for Vec4 {
     type Output = Self;
+    #[inline]
     fn mul(self, rhs: f32) -> Self::Output {
-        Self::new(self.x * rhs, self.y * rhs, self.z * rhs, self.w)
+        self * Self::splat(rhs)
     }
 }
 
 impl Div<f32> for Vec4 {
     type Output = Self;
+    #[inline]
     fn div(self, rhs: f32) -> Self::Output {
-        Self::new(self.x / rhs, self.y / rhs, self.z / rhs, self.w)
+        self / Self::splat(rhs)
     }
 }
 

@@ -115,16 +115,10 @@ unsafe extern "C" {
 pub unsafe extern "C" fn sink_rate() {
     unsafe {
         let k: *mut Katamari;
-        // I have no idea what purpose this instruction serves.
-        // Before I switched to the five-byte hook, I was removing it *and* the next two instructions,
-        // with no replacement, and never managed to observe any notable bugs as a result.
-        asm!("mov [rsp + 0x10 + 8], rbx", out("rdx") k); // trampoline + preserve RDX
-
-        (*k).sink_rate = (*k).sink_rate.powf(values::dt_ticks());
-
-        // RCX and RAX would theoretically also be good to preserve,
-        // but I think only RDX is strictly necessary based on the caller's register usage.
-        asm!("", in("rdx") k);
+        let sink_rate: f32;
+        asm!("", out("rcx") k, out("xmm0") sink_rate);
+        (*k).sink_rate = sink_rate.powf(values::dt_ticks());
+        asm!("", in("rcx") k);
     }
 }
 

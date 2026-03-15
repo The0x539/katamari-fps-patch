@@ -231,10 +231,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // Cheat code to always flip things and never collect directly
             //katamari_x28640[0x19b..0x1d6] => {}
 
-            // TODO: I had a very hard time figuring out where to put this hook,
-            // but that was before the 12->5 byte hook shrink.
-            // I can probably find a better spot now.
-            katamari_sink_things[0x2f..0x34] => things::sink_rate;
+            katamari_physics_big_kahuna[0x648, 8] => things::sink_rate;
 
             thing_hop[0x10..0x29] => things::hop_timer_update;
             thing_hop_turn[0x69..0x76] => things::hop_angle_update;

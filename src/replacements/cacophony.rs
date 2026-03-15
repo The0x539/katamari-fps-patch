@@ -112,7 +112,11 @@ pub unsafe extern "C" fn bang() -> u32 {
     // To minimize confusion, let's have this function return a value either smaller than 5 or larger than 6.
     if too_soon { 4 } else { 7 }
 
-    // TODO: The original code does some math that uses camera distance
-    // and katamari size to determine the volume of the sound,
-    // but if a larger katamari is supposed to hear quieter sounds, I don't think it works properly.
+    // The volume of the sound effect is calculated based on two variables:
+    // - Distance between NPC and katamari
+    // - Diameter of katamari
+    // The volume ramps linearly from maximum (1.0) to silent (0.0) as distance varies from 3 diameters to 12 diameters.
+    // This has annoying and undesirable results when you reach 10+ meters while missing a policeman, but whatever.
+    // Fixing every single issue in the game isn't my responsibility.
+    // That said, if a good idea for how to address this unobtrusively comes across me, I might implement something.
 }

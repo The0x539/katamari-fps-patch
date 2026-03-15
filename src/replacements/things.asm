@@ -130,21 +130,15 @@ fn random_hop_motion:
 ; Please tell me there aren't any already-delta-timed uses of this.
 ; I'm going to guess not based on the usage of pointers for all the args.
 fn angle_move_towards:
-	movss xmm1, [rdx]
-	mulss xmm1, [DT_TICKS]
-	xorps xmm0, xmm0
-	comiss xmm1, xmm0
-	movaps xmm2, xmm1
+	movaps xmm2, xmm1 ; trampoline
+	mulss xmm2, [DT_TICKS]
 	addss xmm2, [rcx]
 	ret
 
 fn pursuit_angle_move_towards:
-	movss xmm1, [rdx + 0x7c]
 	mulss xmm1, [DT_TICKS]
-	movss xmm0, [rdx + 0x78]
-	movss xmm4, [.neg_tau]
+	addss xmm1, [rdx + 0x74]
 	ret
-	.neg_tau: dd -6.283185307
 
 fn animal_angle_move_towards:
 	mulss xmm1, [DT_TICKS]
@@ -160,11 +154,6 @@ fn train_angle_move_towards:
 fn update_flee_timer_1:
 	dec_dt ax
 	mov [rdi + 0x120], ax
-	ret
-
-fn start_flee_timer_2:
-	mov eax, 3000 ; 90 ticks -> 3 seconds
-	mov [rdi + 0x124], ax
 	ret
 
 fn update_flee_timer_2:

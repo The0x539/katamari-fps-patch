@@ -260,20 +260,16 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_animal_state_3_turn[0x71, 5] => things::animal_angle_move_towards;
             thing_train_x391b0[0x4e, 8] => things::train_angle_move_towards;
 
-            // TODO: Hooks below this line still need to be analyzed for improvements with the smaller hook.
-
             thing_flee_state_1[0x80+1..] => 333_u32; // start flee timer 1
             thing_flee_state_2[0x55..0x5f] => things::update_flee_timer_1;
-            thing_flee_state_2[0x64..0x70] => things::start_flee_timer_2;
+            thing_flee_state_2[0x64+1..] => 3000_u32; // start flee timer 2
             thing_flee_state_4[0x3f..0x47] => things::update_flee_timer_2;
 
             thing_pursuit_alt_state_1[0x51+1..] => 333_u32; // start flee timer 1b
             thing_pursuit_alt_state_2[0x10, 7] => things::update_flee_timer_1b;
 
-            f32_angle_move_towards[0..0x11] => things::angle_move_towards;
-            pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;
-
-            // Hooks below this line are newer than the "hooks above this line" comment.
+            f32_angle_move_towards[0xa, 7] => things::angle_move_towards;
+            pursuit_angle_move_towards[0x22, 5] => things::pursuit_angle_move_towards;
 
             thing_machine_22_state_1[0x96..0xaf] => things::balloon_desync_timer_start;
 

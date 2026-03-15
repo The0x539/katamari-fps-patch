@@ -43,23 +43,14 @@ fn hop_timer_reset:
 	mov word [rax + 0x90], 833 ; 25 ticks -> 833 ms
 	ret
 
-fn hop_timer_update:
+fn hop_timer_check:
 	mov ax, [rcx + 0x90]
-	cmp ax, 0
-	jle .a
-
-	sub ax, [DT_MILLIS]
-	jns .b
-	xor eax, eax
-	.b:
-	mov [rcx + 0x90], ax
-
-	; the return of the cursed double return
-	add rsp, 0x28
-	pop rbx
+	test ax, ax
 	ret
 
-	.a:
+fn hop_timer_update:
+	dec_dt ax
+	mov [rcx + 0x90], ax
 	ret
 
 fn hop_angle_update:

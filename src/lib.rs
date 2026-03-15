@@ -233,7 +233,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             katamari_physics_big_kahuna[0x648, 8] => things::sink_rate;
 
-            thing_hop[0x10..0x29] => things::hop_timer_update;
+            thing_hop[0x10, 9] => things::hop_timer_check;
+            thing_hop[0x1b, 8] => things::hop_timer_update;
             thing_hop_turn[0x69..0x76] => things::hop_angle_update;
             thing_hop_apply_velocity[0xd9..0x14a] => things::hop_position_update;
             thing_hop_apply_velocity[0x8c, 8] => things::hop_gravity;

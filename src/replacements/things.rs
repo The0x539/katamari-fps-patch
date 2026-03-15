@@ -30,6 +30,7 @@ unsafe extern "C" {
     pub fn animal_walk();
     pub fn animal_turn();
     pub fn hop_timer_reset();
+    pub fn hop_timer_check();
     pub fn hop_timer_update();
     pub fn hop_angle_update();
     pub fn hop_position_update();

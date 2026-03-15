@@ -83,8 +83,16 @@ fn install_hooks_impl() -> eyre::Result<()> {
                 hook::skip_range(dll.$func, $range)?;
             };
 
+            ($func:ident[$start:expr, $len:expr] => {}) => {
+                hook::skip_range(dll.$func, $start..$start + $len)?;
+            };
+
             ($func:ident[$range:expr] => $($replacement:ident)::*) => {
                 hook::patch(dll.$func, $range, replacements::$($replacement)::* as _)?;
+            };
+
+            ($func:ident[$start:expr, $len:expr] => $($replacement:ident)::*) => {
+                hook::patch(dll.$func, $start..$start + $len, replacements::$($replacement)::* as _)?;
             };
 
             ($func:ident[$offset:literal $(+ $extra:literal)? ..] => $replacement:expr) => {
@@ -97,15 +105,15 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_big_kahuna[0x3ac..0x40e] => movement::climbing_position;
             katamari_physics_climb[0x259..0x2d7] => movement::climbing_ascent;
 
-            katamari_physics_roll[0x254..0x25b] => movement::spin_amount;
-            katamari_pivot[0x17a..0x182] => movement::bumpy_ride;
+            katamari_physics_roll[0x254, 7] => movement::spin_amount;
+            katamari_pivot[0x17a, 8] => movement::bumpy_ride;
             katamari_physics_big_kahuna[0x146..0x15f] => movement::friction;
             speed_thing_2[0xe12..0xe2d] => movement::push_force;
 
-            katamari_bump_thing[0x375..0x37a] => movement::bump_velocity;
+            katamari_bump_thing[0x375, 5] => movement::bump_velocity;
 
-            do_katamari_physics[0x352..0x362] => abilities::spindash_gain_power;
-            do_katamari_physics[0x3d5..0x3da] => abilities::spindash_spinning;
+            do_katamari_physics[0x352, 16] => abilities::spindash_gain_power;
+            do_katamari_physics[0x3d5, 5] => abilities::spindash_spinning;
 
             katamari_physics_climb[0xb9..0xd2] => movement::climb_ascent_timer;
             katamari_physics_climb[0xd2..] => [0x0F, 0x8E]; // JNE -> JNG
@@ -118,29 +126,29 @@ fn install_hooks_impl() -> eyre::Result<()> {
             calculate_gravity[0x607..0x683] => movement::downhill;
 
             // Steering with both sticks.
-            handle_turn[0xb5..0xba] => movement::steer_rcx;
+            handle_turn[0xb5, 5] => movement::steer_rcx;
 
             // Steering with one stick.
-            actually_apply_player_input_force_2[0x37c..0x381] => movement::steer_rbx;
-            actually_apply_player_input_force_2[0x2d4..0x2d9] => movement::steer_rbx;
-            actually_apply_player_input_force_2[0x222..0x227] => movement::steer_rbx;
-            actually_apply_player_input_force_2[0x16c..0x171] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x37c, 5] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x2d4, 5] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x222, 5] => movement::steer_rbx;
+            actually_apply_player_input_force_2[0x16c, 5] => movement::steer_rbx;
 
             // Steering while still pushing forward.
-            gentle_steering[0x25d..0x262] => movement::steer_rbx;
+            gentle_steering[0x25d, 5] => movement::steer_rbx;
 
             ontick_update_angle_guy[0x109..0x14e] => cacophony::sfx_npc_approaching;
 
             //prince_flip[0x305..0x35b] => prince_flip;
-            tick_player[0x13a..0x141] => dash::stamina_gain;
-            prince_handle_dash[0x16f..0x176] => dash::stamina_drain;
-            prince_handle_dash[0x3f9..0x404] => dash::update_dash_input_timer;
+            tick_player[0x13a, 7] => dash::stamina_gain;
+            prince_handle_dash[0x16f, 7] => dash::stamina_drain;
+            prince_handle_dash[0x3f9, 11] => dash::update_dash_input_timer;
             speed_thing_2[0x143..0x21f] => dash::dash_state_machine;
-            prince_handle_dash[0x14c..0x153] => dash::multiplayer_dash_input_window;
+            prince_handle_dash[0x14c, 7] => dash::multiplayer_dash_input_window;
 
-            speed_thing_2[0x42a..0x42f] => movement::turn_radius;
+            speed_thing_2[0x42a, 5] => movement::turn_radius;
 
-            prince_exhausted[0x51..0x58] => dash::prince_exhausted;
+            prince_exhausted[0x51, 7] => dash::prince_exhausted;
 
             splash[0x3c1..0x5ad] => cacophony::splash;
 
@@ -149,14 +157,14 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // This handles the local cooldown
             gunshot[0xd5..0x10a] => cacophony::bang2;
             // Remove a weird remaining increment of the counter, since my code handles it
-            gunshot[0x1bb..0x1be] => {}
+            gunshot[0x1bb, 3] => {}
 
             //do_katamari_physics[0x24c..0x25e] => gravitee;
             //do_katamari_physics[0x40e..0x413] => {}
             //do_katamari_physics[0x4f1..0x4fd] => {}
             //some_sort_of_collision_guy[0xd..0x7e] => good_night;
 
-            calculate_gravity[0x12d..0x135] => movement::airborne_gravity;
+            calculate_gravity[0x12d, 8] => movement::airborne_gravity;
 
             npc_40bb0[0x7a..0x8a] => things::melon_roll;
 
@@ -175,19 +183,18 @@ fn install_hooks_impl() -> eyre::Result<()> {
             //  and Δt thus varying slightly for each member for that segment of the path,
             //  which determined the velocity for that segment)
 
-            // TODO: Replacing these with empty code is incorrect? I think????
-            // Something about 1000/30 (33⅓ , mine) versus DT_SECONDS * 30 (vanilla)
-            // idk, need to think about it after sleep and food
-            thing_walk_cycle_x39440[0x4d..0x56] => {}
-            thing_walk_cycle_x39440[0x62..0x6b] => {}
+            // The instructions being skipped here are the ones that multiply
+            // the walk speed value by 30.0 and by DELTA_TIME (i.e., by DT_TICKS).
+            thing_walk_cycle_x39440[0x4d, 9] => {}
+            thing_walk_cycle_x39440[0x62, 9] => {}
             thing_walk_cycle_x39440[0x368..0x3d6] => things::path_walker_position;
 
-            thing_walk_cycle_x41ce0[0x44..0x4c] => {}
-            thing_walk_cycle_x41ce0[0x50..0x58] => {}
+            thing_walk_cycle_x41ce0[0x44, 8] => {}
+            thing_walk_cycle_x41ce0[0x50, 8] => {}
             thing_walk_cycle_x41ce0[0x216..0x284] => things::path_walker_position;
 
-            thing_walk_cycle_x42080[0x43..0x4c] => {}
-            thing_walk_cycle_x42080[0x55..0x5e] => {}
+            thing_walk_cycle_x42080[0x43, 9] => {}
+            thing_walk_cycle_x42080[0x55, 9] => {}
             // would ideally start at 0x249 but there's a pesky MOV RCX, RBX
             thing_walk_cycle_x42080[0x254..0x2ba] => things::path_walker_position;
 
@@ -209,12 +216,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             prince_flip[0x62..0x73] => abilities::flip_timer;
             prince_flip[0x303..] => [0x7F]; // JNZ -> JG
 
-            camera_update_katamari_view[0x489..0x48f] => abilities::katamari_view_ascend;
+            camera_update_katamari_view[0x489, 6] => abilities::katamari_view_ascend;
             camera_update_katamari_view[0xed..0xf5] => abilities::katamari_view_descend;
             camera_set_view_mode[0x286..] => 666_i32; // mov eax, 20 -> mov eax, 666 (frames -> ms)
 
-            camera_update_xc500[0x8e..0x96] => camera::size_threshold_animation_timer;
-            camera_update_xc500[0x1b5..0x1bd] => camera::size_threshold_animation_spin;
+            camera_update_xc500[0x8e, 8] => camera::size_threshold_animation_timer;
+            camera_update_xc500[0x1b5, 8] => camera::size_threshold_animation_spin;
             // This one adds the vector @ 0x50 to the vector @ 0x10
             camera_update_xc500[0xa5..0xf5] => camera::size_threshold_animation_other_zoom;
             // This one adds the vector @ 0x40 to the vector @ 0x00
@@ -233,12 +240,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_hop[0x10..0x29] => things::hop_timer_update;
             thing_hop_turn[0x69..0x76] => things::hop_angle_update;
             thing_hop_apply_velocity[0xd9..0x14a] => things::hop_position_update;
-            thing_hop_apply_velocity[0x8c..0x94] => things::hop_gravity;
+            thing_hop_apply_velocity[0x8c, 8] => things::hop_gravity;
 
-            thing_freefall[0x12..0x1c] => things::freefall_gravity;
+            thing_freefall[0x12, 10] => things::freefall_gravity;
             thing_freefall[0x2b..0x5e] => things::freefall_pos;
-            thing_freefall[0xb7..0xc0] => things::freefall_spin_a;
-            thing_freefall[0x267..0x270] => things::freefall_spin_b;
+            thing_freefall[0xb7, 9] => things::freefall_spin_a;
+            thing_freefall[0x267, 9] => things::freefall_spin_b;
             thing_freefall[0x2f1..0x305] => things::freefall_spin_c;
             // for some reason the compiler was extra silly
             // and put the x component addition after both ends of the branch
@@ -251,7 +258,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_freefall[0x21b..0x246] => {} // the second branch, after the unrelated stuff
 
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
-            thing_reset_hop_timer[0x2c..0x33] => things::hop_timer_reset;
+            thing_reset_hop_timer[0x2c, 7] => things::hop_timer_reset;
 
             // TODO: Hooks below this line still need to be analyzed for improvements with the smaller hook.
 
@@ -265,7 +272,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_flee_state_4[0x3f..0x47] => things::update_flee_timer_2;
 
             thing_pursuit_alt_state_1[0x51+1..] => 333_u32; // start flee timer 1b
-            thing_pursuit_alt_state_2[0x10..0x17] => things::update_flee_timer_1b;
+            thing_pursuit_alt_state_2[0x10, 7] => things::update_flee_timer_1b;
 
             f32_angle_move_towards[0..0x11] => things::angle_move_towards;
             pursuit_angle_move_towards[0..0x12] => things::pursuit_angle_move_towards;
@@ -274,53 +281,53 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_machine_22_state_1[0x96..0xaf] => things::balloon_desync_timer_start;
 
-            thing_machine_22_state_2[0x1b..0x20] => things::balloon_desync_timer_update;
-            thing_machine_22_state_2[0x30..0x35] => things::sine_bob;
+            thing_machine_22_state_2[0x1b, 5] => things::balloon_desync_timer_update;
+            thing_machine_22_state_2[0x30, 5] => things::sine_bob;
             thing_machine_22_state_3[0x58..0x7f] => things::other_hop_gravity;
 
-            thing_machine_22_state_3[0x386..0x38c] => things::other_hop_timer_check;
-            thing_machine_22_state_3[0x38e..0x393] => things::other_hop_timer_update;
+            thing_machine_22_state_3[0x386, 6] => things::other_hop_timer_check;
+            thing_machine_22_state_3[0x38e, 5] => things::other_hop_timer_update;
             thing_machine_22_state_3[0x449..0x451] => things::other_hop_timer_start;
 
             thing_machine_22_state_6[0x1b1..0x1bb] => things::elevator_timer_reset;
             thing_machine_22_state_6[0x164..0x16a] => things::elevator_timer_reset;
-            thing_machine_22_state_6[0xbf..0xc4] => things::elevator_timer_update;
-            thing_machine_22_state_6[0xd4..0xd9] => things::elevator_height_update;
-            thing_machine_22_state_6[0x63..0x68] => things::elevator_height_update;
+            thing_machine_22_state_6[0xbf, 5] => things::elevator_timer_update;
+            thing_machine_22_state_6[0xd4, 5] => things::elevator_height_update;
+            thing_machine_22_state_6[0x63, 5] => things::elevator_height_update;
 
-            thing_machine_20_state_1[0x51..0x59] => things::teddy_bear_bowl_spin;
+            thing_machine_20_state_1[0x51, 8] => things::teddy_bear_bowl_spin;
 
             thing_basic_gravity[0x21..0xac] => things::basic_gravity;
 
-            thing_wobble_state_1[0x5cb..0x5d0] => things::wobble_rate;
+            thing_wobble_state_1[0x5cb, 5] => things::wobble_rate;
 
             camera_main[0x1a3..0x1bb] => camera::angel_zoom;
             camera_main[0x22a..0x231] => camera::angel_fade;
 
-            katamari_attach_thing_x28ef0[0x562..0x56a] => stereo_haptics::pickup_hook;
-            katamari_collide_with_wall[0x7e2..0x7e9] => stereo_haptics::wall_bump_hook;
-            katamari_bump_thing[0..5] => stereo_haptics::thing_bump_hook;
-            katamari_flip_thing[0x2f..0x34] => stereo_haptics::thing_flip_hook;
+            katamari_attach_thing_x28ef0[0x562, 8] => stereo_haptics::pickup_hook;
+            katamari_collide_with_wall[0x7e2, 7] => stereo_haptics::wall_bump_hook;
+            katamari_bump_thing[0, 5] => stereo_haptics::thing_bump_hook;
+            katamari_flip_thing[0x2f, 5] => stereo_haptics::thing_flip_hook;
 
             thing_start_rng_timer[0x59..0x63] => things::start_rng_timer;
             thing_random_hop_main[0x1bf..0x1c7] => things::fish_timer_decrement;
 
-            thing_x36a10[0x2c5..0x2cb] => things::getup_timer_update;
-            thing_x36a10[0x32f..0x336] => things::getup_timer_check;
+            thing_x36a10[0x2c5, 6] => things::getup_timer_update;
+            thing_x36a10[0x32f, 7] => things::getup_timer_check;
 
-            thing_getup_flee_state_0[0x2d..0x35] => things::flee_timer_start;
+            thing_getup_flee_state_0[0x2d, 8] => things::flee_timer_start;
             thing_getup_flee_state_1[0x3f..0x46] => things::flee_timer_update;
             thing_getup_flee_state_2[0x385..] => 667_u32; // 20 ticks -> ⅔ seconds
 
-            thing_getup_flee_state_3a[0x9..0x10] => things::flee_timer_update;
-            thing_getup_flee_state_3b[0x9..0x10] => things::flee_timer_update;
+            thing_getup_flee_state_3a[0x9, 7] => things::flee_timer_update;
+            thing_getup_flee_state_3b[0x9, 7] => things::flee_timer_update;
             thing_getup_flee_state_3a[0x14+1..] => 1000_u32; // 1 second
             thing_getup_flee_state_3b[0x14+1..] => 1000_u32;
 
-            thing_getup_flee_state_4a[0x4f2..0x4f7] => things::flee_timer_update_state4;
-            thing_getup_flee_state_4b[0x1ab..0x1b0] => things::flee_timer_update_state4;
+            thing_getup_flee_state_4a[0x4f2, 5] => things::flee_timer_update_state4;
+            thing_getup_flee_state_4b[0x1ab, 5] => things::flee_timer_update_state4;
 
-            katamari_queue_things_for_pickup[0x20f..0x215] => things::update_collision_cooldown;
+            katamari_queue_things_for_pickup[0x20f, 6] => things::update_collision_cooldown;
 
             katamari_flip_thing[0x174+1..] => 1000_u32; // NPC collision cooldown: 1 second
             x27170[0x233+1..] => 333_u32;               // NPC collision cooldown: ⅓ second
@@ -334,111 +341,110 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             thing_getup_flee_state_4a[0x9e..0x10c] => things::flee_velocity_1;
             thing_getup_flee_state_4a[0x137..0x19d] => things::flee_velocity_2;
-            thing_getup_flee_state_4b[0x6f..0x74] => things::flee_velocity_3;
-            thing_getup_flee_state_4b[0x49..0x4e] => things::flee_velocity_spin;
+            thing_getup_flee_state_4b[0x6f, 5] => things::flee_velocity_3;
+            thing_getup_flee_state_4b[0x49, 5] => things::flee_velocity_spin;
 
-            thing_spin_x49d40[0x23..0x28] => things::jumboman_spin;
-            thing_windmill_spin_x39900[0x1c..0x21] => things::windmill_spin;
-
-            thing_pendulum[0x23..0x28] => things::pendulum;
-            thing_wrecking_ball_pendulum[0x47..0x4c] => things::wrecking_ball;
+            thing_spin_x49d40[0x23, 5] => things::jumboman_spin;
+            thing_windmill_spin_x39900[0x1c, 5] => things::windmill_spin;
+            thing_pendulum[0x23, 5] => things::pendulum;
+            thing_wrecking_ball_pendulum[0x47, 5] => things::wrecking_ball;
 
             thing_bird_state_0_init[0x62..0x70] => things::bird_start_rng_timer_rax;
-            thing_bird_state_1_idle[0x2b..0x32] => things::bird_update_timer_rbx;
+            thing_bird_state_1_idle[0x2b, 7] => things::bird_update_timer_rbx;
             thing_bird_state_4_ascend[0x117+1..] => 5000_u32; // 150 ticks -> 5 seconds
-            thing_bird_state_5_stay_in_sky[0x1e..0x25] => things::bird_update_timer_rdx;
+            thing_bird_state_5_stay_in_sky[0x1e, 7] => things::bird_update_timer_rdx;
             thing_bird_state_5_stay_in_sky[0x2b+1..] => 5000_u32;
             thing_bird_state_5_stay_in_sky[0x56..0x67] => things::bird_start_rng_timer_rdx;
-            thing_bird_state_6_begin_descent[0x25..0x2c] => things::bird_update_timer_rbx;
+            thing_bird_state_6_begin_descent[0x25, 7] => things::bird_update_timer_rbx;
 
-            thing_bird_state_4_ascend[0x36..0x3b] => things::bird_ascend_vertical_a;
-            thing_bird_state_4_ascend[0x4c..0x51] => things::bird_ascend_horizontal;
-            thing_bird_state_4_ascend[0x8e..0x93] => things::bird_ascend_vertical_b;
+            thing_bird_state_4_ascend[0x36, 5] => things::bird_ascend_vertical_a;
+            thing_bird_state_4_ascend[0x4c, 5] => things::bird_ascend_horizontal;
+            thing_bird_state_4_ascend[0x8e, 5] => things::bird_ascend_vertical_b;
 
             thing_bird_state_7_descend[0x34..0x95] => things::bird_descend_horizontal;
-            thing_bird_state_7_descend[0xf8..0x100] => things::bird_descend_vertical_a;
-            thing_bird_state_7_descend[0xc1..0xc6] => things::bird_descend_vertical_b;
+            thing_bird_state_7_descend[0xf8, 8] => things::bird_descend_vertical_a;
+            thing_bird_state_7_descend[0xc1, 5] => things::bird_descend_vertical_b;
 
             // When the "full walk timer" hits zero, the NPC will make a turn.
             thing_animal_state_0_start[0x3e3..0x3fb] => things::animal_start_walk_timer;
             thing_animal_state_0_start[0x455+1..] => 1000_u32;
-            thing_animal_x3bfb0[0x91..0x98] => things::animal_update_full_walk_timer;
+            thing_animal_x3bfb0[0x91, 7] => things::animal_update_full_walk_timer;
             thing_animal_x3bfb0[0x39..0x64] => things::animal_restart_walk_timer;
 
             // When the "partial walk timer" hits zero, the NPC will stop walking for a brief period.
             // (This period is controlled by the same variable.)
-            thing_animal_state_1_walk[0x89..0x90] => things::animal_update_partial_walk_timer;
-            thing_animal_state_1_walk[0x32..0x39] => things::animal_update_partial_walk_timer;
+            thing_animal_state_1_walk[0x89, 7] => things::animal_update_partial_walk_timer;
+            thing_animal_state_1_walk[0x32, 7] => things::animal_update_partial_walk_timer;
             thing_animal_state_1_walk[0xae..0xcf] => things::animal_reset_partial_walk_timer_30;
             thing_animal_state_1_walk[0x5a..0x7b] => things::animal_reset_partial_walk_timer_60;
 
-            thing_scarecrow_sway[0x1ed..0x1f2] => things::scarecrow_sway;
+            thing_scarecrow_sway[0x1ed, 5] => things::scarecrow_sway;
 
-            prince_read_sticks[0x101..0x107] => movement::prince_bump_timer_update;
-            camera_animate[0x291..0x298] => camera::camera_bump_timer_update;
-            prince_forced_turn[0x119..0x121] => movement::prince_forced_turn;
+            prince_read_sticks[0x101, 6] => movement::prince_bump_timer_update;
+            camera_animate[0x291, 7] => camera::camera_bump_timer_update;
+            prince_forced_turn[0x119, 8] => movement::prince_forced_turn;
 
-            thing_animal_x31f90[0x34..0x39] => things::animal_flee_turn;
+            thing_animal_x31f90[0x34, 5] => things::animal_flee_turn;
 
-            camera_credits_update[0x1de..0x1e6] => camera::credits_zoom;
-            camera_credits_update[0xe9..0xf1] => camera::credits_zoom;
+            camera_credits_update[0x1de, 8] => camera::credits_zoom;
+            camera_credits_update[0xe9, 8] => camera::credits_zoom;
 
-            init[0x251..0x258] => camera::credits_timer_start_a;
-            camera_credits_update[0x1ca..0x1d1] => camera::credits_timer_start_b;
-            camera_credits_update[0xcc..0xd3] => camera::credits_timer_zero;
-            camera_credits_update[0x199..0x1a0] => camera::credits_timer_zero;
+            init[0x251, 7] => camera::credits_timer_start_a;
+            camera_credits_update[0x1ca, 7] => camera::credits_timer_start_b;
+            camera_credits_update[0xcc, 7] => camera::credits_timer_zero;
+            camera_credits_update[0x199, 7] => camera::credits_timer_zero;
 
             camera_credits_update[0xa6..0xba] => camera::credits_timer_update;
-            camera_credits_update[0x189..0x191] => camera::credits_timer_update;
+            camera_credits_update[0x189, 8] => camera::credits_timer_update;
 
-            katamari_physics_big_kahuna[0x37c..0x383] => movement::credits_sphere_walk;
+            katamari_physics_big_kahuna[0x37c, 7] => movement::credits_sphere_walk;
 
             // TODO: does this go on other call sites? there are four in total
-            thing_freefall[0x469..0x46e] => things::thing_bounce;
-            thing_collide_with_other_thing[0x215..0x21a] => things::thing_bounce;
+            thing_freefall[0x469, 5] => things::thing_bounce;
+            thing_collide_with_other_thing[0x215, 5] => things::thing_bounce;
 
-            katamari_collide_with_wall[0xda..0xe2] => movement::fall_time_check;
-            katamari_physics_x14c80[0x593..0x59d] => movement::air_time_increment;
-            katamari_physics_x14c80[0x60f..0x619] => movement::air_time_increment;
-            katamari_physics_x14c80[0x5b2..0x5b9] => movement::fall_time_increment;
-            katamari_physics_x14c80[0x62e..0x635] => movement::fall_time_increment;
+            katamari_collide_with_wall[0xda, 8] => movement::fall_time_check;
+            katamari_physics_x14c80[0x593, 10] => movement::air_time_increment;
+            katamari_physics_x14c80[0x60f, 10] => movement::air_time_increment;
+            katamari_physics_x14c80[0x5b2, 7] => movement::fall_time_increment;
+            katamari_physics_x14c80[0x62e, 7] => movement::fall_time_increment;
 
             thing_kickball_state_1[0x3b..0xd1] => things::kickball_position;
-            thing_kickball_state_1[0x15e..0x166] => things::kickball_rotation;
+            thing_kickball_state_1[0x15e, 8] => things::kickball_rotation;
             thing_kickball_physics[0x10b..0x14b] => things::kickball_deceleration;
 
-            thing_golfer_animation_state_0[0x1a..0x21] => things::golfer_start_timer_b;
+            thing_golfer_animation_state_0[0x1a, 7] => things::golfer_start_timer_b;
             thing_golfer_animation_state_1[0x7+1..] => 3000_u32; // 90 ticks -> 3 seconds
-            thing_golfer_animation_state_2[0x7..0xd] => things::golfer_check_timer_b;
-            thing_golfer_animation_state_2[0xf..0x14] => things::golfer_update_timer_b;
-            thing_golfer_animation_state_3[0x10..0x17] => things::golfer_update_timer_a;
+            thing_golfer_animation_state_2[0x7, 6] => things::golfer_check_timer_b;
+            thing_golfer_animation_state_2[0xf, 5] => things::golfer_update_timer_b;
+            thing_golfer_animation_state_3[0x10, 7] => things::golfer_update_timer_a;
             thing_golfer_animation_state_3[0x1f..0x2c] => things::golfer_restart_both_timers;
 
-            prince_first_person_controls[0xff..0x105] => camera::first_person_controls;
+            prince_first_person_controls[0xff, 6] => camera::first_person_controls;
 
-            thing_vortex_spin[0x14..0x19] => things::vortex_spin_a;
-            thing_vortex_spin[0x3d..0x42] => things::vortex_spin_b;
+            thing_vortex_spin[0x14, 5] => things::vortex_spin_a;
+            thing_vortex_spin[0x3d, 5] => things::vortex_spin_b;
 
-            thing_pinwheel_spin[0x12..0x17] => things::pinwheel_spin;
+            thing_pinwheel_spin[0x12, 5] => things::pinwheel_spin;
 
             katamari_compute_dash[0xac+1..] => 500_u32; // 15 ticks -> 0.5 seconds
             speed_thing_2[0x244..0x250] => dash::update_spindown_timer;
 
             camera_set_view_mode[0x51b+1..] => 2000_u32;
             camera_set_view_mode[0x565+1..] => 666_u32;
-            camera_animate[0x437..0x43e] => camera::update_shoot_timer;
+            camera_animate[0x437, 7] => camera::update_shoot_timer;
             update_prince_position[0x455..0x468] => camera::update_shoot_angle;
-            katamari_physics_big_kahuna[0x698..0x69f] => dash::multiplayer_dash_deplete_distance;
+            katamari_physics_big_kahuna[0x698, 7] => dash::multiplayer_dash_deplete_distance;
 
-            katamari_brakes[0x542..0x54a] => cacophony::brake_dust_timer_update;
+            katamari_brakes[0x542, 8] => cacophony::brake_dust_timer_update;
             katamari_brakes[0x555+1..] => 333_u32;
 
             katamari_bump_stationary_thing[0x228..0x270] => movement::bumped_by_thing;
 
-            katamari_queue_things_for_pickup[0x226..0x22b] => cacophony::bump_scream_cooldown_update;
+            katamari_queue_things_for_pickup[0x226, 5] => cacophony::bump_scream_cooldown_update;
             katamari_queue_things_for_pickup[0x386+3..] => 0xff_u8; // 15 ticks -> 255 milliseconds ¯\_(ツ)_/¯ (better than nothing)
 
-            thing_swingset_state_2[0x38..0x3f] => things::swingset;
+            thing_swingset_state_2[0x38, 7] => things::swingset;
 
             katamari_physics_x14c80[0x140+2..] => 333_u32;
             init_x1f030[0x679+2..] => 333_u32;
@@ -446,21 +452,21 @@ fn install_hooks_impl() -> eyre::Result<()> {
             do_katamari_physics[0xeb..0xf5] => movement::update_climb_cooldown;
 
             katamari_start_climb_x16930[0x9+1..] => 33_u32;
-            katamari_physics_x14c80[0x6d2..0x6dc] => movement::climb_coyote_timer_update_a;
+            katamari_physics_x14c80[0x6d2, 10] => movement::climb_coyote_timer_update_a;
             katamari_physics_x14c80[0x5bb..0x5d4] => movement::climb_coyote_timer_update_b;
-            katamari_terminate_climb[0x3e..0x48] => movement::climb_coyote_timer_update_b;
+            katamari_terminate_climb[0x3e..0x48] => movement::climb_coyote_timer_update_a;
 
-            thing_bird_orbit_x43730[0x152..0x157] => things::bird_orbit;
+            thing_bird_orbit_x43730[0x152, 5] => things::bird_orbit;
 
-            do_katamari_physics[0x70a..0x713] => cacophony::big_dust_timer;
+            do_katamari_physics[0x70a, 9] => cacophony::big_dust_timer;
             do_katamari_physics[0x729+1..] => 100_u32; // 3 ticks -> 100 ms
 
             thing_bamboo_fountain_state_0[0x7a+3..] => 3000_u32; // 0x5a = 90 ticks -> 3 seconds
-            thing_bamboo_fountain_state_1[0x14..0x19] => things::bamboo_fountain_timer_update;
-            thing_bamboo_fountain_state_2[0x1e..0x23] => things::bamboo_fountain_motion;
+            thing_bamboo_fountain_state_1[0x14, 5] => things::bamboo_fountain_timer_update;
+            thing_bamboo_fountain_state_2[0x1e, 5] => things::bamboo_fountain_motion;
             thing_bamboo_fountain_state_2[0x6f+3..] => 100_u32; // 3 ticks
-            thing_bamboo_fountain_state_3[0xe..0x13] => things::bamboo_fountain_timer_update;
-            thing_bamboo_fountain_state_4[0x1e..0x23] => things::bamboo_fountain_motion;
+            thing_bamboo_fountain_state_3[0xe, 5] => things::bamboo_fountain_timer_update;
+            thing_bamboo_fountain_state_4[0x1e, 5] => things::bamboo_fountain_motion;
             thing_bamboo_fountain_state_4[0x73+3..] => 3000_u32;
 
             // Prototype for versus mode on Earth

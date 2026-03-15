@@ -23,7 +23,7 @@ fn animal_walk:
 	movss xmm1, [rbx + 0xe8]
 	movss xmm4, [rbx + 0xec]
 
-	movaps xmm2, xmm4 ; might need to swap these two registers
+	movaps xmm2, xmm4
 
 	mulss xmm3, [DT_TICKS]
 	mulss xmm0, [DT_TICKS]
@@ -64,7 +64,7 @@ fn hop_timer_update:
 
 fn hop_angle_update:
 	movss xmm2, [rdi + 0x78]
-	movss xmm1, [rdi + 0x74]
+	movss xmm1, [rdi + 0x74] ; Access this memory now to free up the next instruction's memory operand for DT_TICKS. Either way, the register ends up containing the incremented value.
 	vfmadd231ss xmm1, xmm0, [DT_TICKS]
 	ret
 

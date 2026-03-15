@@ -11,10 +11,7 @@ fn stamina_drain:
 	ret
 
 fn update_dash_input_timer:
-	sub ax, [DT_MILLIS] ; ax -= DT_MILLIS
-	jns .a              ; if ax < 0 {
-	xor eax, eax        ;     eax = 0
-	.a:                 ; }
+	dec_dt ax
 	mov [rsp + 0x90 + 8], rbx ; trampoline
 	ret
 

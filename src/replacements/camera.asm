@@ -54,6 +54,29 @@ fn size_threshold_animation_other_zoom:
 ; meaning the fade-to-white accelerates as the timer counts down towards zero.
 ;
 ; I'm hoping the difference between that behavior and my delta-timed version is small.
+;
+; ------------------------------------------------------------------------------------
+;
+; Returning to this, it turns out the math described above results in linear change.
+; To observe this, plot the following in Desmos:
+;
+; f(0) = 0
+; f(x) = f(x - 1) + (700 - f(x - 1))/(900 - x)
+; ([0...900], f([0...900]))
+;
+; 900 represents the 30-second duration on the mission timer when the fade starts,
+; such that `900 - x` is the remaining time.
+;
+; The second 0 in the first line represents the initial value of the thing being smoothed,
+; while 700 represents the target value.
+;
+; Most importantly, observe that if you vary either of the zeroes in the first line,
+; the start point moves around, but the plot remains linear.
+;
+;
+;
+; Hilarious.
+;
 fn angel_fade:
 	vfmadd231ss xmm2, xmm1, [DT_TICKS]
 	comiss xmm2, xmm7 ; trampoline

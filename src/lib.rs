@@ -213,8 +213,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             camera_animate[0x2b4..0x2c4] => camera::zoom_out;
 
             tick_player[0x113..0x121] => abilities::flip_duration;
-            prince_flip[0x62..0x73] => abilities::flip_timer;
-            prince_flip[0x303..] => [0x7F]; // JNZ -> JG
+            prince_flip[0x62, 6] => abilities::flip_timer;
 
             camera_update_katamari_view[0x489, 6] => abilities::katamari_view_ascend;
             camera_update_katamari_view[0xed..0xf5] => abilities::katamari_view_descend;

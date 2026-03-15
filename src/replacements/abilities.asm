@@ -13,10 +13,9 @@ fn flip_duration:
 	ret
 
 fn flip_timer:
-	mov edi, [DT_MILLIS]
-	sub [rcx + 0x44c], edi
-	xorps xmm11, xmm11
-	movaps xmm0, [VEC_W]
+	mov edi, [rcx + 0x44c]
+	dec_dt edi
+	mov [rcx + 0x44c], edi
 	ret
 
 fn katamari_view_ascend:

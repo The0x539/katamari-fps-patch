@@ -147,15 +147,12 @@ fn pursuit_angle_move_towards:
 	.neg_tau: dd -6.283185307
 
 fn animal_angle_move_towards:
-	movss xmm0, [rdi + 0x7c]
-	mulss xmm0, [DT_TICKS]
-	comiss xmm6, xmm0
-	movss xmm2, [rdi + 0x78]
+	mulss xmm1, [DT_TICKS]
+	addss xmm1, [rdi + 0x74]
 	ret
 
 fn train_angle_move_towards:
-	mov r14, rcx
-	movaps xmm2, xmm1
+	; I tried making this use FMA, but that brought back the melon jank somehow.
 	mulss xmm2, [DT_TICKS]
 	addss xmm2, [rdx + 0x10c]
 	ret

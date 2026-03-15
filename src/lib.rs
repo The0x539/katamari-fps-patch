@@ -257,11 +257,10 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_random_hop_main[0x60..0x88] => things::random_hop_motion;
             thing_reset_hop_timer[0x2c, 7] => things::hop_timer_reset;
 
-            // TODO: Hooks below this line still need to be analyzed for improvements with the smaller hook.
+            thing_animal_state_3_turn[0x71, 5] => things::animal_angle_move_towards;
+            thing_train_x391b0[0x4e, 8] => things::train_angle_move_towards;
 
-            thing_animal_state_3_turn[0x61..0x6e] => things::animal_angle_move_towards;
-            // This isn't working. There's something missing. More blood must be shed.
-            thing_train_x391b0[0x48..0x56] => things::train_angle_move_towards;
+            // TODO: Hooks below this line still need to be analyzed for improvements with the smaller hook.
 
             thing_flee_state_1[0x80+1..] => 333_u32; // start flee timer 1
             thing_flee_state_2[0x55..0x5f] => things::update_flee_timer_1;

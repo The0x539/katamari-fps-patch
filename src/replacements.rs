@@ -51,8 +51,11 @@ pub(crate) mod values {
     /// If the original code uses an integer to count ticks,
     /// then updating it to instead count milliseconds
     /// will require using this value (instead of 1) as an increment/decrement.
+    ///
+    /// This is never expected to overflow u8, let alone i16,
+    /// but using 32 bits is helpful for some asm.
     #[unsafe(no_mangle)]
-    pub static mut DT_MILLIS: i16 = 16;
+    pub static mut DT_MILLIS: i32 = 16;
 
     /// The accumulated rounding error of DT_MILLIS.
     static mut DT_MICROS: i16 = 0;
@@ -67,7 +70,7 @@ pub(crate) mod values {
             DT_TICKS = AlignedVec4(Vec4::splat3(dt_ticks));
 
             let millis = delta * 1000.0;
-            DT_MILLIS = millis.floor() as i16;
+            DT_MILLIS = millis.floor() as i32;
 
             let micros = (millis - millis.floor()) * 1000.0;
             DT_MICROS += micros.round() as i16;
@@ -120,7 +123,7 @@ pub(crate) mod values {
     // Exposed for convenience from safe-Rust code.
     #[inline]
     pub(super) fn dt_millis() -> i16 {
-        unsafe { DT_MILLIS }
+        unsafe { DT_MILLIS as i16 }
     }
 
     #[inline]

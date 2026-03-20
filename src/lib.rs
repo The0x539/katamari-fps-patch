@@ -461,6 +461,8 @@ fn install_hooks_impl() -> eyre::Result<()> {
             thing_bamboo_fountain_state_4[0x1e, 5] => things::bamboo_fountain_motion;
             thing_bamboo_fountain_state_4[0x73+3..] => 3000_u32;
 
+            katamari_prepend_guy[0x70a..0x722] => movement::increment_stuck_in_ground_timer;
+
             // Prototype for versus mode on Earth
             //init[0x2d+2..] => 3_u32;
             //mono_init_start[0x4a+1..] => 3_u32;

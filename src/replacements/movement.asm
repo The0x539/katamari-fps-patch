@@ -161,3 +161,14 @@ fn climb_coyote_timer_update_c:
 	dec_dt ax
 	mov [rcx + 0x898], ax
 	ret
+
+; Among other reasons, the game will detach props if:
+; - You have 3 or more points of contact with walls
+; - You're "stuck in the ground" for at least half a second (the one we're patching)
+fn increment_stuck_in_ground_timer:
+	mov eax, [rbx + 0x87c]
+	add eax, [DT_MILLIS]
+	mov byte [rbx + 0xbe], 1
+	mov [rbx + 0x87c], eax
+	cmp eax, 500 ; 0xF (15) ticks -> 0.5 seconds
+	ret

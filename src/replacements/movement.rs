@@ -28,6 +28,7 @@ unsafe extern "C" {
     pub fn steer_rcx();
 
     pub fn bumped_by_thing();
+    pub fn increment_stuck_in_ground_timer();
 }
 
 #[inline]

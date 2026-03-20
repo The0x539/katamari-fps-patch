@@ -427,6 +427,9 @@ exports! {
     #[func @ 0x46f60]
     fn thing_bamboo_fountain_state_4(t: *mut Thing);
 
+    #[func @ 0x16fa0]
+    fn katamari_prepend_guy(rcx: *mut Katamari, k: *mut Katamari);
+
     #[var @ 0]
     static base_addr: ();
 

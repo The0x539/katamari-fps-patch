@@ -8,7 +8,6 @@ pub mod abilities;
 pub mod cacophony;
 pub mod camera;
 pub mod dash;
-pub mod experiments;
 pub mod movement;
 pub mod stereo_haptics;
 pub mod things;

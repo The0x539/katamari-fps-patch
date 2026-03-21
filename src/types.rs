@@ -872,14 +872,6 @@ impl Vec4 {
         Self::new(self.x, self.y, self.z, 0.0)
     }
 
-    // TODO: I accidentally wrote this as x0yz earlier.
-    // Could this be the reason my full-function replacement for big_kahuna didn't work?
-    // Needs re-investigation
-    #[inline]
-    pub fn x0zw(&self) -> Self {
-        Self::new(self.x, 0.0, self.z, self.w)
-    }
-
     #[inline]
     pub fn xz(&self) -> Vec2 {
         Vec2::new(self.x, self.z)

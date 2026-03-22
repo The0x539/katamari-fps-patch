@@ -74,11 +74,10 @@ macro_rules! exports {
         $(
             #[inline]
             pub fn $arr(i: impl TryInto<usize>) -> *mut $arr_ty {
-                // TODO: decide how this should handle conversion failure
-                // most/all of these arrays have indices that fit in 0..=127,
-                // so anything negative or large is almost certainly a bogus index
+                let Ok(i) = i.try_into() else {
+                    return std::ptr::null_mut();
+                };
 
-                let i = i.try_into().unwrap_or(0xDEAD_DEAD_DEAD_DEAD);
                 unsafe { &raw mut (*DLL.$arr)[i] }
             }
         )*

@@ -128,11 +128,6 @@ pub(crate) mod values {
     pub(super) fn dt_ticks() -> f32 {
         unsafe { DT_TICKS.0.x }
     }
-
-    #[inline]
-    pub(super) fn multiplayer() -> bool {
-        unsafe { MULTIPLAYER != 0 }
-    }
 }
 
 pub unsafe extern "C" fn prince_post_init() {

@@ -117,7 +117,6 @@ pub(crate) mod values {
 
     #[unsafe(no_mangle)]
     pub static mut MULTIPLAYER: u8 = 0;
-    // TODO: add more stuff here as necessary and update it whenever needed
 
     // Exposed for convenience from safe-Rust code.
     #[inline]

@@ -45,6 +45,27 @@ pub unsafe fn patch(
     Ok(())
 }
 
+pub unsafe fn replace_inplace(
+    target: impl Target,
+    start: *const u8,
+    end: *const u8,
+) -> eyre::Result<()> {
+    let target = target.into_target();
+    assert!(end > start);
+    unsafe {
+        assert_eq!(*end, 0xC3); // Make sure the function ends with a RET
+
+        let len = end.byte_offset_from(start) as usize + 1;
+        let target_code = std::ptr::slice_from_raw_parts_mut(target, len);
+
+        mprotect(target_code, w::PAGE_READWRITE, || {
+            std::ptr::copy(start, target, len);
+        })?;
+    }
+
+    Ok(())
+}
+
 unsafe fn generate_call(call_addr: *const u8, target_addr: *const u8) -> [u8; 5] {
     // This mechanism relies on the two addresses being nearby enough for 32-bit relative addressing.
     // Originally, this mod just assumed both relevant DLLs would be loaded within a suitable range.

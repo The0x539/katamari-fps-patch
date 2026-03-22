@@ -42,8 +42,6 @@ extern MULTIPLAYER
 
 section .text
 
-; TODO: patch this directly into the original code to avoid the jump
-; (possibly do similar for other position-independent code that's smaller than its replacement?)
 fn copy_matrix:
         sub rsp, 0x20
         movups [rsp], xmm0 ; Assumption: the original code doesn't use AVX
@@ -59,4 +57,5 @@ fn copy_matrix:
         vmovups xmm0, [rsp] ; VEX version, to zero the upper bits
         vmovups xmm1, [rsp + 0x10]
         add rsp, 0x20
+        fn copy_matrix_end:
         ret

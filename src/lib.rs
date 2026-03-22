@@ -120,8 +120,6 @@ fn install_hooks_impl() -> eyre::Result<()> {
             katamari_physics_climb[0x15..0x26] => movement::climb_sustain_timer;
             katamari_physics_climb[0x7F..0x90] => movement::climb_sustain_timer;
 
-            copy_matrix => copy_matrix;
-
             calculate_gravity[0x688..0x820] => movement::uphill;
             calculate_gravity[0x607..0x683] => movement::downhill;
 
@@ -489,6 +487,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
             dll.initialize_princes,
             0x3e3,
             replacements::prince_post_init,
+        )?;
+
+        hook::replace_inplace(
+            dll.copy_matrix,
+            replacements::copy_matrix as _,
+            &raw const replacements::copy_matrix_end,
         )?;
     }
 

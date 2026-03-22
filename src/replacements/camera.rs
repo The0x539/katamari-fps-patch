@@ -18,7 +18,6 @@ unsafe extern "C" {
     pub fn update_shoot_angle();
 }
 
-// TODO: For some reason, this might be too *slow* now, and the fade to white is still too fast.
 pub unsafe extern "C" fn angel_zoom() -> f32 {
     unsafe {
         asm!("push rcx");

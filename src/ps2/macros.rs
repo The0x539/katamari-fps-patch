@@ -90,8 +90,9 @@ macro_rules! exports {
                 pub fn $cb( $($cb_arg : $cb_arg_ty),* ) $(-> $cb_ret)? {
                     unsafe {
                         let f = DLL.$cb;
-                        // TODO: check for null pointer, like the original code does?
-                        (*f)($($cb_arg),*)
+                        if !f.is_null() {
+                            (*f)($($cb_arg),*)
+                        }
                     }
                 }
             )*

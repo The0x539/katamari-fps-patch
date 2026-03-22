@@ -394,6 +394,7 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // TODO: does this go on other call sites? there are four in total
             thing_freefall[0x469, 5] => things::thing_bounce;
             thing_collide_with_other_thing[0x215, 5] => things::thing_bounce;
+            thing_basic_gravity[0x18a, 5] => things::thing_bounce;
 
             katamari_collide_with_wall[0xda, 8] => movement::fall_time_check;
             katamari_physics_x14c80[0x593, 10] => movement::air_time_increment;

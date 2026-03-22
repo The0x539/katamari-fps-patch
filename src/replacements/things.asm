@@ -71,7 +71,6 @@ fn hop_gravity:
 	vfmadd132ss xmm0, xmm3, [DT_TICKS] ; xmm0 = (xmm0 * dt) + xmm3
 	ret
 
-; TODO: Maybe combine the preceding two functions into one, like this one?
 fn other_hop_gravity:
 	movss xmm1, [DT_TICKS]
 	movss xmm0, [rdx + 0x14]

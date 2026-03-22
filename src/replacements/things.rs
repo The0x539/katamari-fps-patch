@@ -5,15 +5,11 @@ use super::*;
 pub struct ExtraThingState {
     // The vanilla game uses a u8, which isn't quite enough for our purposes
     pub rng_timer: u16,
-    pub getup_timer: i16,
 }
 
 impl ExtraThingState {
     pub const fn new() -> Self {
-        Self {
-            rng_timer: 0,
-            getup_timer: 0,
-        }
+        Self { rng_timer: 0 }
     }
 
     pub unsafe fn of<'a>(thing: *mut Thing) -> &'a mut Self {
@@ -145,29 +141,6 @@ pub unsafe extern "C" fn fish_timer_decrement() -> u8 {
         state.rng_timer = state.rng_timer.saturating_sub(values::dt_millis() as u16);
         (*t).base_machine.rng_timer = if state.rng_timer > 0 { 100 } else { 0 };
         0
-    }
-}
-
-pub unsafe extern "C" fn getup_timer_update() {
-    unsafe {
-        let t: *mut Thing;
-        asm!("mov {}, rbx", out(reg) t);
-        ExtraThingState::of(t).getup_timer += values::dt_millis();
-        asm!("mov rbx, {}", in(reg) t);
-    }
-}
-
-pub unsafe extern "C" fn getup_timer_check() {
-    unsafe {
-        let t: *mut Thing;
-        asm!("mov {}, rbx", out(reg) t);
-        let timer = ExtraThingState::of(t).getup_timer;
-        asm! {
-            "cmp {:x}, 267", // 8 ticks -> 267 milliseconds
-            "mov rbx, {}",
-            in(reg) timer,
-            in(reg) t,
-        }
     }
 }
 

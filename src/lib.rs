@@ -148,7 +148,12 @@ fn install_hooks_impl() -> eyre::Result<()> {
 
             prince_exhausted[0x51, 7] => dash::prince_exhausted;
 
-            splash[0x3c1..0x5ad] => cacophony::splash;
+            splash[0x43c, 7] => cacophony::splash_timer_a_update; // Ripples, generated unconditionally
+            splash[0x4c8, 7] => cacophony::splash_timer_b_update; // Sound effects
+            splash[0x51f, 7] => cacophony::splash_timer_c_update; // Droplets, generated when moving
+            splash[0x454+1..] => 267_u32; // timer A
+            // (timer B needs to be handled in a different way, inside the update patch)
+            splash[0x534+1..] => 33_u32; // timer C
 
             // This one only fixes the global cooldown; the NPC also has a longer local cooldown.
             gunshot[0x1cb..0x1eb] => cacophony::bang;

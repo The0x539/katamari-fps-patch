@@ -37,3 +37,25 @@ fn big_dust_timer:
 	dec_dt ax
 	mov [rdx + r15*2 + 0x10eac8], ax
 	ret
+
+fn splash_timer_a_update:
+	mov ax, [rbx + 0x89a]
+	dec_dt ax
+	mov [rbx + 0x89a], ax
+	ret
+
+fn splash_timer_b_update:
+	mov ax, [rbx + 0x89e]
+	dec_dt ax
+	mov [rbx + 0x89e], ax
+	; Initialized significantly earlier to 24,
+	; but that value has a double meaning as a particle effect ID,
+	; so we need to set it here instead.
+	mov esi, 800
+	ret
+
+fn splash_timer_c_update:
+	mov ax, [rbx + 0x89c]
+	dec_dt ax
+	mov [rbx + 0x89c], ax
+	ret

@@ -24,7 +24,7 @@ pub unsafe extern "C" fn angel_zoom() -> f32 {
         let distance = ps2::raw::angel_zoom_distance();
         let rate = ps2::raw::angel_zoom_rate();
         let dt = values::dt_ticks();
-        *distance += *rate * dt;
+        *distance = f32::mul_add(*rate, dt, *distance);
         asm!("pop rcx");
         *distance // returned via xmm0, which is used again soon afterwards in the caller
     }

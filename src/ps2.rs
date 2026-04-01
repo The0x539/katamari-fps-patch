@@ -430,6 +430,12 @@ exports! {
     #[func @ 0x16fa0]
     fn katamari_prepend_guy(rcx: *mut Katamari, k: *mut Katamari);
 
+    #[func @ 0x41870]
+    fn thing_racecar_walk_cycle_x41870(t: *mut Thing);
+
+    #[func @ 0x41490]
+    fn thing_racecar_walk_cycle_x41490(t: *mut Thing);
+
     #[var @ 0]
     static base_addr: ();
 

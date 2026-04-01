@@ -201,6 +201,13 @@ fn install_hooks_impl() -> eyre::Result<()> {
             // would ideally start at 0x249 but there's a pesky MOV RCX, RBX
             thing_walk_cycle_x42080[0x254..0x2ba] => things::path_walker_position;
 
+            // This group was discovered much later, post release, on a remote-control racecar in level 3.
+            thing_racecar_walk_cycle_x41870[0x30, 16] => {}
+            thing_racecar_walk_cycle_x41870[0xf2..0x101] => things::path_walker_position; // Not messing with the stack saving. No thanks.
+            thing_racecar_walk_cycle_x41490[0x3e, 9] => {}
+            thing_racecar_walk_cycle_x41490[0x4b, 9] => {}
+            thing_racecar_walk_cycle_x41490[0x241..0x2a7] => things::path_walker_position;
+
             // On top of the stuff described above, a very tricky floating-point rounding error kind of issue
             // in the code to check whether an NPC has "reached" its current target node
             // was causing some NPCs to occasionally make instantaneous 180° turns,

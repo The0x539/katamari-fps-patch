@@ -448,7 +448,6 @@ fn kickball_deceleration:
 	movss [rbx + 0xa8], xmm0
 	ret
 
-; I am extremely grateful that three different functions need this patch and use the same GPRs
 fn path_walker_position_borked:
 	movaps xmm0, [rbx + 0xd0]
 
@@ -472,6 +471,8 @@ fn path_walker_position_borked:
 	movaps [rdi + 0x90], xmm0
 	ret
 
+; I am extremely grateful that FIVE different functions need this patch and use the same GPRs
+; (it's probably because a function got inlined after being lowered to asm or something?)
 fn path_walker_position:
 	movups xmm0, [rbx + 0xd0]
 	movaps xmm1, [DT_TICKS]
